@@ -71,8 +71,18 @@ namespace HcomDiagUi
 
 				case MessageClass.Text:
 					// Pick up the Text data that is in the UI
-					_sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData,
-						_uiSupport.TextForMsg());
+					if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
+                    {
+						// Special case for new type of text message
+						_sendSerialComms.BuildAndSendDiagCmdMsg(rqstInfo.rqstType, userData,
+							_uiSupport.TextForMsg());
+                    }
+					else
+					{
+						// Normal case
+						_sendSerialComms.BuildAndSendTextMsgOld(rqstInfo.rqstType, userData,
+							_uiSupport.TextForMsg());
+					}
 					break;
 
 				case MessageClass.Binary:

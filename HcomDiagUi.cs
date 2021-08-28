@@ -27,7 +27,7 @@ namespace HcomDiagUi
             InitializeComponent();
             
             _uiSupport = new UiSupport(this);
-            _uiSupport.PopulateCommandListBox(commandListBox);
+            _uiSupport.PopulateCommandListBox();
             _commsManager = new CommsManager(this);
         }
 

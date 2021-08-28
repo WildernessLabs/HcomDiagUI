@@ -18,13 +18,13 @@ namespace HcomDiagUi
             _hcomUiForm = hcomUiForm;
         }
 
-        internal void PopulateCommandListBox(System.Windows.Forms.ListBox commandListBox)
+        internal void PopulateCommandListBox()
         {
+            UInt16[] requestTypes = (ushort[])Enum.GetValues(typeof(MeadowRqstType));
+
             _hcomUiForm.CommandListBox.BeginUpdate();
-            for (int i = 0; i < ProtocolHelper.MeadowRqstTypeArray.Length; i++)
+            foreach (MeadowRqstType rqstType in requestTypes)
             {
-                // Get the request type
-                MeadowRqstType rqstType = ProtocolHelper.MeadowRqstTypeArray[i];
                 // Use the request type to find the command name and command information
                 MeadowRqstData meadowRqstData = ProtocolHelper.DecodeMsgToMeadow(rqstType);
                 _hcomUiForm.CommandListBox.Items.Add(meadowRqstData);

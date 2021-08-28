@@ -40,44 +40,6 @@ namespace HcomDiagUi
         }
     }
 
-    ////-----------------------------------------------------------------------
-    //// Complete HCOM data message
-    //// Deprecated
-    //// [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    //[StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
-    //public struct HcomProtoDataMessage
-    //{
-    //    [FieldOffset(0)] public UInt16 seqNumber;
-
-    //    [FieldOffset(2)] public Byte binData;
-    //}
-
-    ////-----------------------------------------------------------------------
-    //// This structure defines the additional information needed to initiate a file
-    //// download, delete and other file related messages. Many of the following
-    //// fields are not required nor needed for every message type.
-    //// [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    //[StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
-    //public struct HcomProtoFileInfo
-    //{
-    //    // File length of the entire file
-    //    [FieldOffset(0)] public UInt32 fileSize;
-
-    //    // File checksum calculated by sender (not used by ESP32)
-    //    [FieldOffset(4)] public UInt32 fileCheckSum;
-
-    //    // File flash address (used only by ESP32)
-    //    [FieldOffset(8)] public UInt32 fileFlashAddr;
-
-    //    // The MD5 Hash is 32 char hex "string" (used only by ESP32)
-    //    // 32 byte field
-    //    [FieldOffset(12)] public byte[] fileMD5Hash;
-
-    //    // File name (variable length field, not used by ESP32)
-    //    // Variable size. Offset is 12 + 32 = 44;
-    //    [FieldOffset(44)] public byte[] fileName;
-    //}
-
     //-----------------------------------------------------------------------
     // [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
     [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
@@ -116,6 +78,29 @@ namespace HcomDiagUi
     {
         // This is the only thing in a header only message
         [FieldOffset(0)] public HcomProtoStdHeader stdHeader;
+    }
+
+    //--------------------------------------------------------------------
+    // This diagnostic command message allows HCOM to use code from NSH that
+    // is not be able to be built because we are using the protected build.
+    // This is initiall done to support ping for networking.
+    [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
+    public struct HcomProtoDiagCmdMsg
+    {
+        [FieldOffset(0)] public UInt16 seqNumber;
+
+        [FieldOffset(2)] public UInt16 version;
+
+        [FieldOffset(4)] public UInt16 rqstType;
+
+        [FieldOffset(6)] public UInt16 extraData;
+
+        [FieldOffset(8)] public UInt32 userData;
+
+        // Additional data fields contains the length of the following text
+        [FieldOffset(12)] public UInt16 argListLen;
+
+        //[FieldOffset(14)] public byte[] argListText;
     }
 
     //--------------------------------------------------------------------
@@ -159,55 +144,6 @@ namespace HcomDiagUi
         //// Variable length
         //[FieldOffset(20)] public byte[] fileName;
     }
-
-    ////--------------------------------------------------------------------
-    //// Header plus File Info
-    //[StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
-    //struct HcomProtoFileMessage
-    //{
-    //    // If the sequence number is zero (0), it indicates that this is a non-data
-    //    // message.Non-data messages always contain basic message related
-    //    // information. Most messages fit this category.
-    //    [FieldOffset(0)] public UInt16 seqNumber;
-
-    //    // The second header field is the 'Version' field. This value is updated for each
-    //    // breaking change to the protocol.
-    //    // The version field is considered a single number which is incremented for each
-    //    // protocol change.
-    //    [FieldOffset(2)] public UInt16 version;
-
-    //    // The third header field is the 'Request Type' which defines the type of
-    //    // message. Each message type must have a unique request type. These are
-    //    // defined below.
-    //    [FieldOffset(4)] public UInt16 rqstType;
-
-    //    // The forth header field is called Extra Data. However, it is no longer
-    //    // used and can be considered 'future'.
-    //    [FieldOffset(6)] public UInt16 extraData;
-
-    //    // The fifth and last header field is the 'User Data' field. This field can
-    //    // be used for any purpose specified by the Request Type.
-    //    [FieldOffset(8)] public UInt32 userData;
-
-    //    // File length of the entire file
-    //    [FieldOffset(12)] public UInt32 fileSize;
-
-    //    // File checksum calculated by sender (not used by ESP32)
-    //    [FieldOffset(16)] public UInt32 fileCheckSum;
-
-    //    // File flash address (used only by ESP32)
-    //    [FieldOffset(20)] public UInt32 fileFlashAddr;
-
-    //    // Since the data from Meadow is packed and arrays seem to like to
-    //    // live on nice even boundaries these arrays are handled differently.
-    //    //// The MD5 Hash is 32 char hex "string" (used only by ESP32)
-    //    //// 32 byte field
-    //    //[FieldOffset(24)] public byte[] fileMD5Hash;
-
-    //    //// File name (variable length field, not used by ESP32)
-    //    //// Variable size. Offset is 24 + 32 = 44;
-    //    //[FieldOffset(56)] public byte[] fileName;
-    //}
 
     //--------------------------------------------------------------------
     // Header plus Text  Info
@@ -319,8 +255,9 @@ namespace HcomDiagUi
         HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME = 0x02 | MajorTypes.HCOM_PROTOCOL_HEADER_FILE_START_TYPE,
         HCOM_MDOW_REQUEST_START_ESP_FILE_TRANSFER = 0x03 | MajorTypes.HCOM_PROTOCOL_HEADER_FILE_START_TYPE,
 
-        // These message are a header followed by text
+        // These message are a header followed by text, one contains the texts length too
         HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT = 0x01 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
+        HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD = 0x02 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
 
         // This is a simple type with binary data
         HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA = 0x01 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_BINARY_TYPE,

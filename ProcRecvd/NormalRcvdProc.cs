@@ -21,6 +21,8 @@ namespace HcomDiagUi
             _hcomHdrLen = Protocol.HcomProtoHdrMessageSize();
         }
 
+        public bool Verbose { get; set; }
+
         //===================================================================
         internal void DisplayNormalMsgData(HcomProtoHdrMessage hdrMsg,
             HostRqstData hostRqstData, HostRqstType hostRqstType,
@@ -34,9 +36,11 @@ namespace HcomDiagUi
                 $"Extr:{hdrMsg.stdHeader.extraData}, " +
                 $"UDat:{hdrMsg.stdHeader.userData}]");
 
-            _uiSupport.WriteSendReceiveTimeLine(hdrAsStr);
-
-            _uiSupport.WriteDebugLine($"Received Msg Class '{hostRqstData.msgClass}'");
+            if (Verbose)
+            {
+                _uiSupport.WriteSendReceiveTimeLine(hdrAsStr);
+                _uiSupport.WriteDebugLine($"Received Msg Class '{hostRqstData.msgClass}'");
+            }
 
             switch (hostRqstData.msgClass)
             {
@@ -90,8 +94,6 @@ namespace HcomDiagUi
             // Convert everything after the header from a byte[] to a .net string
             var hdrText = Encoding.ASCII.GetString(messageBuffer, _hcomHdrLen,
                     messageLength - _hcomHdrLen);
-
-            _uiSupport.WriteDebugLine($"Received text message '{hdrText}'");
 
             // The text is always shown
             _uiSupport.WriteSendReceiveTime("'");

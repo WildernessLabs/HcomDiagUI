@@ -135,7 +135,10 @@ namespace HcomDiagUi
                 $"Extr:{hdrMsg.stdHeader.extraData}, " +
                 $"UDat:{hdrMsg.stdHeader.userData}]");
 
-            _uiSupport.WriteSendReceiveTimeLine(xmitHeader);
+            if (Verbose)
+            {
+                _uiSupport.WriteSendReceiveTimeLine(xmitHeader);
+            }
 
             byte[] msgBuffer = new byte[_protocolHdrSize];
 
@@ -150,7 +153,8 @@ namespace HcomDiagUi
 
         //==========================================================================
         // Build and send a message with a header plus text
-        internal void BuildAndSendTextMsg(MeadowRqstType requestType, UInt32 userData, string textData)
+        internal void BuildAndSendTextMsgOld(MeadowRqstType requestType,
+            UInt32 userData, string textData)
         {
             // Copy the encoded string to the buffer
             var hcomHdrMsg = new HcomProtoHdrMessage();
@@ -174,6 +178,48 @@ namespace HcomDiagUi
 
             // Encode and copy the text to the buffer
             _ = Encoding.ASCII.GetBytes(textData, 0, textData.Length, msgBuffer, _protocolHdrSize);
+
+            EncodeAndSendPacket(msgBuffer, totalSize);
+        }
+
+        //==========================================================================
+        // Build and send a message with a header, text length plus text
+        internal void BuildAndSendDiagCmdMsg(MeadowRqstType requestType,
+            UInt32 userData, string textData)
+        {
+            // Copy the encoded string to the buffer
+            var hcomDiagCmdMsg = new HcomProtoDiagCmdMsg();
+
+            var protocolDiagCmdSize = Marshal.SizeOf(typeof(HcomProtoDiagCmdMsg));
+
+            hcomDiagCmdMsg.seqNumber = 0;
+            hcomDiagCmdMsg.version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER;
+            hcomDiagCmdMsg.rqstType = (UInt16)requestType;
+            hcomDiagCmdMsg.extraData = 0;
+            hcomDiagCmdMsg.userData = userData;
+
+            // Determine the needed buffer for text length
+            UInt16 encodedLength = (UInt16)Encoding.ASCII.GetByteCount(textData);
+            hcomDiagCmdMsg.argListLen = encodedLength;
+
+            // Reserve space for the string
+            int totalSize = protocolDiagCmdSize + encodedLength;
+            byte[] msgBuffer = new byte[totalSize];
+
+            // Copy the structure to message buffer
+            IntPtr structPtr = Marshal.AllocHGlobal(protocolDiagCmdSize);
+
+            // Marshal data from managed structure to unmanaged memory
+            Marshal.StructureToPtr(hcomDiagCmdMsg, structPtr, true);
+
+            // Copy structure (in unmanaged memory) to the start of the buffer
+            Marshal.Copy(structPtr, msgBuffer, 0, protocolDiagCmdSize);
+            Marshal.FreeHGlobal(structPtr);
+
+            // Encode and put the text at the end of the message buffer, after
+            // the structure
+            _ = Encoding.ASCII.GetBytes(textData, 0, textData.Length, msgBuffer,
+                protocolDiagCmdSize);
 
             EncodeAndSendPacket(msgBuffer, totalSize);
         }

@@ -98,7 +98,7 @@ namespace HcomDiagUi
 
     static class ProtocolHelper
     {
-        // Takes a hcom request type and outputs a string contining the header information
+        // Takes a hcom request type and outputs a string containing the header information
         public static MeadowRqstData DecodeMsgToMeadow(MeadowRqstType rqstType)
         {
             return FindMeadowRqstInformation(rqstType);
@@ -363,6 +363,14 @@ namespace HcomDiagUi
                     msgComplex = MessageComplex.Normal;
                     break;
 
+                case MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD:
+                    commandName = "diag execute meadow app";
+                    commandInfo = "Currently only 'ping' is implemented. " +
+                                  "All elements must be comma separated (e.g. ping, 123.123.123.123).";
+                    msgClass = MessageClass.Text;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA:
                     commandName = "start mono debugger";
                     commandInfo = "...";
@@ -606,55 +614,5 @@ namespace HcomDiagUi
             return new HostRqstData(commandName, commandInfo,
                  hostRqstType,msgClass, msgComplex);
         }
-
-        //------------------------------------------------------
-        // This may not be used
-        // Note: Undefined is excluded
-        public static MeadowRqstType[] MeadowRqstTypeArray =
-        {
-            MeadowRqstType.HCOM_MDOW_REQUEST_CHANGE_TRACE_LEVEL,
-            MeadowRqstType.HCOM_MDOW_REQUEST_FORMAT_FLASH_FILE_SYS,
-            MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER,
-            MeadowRqstType.HCOM_MDOW_REQUEST_RESTART_PRIMARY_MCU,
-            MeadowRqstType.HCOM_MDOW_REQUEST_VERIFY_ERASED_FLASH,
-            MeadowRqstType.HCOM_MDOW_REQUEST_BULK_FLASH_ERASE,
-            MeadowRqstType.HCOM_MDOW_REQUEST_ENTER_DFU_MODE,
-            MeadowRqstType.HCOM_MDOW_REQUEST_ENABLE_DISABLE_NSH,
-            MeadowRqstType.HCOM_MDOW_REQUEST_LIST_PARTITION_FILES,
-            MeadowRqstType.HCOM_MDOW_REQUEST_LIST_PART_FILES_AND_CRC,
-            MeadowRqstType.HCOM_MDOW_REQUEST_MONO_DISABLE,
-            MeadowRqstType.HCOM_MDOW_REQUEST_MONO_ENABLE,
-            MeadowRqstType.HCOM_MDOW_REQUEST_MONO_RUN_STATE,
-            MeadowRqstType.HCOM_MDOW_REQUEST_GET_DEVICE_INFORMATION,
-            MeadowRqstType.HCOM_MDOW_REQUEST_PART_RENEW_FILE_SYS,
-            MeadowRqstType.HCOM_MDOW_REQUEST_NO_TRACE_TO_HOST,
-            MeadowRqstType.HCOM_MDOW_REQUEST_SEND_TRACE_TO_HOST,
-            MeadowRqstType.HCOM_MDOW_REQUEST_END_ESP_FILE_TRANSFER,
-            MeadowRqstType.HCOM_MDOW_REQUEST_READ_ESP_MAC_ADDRESS,
-            MeadowRqstType.HCOM_MDOW_REQUEST_RESTART_ESP32,
-            MeadowRqstType.HCOM_MDOW_REQUEST_MONO_FLASH,
-            MeadowRqstType.HCOM_MDOW_REQUEST_SEND_TRACE_TO_UART,
-            MeadowRqstType.HCOM_MDOW_REQUEST_NO_TRACE_TO_UART,
-            MeadowRqstType.HCOM_MDOW_REQUEST_MONO_UPDATE_RUNTIME,
-            MeadowRqstType.HCOM_MDOW_REQUEST_MONO_UPDATE_FILE_END,
-            MeadowRqstType.HCOM_MDOW_REQUEST_MONO_START_DBG_SESSION,
-            MeadowRqstType.HCOM_MDOW_REQUEST_GET_DEVICE_NAME,
-            MeadowRqstType.HCOM_MDOW_REQUEST_GET_INITIAL_FILE_BYTES,
-            MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND,
-            MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_ABORT_DATA_SEND,
-            MeadowRqstType.HCOM_MDOW_REQUEST_START_FILE_TRANSFER,
-            MeadowRqstType.HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME,
-            MeadowRqstType.HCOM_MDOW_REQUEST_START_ESP_FILE_TRANSFER,
-            MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT,
-            MeadowRqstType.HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA,
-            MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_1,
-            MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_2,
-            MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_3,
-            MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_4,
-            MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_INIT,
-            MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_WRITE,
-            MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_READ,
-        };
-
     }
 }

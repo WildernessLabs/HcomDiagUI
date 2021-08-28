@@ -69,7 +69,7 @@ namespace HcomDiagUi
             this.comPortTextBox.Name = "comPortTextBox";
             this.comPortTextBox.Size = new System.Drawing.Size(67, 21);
             this.comPortTextBox.TabIndex = 1;
-            this.comPortTextBox.Text = "Com9";
+            this.comPortTextBox.Text = "Com24";
             this.comPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.comPortTextBox.TextChanged += new System.EventHandler(this.comPortTextBox_TextChanged);
             // 
@@ -83,15 +83,15 @@ namespace HcomDiagUi
             this.commandListBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.commandListBox.Name = "commandListBox";
             this.commandListBox.ScrollAlwaysVisible = true;
-            this.commandListBox.Size = new System.Drawing.Size(193, 154);
+            this.commandListBox.Size = new System.Drawing.Size(193, 139);
             this.commandListBox.Sorted = true;
             this.commandListBox.TabIndex = 2;
             this.commandListBox.SelectedIndexChanged += new System.EventHandler(this.commandListBox_SelectedIndexChanged);
             // 
             // sendRecvTextBox
             // 
-            this.sendRecvTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.sendRecvTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.sendRecvTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.sendRecvTextBox.Location = new System.Drawing.Point(15, 414);
@@ -136,7 +136,7 @@ namespace HcomDiagUi
             // 
             // statusTextBox
             // 
-            this.statusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.statusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.statusTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.statusTextBox.Location = new System.Drawing.Point(15, 260);
@@ -210,7 +210,7 @@ namespace HcomDiagUi
             this.textForMsgTextBox.Name = "textForMsgTextBox";
             this.textForMsgTextBox.Size = new System.Drawing.Size(588, 21);
             this.textForMsgTextBox.TabIndex = 12;
-            this.textForMsgTextBox.Text = "TestFile4096.txt";
+            this.textForMsgTextBox.Text = "ping -c 5 -i 500 192.168.2.81";
             // 
             // label2
             // 
@@ -260,7 +260,7 @@ namespace HcomDiagUi
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(7, 149);
+            this.label7.Location = new System.Drawing.Point(7, 152);
             this.label7.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(79, 13);
@@ -272,7 +272,7 @@ namespace HcomDiagUi
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(622, 600);
+            this.ClientSize = new System.Drawing.Size(622, 597);
             this.Controls.Add(this.showRecvHexCheckBox);
             this.Controls.Add(this.HostFileTextBox);
             this.Controls.Add(this.textForMsgTextBox);
