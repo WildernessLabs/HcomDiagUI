@@ -88,7 +88,7 @@ namespace HcomDiagUi
             }
         }
 
-        internal string ReadHostFileName()
+        internal string ReadHostFileInfo()
         {
             return HostFileTextBox.Text;
         }

@@ -121,7 +121,7 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_CHANGE_TRACE_LEVEL:
-                    commandName = "Change Trace Level";
+                    commandName = "trace level";
                     commandInfo = "User Data holds the new level.\r\nThe value " +
                                   "of 2 is usually a good choice.";
                     msgClass = MessageClass.Header;
@@ -129,28 +129,28 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_FORMAT_FLASH_FILE_SYS:
-                    commandName = "format flash file sys";
-                    commandInfo = "No longer used";
-                              msgClass = MessageClass.Header;
+                    commandName = "** not supported fs format";
+                    commandInfo = "Was used to format file system, but no longer supported";
+                    msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER:
-                    commandName = "End of File download";
-                    commandInfo = "...";
+                    commandName = "(internal) indicates EOF for F/S";
+                    commandInfo = "When the CLI has sent all the F/S data for download, it sends this";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_RESTART_PRIMARY_MCU:
-                    commandName = "Restart the STM32F777 MCU";
-                    commandInfo = "...";
+                    commandName = "device restart";
+                    commandInfo = "Restarts the STM32F777 but not the ESP32";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_VERIFY_ERASED_FLASH:
-                    commandName = "Verify Erased Flash";
+                    commandName = "flash verify";
                     commandInfo = "Only useful after bulk erase of flash.\r\n " +
                                   "This will take a few minutes to execute.";
                     msgClass = MessageClass.Header;
@@ -158,22 +158,23 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_BULK_FLASH_ERASE:
-                    commandName = "Bulk Flash Erase";
-                    commandInfo = "This will take a few minutes to execute.";
+                    commandName = "flash erase";
+                    commandInfo = "Format the file system (2-3 minutes)";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_ENTER_DFU_MODE:
-                    commandName = "Enter DFU Mode";
-                    commandInfo = "...";
+                    commandName = "flash os";
+                    commandInfo = "Enter DFU Mode";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_ENABLE_DISABLE_NSH:
-                    commandName = "Enable Disable NuttShell (NSH)";
-                    commandInfo = "User Data = 1 will enable. Other values " +
+                    commandName = "nsh enable/nsh disable";
+                    commandInfo = "Enable/Disable NuttShell (NSH). " +
+                                  "User Data = 1 will enable. Other values " +
                                   "will report that it cannot be disabled\r\n" +
                                   "This will only work if NSH support is included " +
                                   "in the build.";
@@ -182,14 +183,14 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_LIST_PARTITION_FILES:
-                    commandName = "list partition files";
+                    commandName = "file list";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_LIST_PART_FILES_AND_CRC:
-                    commandName = "list part files and crc";
+                    commandName = "file list + crc";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
@@ -210,56 +211,56 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_MONO_RUN_STATE:
-                    commandName = "mono run state";
+                    commandName = "mono state";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_GET_DEVICE_INFORMATION:
-                    commandName = "get device information";
+                    commandName = "device info";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_PART_RENEW_FILE_SYS:
-                    commandName = "part renew file sys";
-                    commandInfo = "...";
+                    commandName = "fs renew";
+                    commandInfo = "Deletes all files quickly";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_NO_TRACE_TO_HOST:
-                    commandName = "no trace to host";
-                    commandInfo = "...";
+                    commandName = "trace disable";
+                    commandInfo = "Disables trace output from being displayed on CLI";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_SEND_TRACE_TO_HOST:
-                    commandName = "send trace to host";
-                    commandInfo = "...";
+                    commandName = "trace enable";
+                    commandInfo = "Enables trace output to be displayed on CLI";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_END_ESP_FILE_TRANSFER:
-                    commandName = "end esp file transfer";
-                    commandInfo = "...";
+                    commandName = "(internal) indicates EOF for ESP32";
+                    commandInfo = "When the CLI has sent all the ESP32 data for download, it sends this";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_READ_ESP_MAC_ADDRESS:
-                    commandName = "read esp mac address";
-                    commandInfo = "...";
+                    commandName = "device mac (esp32)";
+                    commandInfo = "read esp mac address";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_RESTART_ESP32:
-                    commandName = "restart esp32";
+                    commandName = "esp32 restart";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
@@ -267,112 +268,115 @@ namespace HcomDiagUi
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_MONO_FLASH:
                     commandName = "mono flash";
-                    commandInfo = "...";
+                    commandInfo = "Flashes the mono image already download to file system. " +
+                                  "Not used much since 'mono upload rt' downloads and flashes";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_SEND_TRACE_TO_UART:
-                    commandName = "send trace to uart";
-                    commandInfo = "...";
+                    commandName = "uart trace -e";
+                    commandInfo = "Directs trace output to uart1";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_NO_TRACE_TO_UART:
-                    commandName = "no trace to uart";
-                    commandInfo = "...";
+                    commandName = "uart trace";
+                    commandInfo = "Stops trace output from going to uart1";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_MONO_UPDATE_RUNTIME:
-                    commandName = "mono update runtime";
+                    commandName = "mono update rt";
                     commandInfo = "...";
                     msgClass = MessageClass.FileInfo;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_MONO_UPDATE_FILE_END:
-                    commandName = "mono update file end";
-                    commandInfo = "...";
+                    commandName = "(internal) indicates mono RT downloaded";
+                    commandInfo = "CLI sends this when mono RT has been downloaded";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_MONO_START_DBG_SESSION:
-                    commandName = "mono start dbg session";
-                    commandInfo = "...";
+                    commandName = "debug";
+                    commandInfo = "Start mono dbg session";
                     msgClass = MessageClass.Header;         // VERIFY
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_GET_DEVICE_NAME:
-                    commandName = "get device name";
-                    commandInfo = "gets the connected Meadow's name";
+                    commandName = "device name";
+                    commandInfo = "Gets the connected Meadow's name (MeadowF7 is default)";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_GET_INITIAL_FILE_BYTES:
-                    commandName = "get initial file bytes";
-                    commandInfo = "Requires the Meadow file name in 'Text Data'";
+                    commandName = "file initial";
+                    commandInfo = "Gets the initial bytes (upto 500).\r\n" +
+                                  "Requires the Meadow file name in 'Text Data' field";
                     msgClass = MessageClass.Text;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND:
-                    commandName = "Upload Tell F7, Ready for Data";
-                    commandInfo = "...";
+                    commandName = "(new-internal) upload data start";
+                    commandInfo = "Tells F7 Host is ready for data to be sent. Must supply " +
+                                  "both F7 file name and destination path and file name";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_ABORT_DATA_SEND:
-                    commandName = "Upload Abort File sending (not implemented)";
+                    commandName = "(new) upload abort";
                     commandInfo = "Cancel the current file being uploaded";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_START_FILE_TRANSFER:
-                    commandName = "start file transfer";
+                    commandName = "file write";
                     commandInfo = "...";
                     msgClass = MessageClass.FileInfo;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME:
-                    commandName = "delete file by name";
-                    commandInfo = "...";
+                    commandName = "file delete";
+                    commandInfo = "Deletes a file by name from the F7 file system";
                     msgClass = MessageClass.FileInfo;       // VERIFY
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_START_ESP_FILE_TRANSFER:
-                    commandName = "start esp file transfer";
-                    commandInfo = "...";
+                    commandName = "esp file write";
+                    commandInfo = "start esp file transfer";
                     msgClass = MessageClass.FileInfo;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT:
-                    commandName = "Upload ->Initialize F7 for Upload";
-                    commandInfo = "Requires the Meadow file name in 'Text Data'";
+                    commandName = "(new) upload start";
+                    commandInfo = "Destination in 'Host File' and the F7 file name in 'F7 File Name'";
                     msgClass = MessageClass.Text;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD:
-                    commandName = "diag execute meadow app";
-                    commandInfo = "Currently only 'ping' is implemented. " +
-                                  "All elements must be comma separated (e.g. ping, 123.123.123.123).";
+                    commandName = "(new) ping server";
+                    commandInfo = "Only for Ethernet. Pings the requested web site via IP or name" +
+                                  "All elements must be comma separated (e.g. ping, wildernesslabs.co).";
                     msgClass = MessageClass.Text;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA:
-                    commandName = "start mono debugger";
+                    commandName = "debug";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
@@ -407,21 +411,21 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_INIT:
-                    commandName = "qspi flash init";
+                    commandName = "qspi init";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_WRITE:
-                    commandName = "qspi flash write";
+                    commandName = "qspi write";
                     commandInfo = "For testing only";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_READ:
-                    commandName = "qspi flash read";
+                    commandName = "qspi read";
                     commandInfo = "For testing only";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.Normal;
@@ -465,7 +469,7 @@ namespace HcomDiagUi
                     break;
 
                 case HostRqstType.HCOM_HOST_REQUEST_UPLOAD_FILE_COMPLETED:
-                    commandName = "F7 Uploading is finished";
+                    commandName = "(new-internal) F7 Uploading is finished";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.F7FileUpload;
@@ -583,14 +587,14 @@ namespace HcomDiagUi
                     break;
 
                 case HostRqstType.HCOM_HOST_REQUEST_INIT_UPLOAD_OKAY:
-                    commandName = "Upload Initialization Okay";
+                    commandName = "(new-internal) Upload Initialization Okay";
                     commandInfo = "...";
                     msgClass = MessageClass.Text;
                     msgComplex = MessageComplex.F7FileUpload;
                     break;
 
                 case HostRqstType.HCOM_HOST_REQUEST_INIT_UPLOAD_FAIL:
-                    commandName = "Upload Initialization Failed";
+                    commandName = "(new-internal) Upload Initialization Failed";
                     commandInfo = "...";
                     msgClass = MessageClass.Header;
                     msgComplex = MessageComplex.F7FileUpload;

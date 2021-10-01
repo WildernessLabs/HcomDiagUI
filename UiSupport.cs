@@ -93,9 +93,9 @@ namespace HcomDiagUi
             _hcomUiForm.WriteSendReceiveSafe(sb.ToString());
         }
 
-        public string GetHostFileName()
+        public string GetHostFileInfo()
         {
-            return _hcomUiForm.ReadHostFileName();
+            return _hcomUiForm.ReadHostFileInfo();
         }
 
         //---------------------------------------------

@@ -86,8 +86,8 @@ namespace HcomDiagUi
                 _xferCalcFileCrc = 0;
 
                 // Need to open the file so we can save it. Get the name from the UI.
-                string hostFileName = _uiSupport.GetHostFileName();
-                _fileStream = new FileStream(hostFileName, FileMode.Create);
+                string hostFileInfo = _uiSupport.GetHostFileInfo();
+                _fileStream = new FileStream(hostFileInfo, FileMode.Create);
 
                 // Tell F7 we are ready so start sending data
                 _commsMgr.BuildHdrMsgToSend(
