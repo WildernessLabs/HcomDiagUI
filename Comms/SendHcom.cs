@@ -183,6 +183,57 @@ namespace HcomDiagUi
         }
 
         //==========================================================================
+        // Build and send a message with a header plus text. The text is the current
+        // date time encoded in the ISO 8601 format.
+        internal void BuildAndSendRTCTimeCmdMsg(MeadowRqstType requestType)
+        {
+            // Since NTP provides time in UTC we'll do the same
+            // Using UtcNow, the formats are:
+            // 's' = 2022-04-01T21:34:05
+            // 'o' = 2022-04-01T21:35:03.9174375+00:00
+            // 'u' = 2022-04-01 21:35:31Z - Notice no 'T' but a space
+            // Using Now (local time in Pacific timezone with DST true), the formats are:
+            // 's' = 2022-04-01T14:37:34
+            // 'o' = 2022-04-01T14:38:25.1838288-07:00
+            // 'u' = 2022-04-01 21:38:59Z - Notice UTC time & no 'T'
+            //
+            var timeString = DateTimeOffset.UtcNow.ToString("o");
+            Console.WriteLine($"UTC Time string {timeString}");
+
+            var hcomSendTimeMsg = new HcomProtoTextMessage();
+            var protocolMsgSize = Marshal.SizeOf(typeof(HcomProtoTextMessage));
+
+            // Populate header
+            hcomSendTimeMsg.seqNumber = 0;
+            hcomSendTimeMsg.version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER;
+            hcomSendTimeMsg.rqstType = (UInt16)requestType;
+            hcomSendTimeMsg.extraData = 0;
+            hcomSendTimeMsg.userData = 0;
+
+            // Reserve space for time string
+            UInt16 encodedLength = (UInt16)Encoding.ASCII.GetByteCount(timeString);
+            int totalSize = protocolMsgSize + encodedLength;
+            byte[] msgBuffer = new byte[totalSize];
+
+            // Allocate unmanaged memory to copy the structure to message buffer
+            IntPtr structPtr = Marshal.AllocHGlobal(protocolMsgSize);
+
+            // Marshal data from managed structure to unmanaged memory
+            Marshal.StructureToPtr(hcomSendTimeMsg, structPtr, true);
+
+            // Copy header (in unmanaged memory) to the start of the buffer
+            Marshal.Copy(structPtr, msgBuffer, 0, protocolMsgSize);
+            Marshal.FreeHGlobal(structPtr);
+
+            // Encode and put the text at the end of the message buffer, immediately
+            // after the header structure
+            _ = Encoding.ASCII.GetBytes(timeString, 0, timeString.Length, msgBuffer,
+                protocolMsgSize);
+
+            EncodeAndSendPacket(msgBuffer, totalSize);
+        }
+
+        //==========================================================================
         // Build and send a message with a header, text length plus text
         internal void BuildAndSendDiagCmdMsg(MeadowRqstType requestType,
             UInt32 userData, string textData)
@@ -212,14 +263,14 @@ namespace HcomDiagUi
             // Marshal data from managed structure to unmanaged memory
             Marshal.StructureToPtr(hcomDiagCmdMsg, structPtr, true);
 
-            // Copy structure (in unmanaged memory) to the start of the buffer
+            // Copy structure (in unmanaged memory) to the start of managed buffer
             Marshal.Copy(structPtr, msgBuffer, 0, protocolDiagCmdSize);
             Marshal.FreeHGlobal(structPtr);
 
             // Encode and put the text at the end of the message buffer, after
             // the structure
             _ = Encoding.ASCII.GetBytes(textData, 0, textData.Length, msgBuffer,
-                protocolDiagCmdSize);
+                        protocolDiagCmdSize);
 
             EncodeAndSendPacket(msgBuffer, totalSize);
         }
@@ -320,6 +371,8 @@ namespace HcomDiagUi
         {
             try
             {
+                Console.WriteLine($"Sending packet with {messageSize} bytes");
+
                 // For testing calculate the crc including the sequence number
                 //_packetCrc32 = NuttxCrc.Crc32part(messageBytes, messageSize, 0, _packetCrc32);
 

@@ -72,11 +72,16 @@ namespace HcomDiagUi
 				case MessageClass.Text:
 					// Pick up the Text data that is in the UI
 					if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
-                    {
+          {
 						// Special case for new type of text message
 						_sendSerialComms.BuildAndSendDiagCmdMsg(rqstInfo.rqstType, userData,
 							_uiSupport.TextForMsg());
-                    }
+          }
+          else if(rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD)
+          {
+						// Special case - build and format current time as UTC
+						_sendSerialComms.BuildAndSendRTCTimeCmdMsg(rqstInfo.rqstType);
+          }
 					else
 					{
 						// Normal case

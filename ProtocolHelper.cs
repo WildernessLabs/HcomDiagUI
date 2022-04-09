@@ -375,6 +375,21 @@ namespace HcomDiagUi
                     msgComplex = MessageComplex.Normal;
                     break;
 
+                case MeadowRqstType.HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD:
+                    commandName = "(new) Set RTC clock";
+                    commandInfo = "Needs UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25+00:00)";
+                    msgClass = MessageClass.Text;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+                
+                case MeadowRqstType.HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD:
+                    commandName = "(new) Read RTC clock";
+                    commandInfo = "Reads UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25+00:00)";
+                    msgClass = MessageClass.Text;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+                
+
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA:
                     commandName = "(internal) debugging data";
                     commandInfo = "Identifies to F7 debugging information";
