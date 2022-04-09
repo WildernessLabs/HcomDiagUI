@@ -81,12 +81,35 @@ namespace HcomDiagUi
     }
 
     //--------------------------------------------------------------------
-    // This diagnostic command message allows HCOM to use code from NSH that
-    // is not be able to be built because we are using the protected build.
-    // This is initiall done to support ping for networking.
+    // Header plus Text Info
+    [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
+    struct HcomProtoTextMessage
+    {
+        // [FieldOffset(0)] public HcomProtoStdHeader stdHeader;
+        // Copy of  standard header
+        [FieldOffset(0)] public UInt16 seqNumber;
+
+        [FieldOffset(2)] public UInt16 version;
+
+        [FieldOffset(4)] public UInt16 rqstType;
+
+        [FieldOffset(6)] public UInt16 extraData;
+
+        [FieldOffset(8)] public UInt32 userData;
+
+        // Some 'simple' messages contain string information.
+        // Note: This is a variable length field
+        //[FieldOffset(12)] public byte[] textData;
+    }
+
+    //--------------------------------------------------------------------
+    // This diagnostic command message allows HCOM to use code originally designed
+    // for NSH that is not be able to be built because we are using the protected
+    // build. This is initially done to support ping for networking.
     [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
     public struct HcomProtoDiagCmdMsg
-    {
+    {   
+        // Copy of  standard headere
         [FieldOffset(0)] public UInt16 seqNumber;
 
         [FieldOffset(2)] public UInt16 version;
@@ -143,18 +166,6 @@ namespace HcomDiagUi
         //// File name 
         //// Variable length
         //[FieldOffset(20)] public byte[] fileName;
-    }
-
-    //--------------------------------------------------------------------
-    // Header plus Text  Info
-    [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
-    struct HcomProtoTextMessage
-    {
-        [FieldOffset(0)] public HcomProtoStdHeader stdHeader;
-
-        // Some 'simple' messages contain string information.
-        // Note: This is a variable length field
-        [FieldOffset(12)] public byte[] textData;
     }
 
     //--------------------------------------------------------------------
@@ -258,6 +269,8 @@ namespace HcomDiagUi
         // These message are a header followed by text, one contains the texts length too
         HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT = 0x01 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
         HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD = 0x02 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
+        HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD = 0x03 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
+        HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD = 0x04 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
 
         // This is a simple type with binary data
         HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA = 0x01 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_BINARY_TYPE,

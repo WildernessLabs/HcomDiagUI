@@ -69,7 +69,7 @@ namespace HcomDiagUi
             this.comPortTextBox.Name = "comPortTextBox";
             this.comPortTextBox.Size = new System.Drawing.Size(172, 41);
             this.comPortTextBox.TabIndex = 1;
-            this.comPortTextBox.Text = "Com4";
+            this.comPortTextBox.Text = "Com28";
             this.comPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.comPortTextBox.TextChanged += new System.EventHandler(this.comPortTextBox_TextChanged);
             // 
@@ -83,7 +83,7 @@ namespace HcomDiagUi
             this.commandListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.commandListBox.Name = "commandListBox";
             this.commandListBox.ScrollAlwaysVisible = true;
-            this.commandListBox.Size = new System.Drawing.Size(508, 292);
+            this.commandListBox.Size = new System.Drawing.Size(508, 256);
             this.commandListBox.Sorted = true;
             this.commandListBox.TabIndex = 2;
             this.commandListBox.SelectedIndexChanged += new System.EventHandler(this.commandListBox_SelectedIndexChanged);
@@ -266,7 +266,7 @@ namespace HcomDiagUi
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1659, 1424);
+            this.ClientSize = new System.Drawing.Size(1659, 1343);
             this.Controls.Add(this.showRecvHexCheckBox);
             this.Controls.Add(this.HostFileTextBox);
             this.Controls.Add(this.textForMsgTextBox);
