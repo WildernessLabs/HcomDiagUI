@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace HcomDiagUi
 {
@@ -25,32 +26,45 @@ namespace HcomDiagUi
             int encodedOffset = 1;  // Offset into destination buffer
             int replaceOffset = 0;  // Offset where replaceValue is being tracked
             byte replaceValue = 1;  // Value of the offset to the next delimiter
-
-            while (sourceOffset < length + startingSkip)
+            try
             {
-                // Is source value the one we must replace?
-                if (source[sourceOffset] == 0x00)
+                while (sourceOffset < length + startingSkip)
                 {
-                    encoded[encodeSkip + replaceOffset] = replaceValue;  // Replace original value with offset to replaceValue
-                    replaceOffset = encodedOffset++;        // Update replace offset and bump encoded offset
-                    replaceValue = 1;                       // Reset replaceValue
-                }
-                else
-                {
-                    encoded[encodeSkip + encodedOffset++] = source[sourceOffset]; // Just copy original value
-                    replaceValue++;                                  // Keep zero offset tracker
-
-                    // replaceValue has been tracking the delimiter offset. If it's  0xff then
-                    // special action is needed, because we reached the end of a 254 byte block
-                    // of data. And now encoding starts like at the first.
-                    if (replaceValue == 0xff)                   // Signals maximum possible offset
+                    // Is source value the one we must replace?
+                    if (source[sourceOffset] == 0x00)
                     {
-                        encoded[encodeSkip + replaceOffset] = replaceValue;
-                        replaceOffset = encodedOffset++;
-                        replaceValue = 1;
+                        encoded[encodeSkip + replaceOffset] = replaceValue;  // Replace original value with offset to replaceValue
+                        replaceOffset = encodedOffset++;        // Update replace offset and bump encoded offset
+                        replaceValue = 1;                       // Reset replaceValue
                     }
+                    else
+                    {
+                        if (encodeSkip + encodedOffset == encoded.Length)
+                        {
+                            Console.WriteLine($"encodeSkip + encodedOffset == encoded.Length");
+                            return -1;
+                        }
+                        encoded[encodeSkip + encodedOffset++] = source[sourceOffset]; // Just copy original value
+                        replaceValue++;                                  // Keep zero offset tracker
+
+                        // replaceValue has been tracking the delimiter offset. If it's 0xff then
+                        // special action is needed, because we reached the end of a 254 byte block
+                        // of data. And now encoding starts like at the first.
+                        if (replaceValue == 0xff)                   // Signals maximum possible offset
+                        {
+                            encoded[encodeSkip + replaceOffset] = replaceValue;
+                            replaceOffset = encodedOffset++;
+                            replaceValue = 1;
+                        }
+                    }
+                    sourceOffset++;                              // Point to next source value
                 }
-                sourceOffset++;                              // Point to next source value
+            }
+            catch(Exception except)
+            {
+                Console.WriteLine($"An exception was caught: {except}");
+                Thread.Sleep(10*60*1000);   // Sleep for 10 minutes
+                throw;
             }
 
             // Last character

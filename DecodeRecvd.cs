@@ -27,7 +27,7 @@ namespace MeadowCLI.Hcom
         Concluded,
         DownloadStartOkay,
         DownloadStartFail,
-  }
+    }
 
     public class MeadowMessageEventArgs : EventArgs
     {
@@ -151,8 +151,8 @@ namespace MeadowCLI.Hcom
             }
         }
 
-          void AddAndProcessData(byte[] buffer, int availableBytes)
-          {
+        void AddAndProcessData(byte[] buffer, int availableBytes)
+        {
             HcomBufferReturn result;
             while (true)
             {
@@ -187,54 +187,54 @@ namespace MeadowCLI.Hcom
                     Debug.Assert(false);
                 }
             }
-          }
+        }
 
-//         void AddAndProcessData(byte[] buffer, int availableBytes)
-//         {
-//             HcomBufferReturn result;
-//             while (true)
-//             {
-//                 // Add these bytes to the circular buffer
-// Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-**Calling AddBytes to add {availableBytes} bytes to Circular buffer");
-//                 result = _hostCommBuffer.AddBytes(buffer, 0, availableBytes);
-//                 if (result == HcomBufferReturn.HCOM_CIR_BUF_ADD_SUCCESS)
-//                 {
-//                     break;
-//                 }
-//                 else if (result == HcomBufferReturn.HCOM_CIR_BUF_ADD_WONT_FIT)
-//                 {
-//                     // Wasn't possible to put these bytes in the buffer. We need to
-//                     // process a few packets and then retry to add this data
-//                     result = PullAndProcessAllPackets();
-//                     if (result == HcomBufferReturn.HCOM_CIR_BUF_GET_FOUND_MSG ||
-//                         result == HcomBufferReturn.HCOM_CIR_BUF_GET_NONE_FOUND)
-//                         continue;   // There should be room now for the failed add
+        //         void AddAndProcessData(byte[] buffer, int availableBytes)
+        //         {
+        //             HcomBufferReturn result;
+        //             while (true)
+        //             {
+        //                 // Add these bytes to the circular buffer
+        // Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-**Calling AddBytes to add {availableBytes} bytes to Circular buffer");
+        //                 result = _hostCommBuffer.AddBytes(buffer, 0, availableBytes);
+        //                 if (result == HcomBufferReturn.HCOM_CIR_BUF_ADD_SUCCESS)
+        //                 {
+        //                     break;
+        //                 }
+        //                 else if (result == HcomBufferReturn.HCOM_CIR_BUF_ADD_WONT_FIT)
+        //                 {
+        //                     // Wasn't possible to put these bytes in the buffer. We need to
+        //                     // process a few packets and then retry to add this data
+        //                     result = PullAndProcessAllPackets();
+        //                     if (result == HcomBufferReturn.HCOM_CIR_BUF_GET_FOUND_MSG ||
+        //                         result == HcomBufferReturn.HCOM_CIR_BUF_GET_NONE_FOUND)
+        //                         continue;   // There should be room now for the failed add
 
-//                     if (result == HcomBufferReturn.HCOM_CIR_BUF_GET_BUF_NO_ROOM)
-//                     {
-//                         // The buffer to receive the message is too small? Probably 
-//                         // corrupted data in buffer.
-//                         Debug.Assert(false);
-//                     }
-//                 }
-//                 else if (result == HcomBufferReturn.HCOM_CIR_BUF_ADD_BAD_ARG)
-//                 {
-//                     // Something wrong with implemenation
-//                     Debug.Assert(false);
-//                 }
-//                 else
-//                 {
-//                     // Undefined return value????
-//                     Debug.Assert(false);
-//                 }
-//             }
+        //                     if (result == HcomBufferReturn.HCOM_CIR_BUF_GET_BUF_NO_ROOM)
+        //                     {
+        //                         // The buffer to receive the message is too small? Probably 
+        //                         // corrupted data in buffer.
+        //                         Debug.Assert(false);
+        //                     }
+        //                 }
+        //                 else if (result == HcomBufferReturn.HCOM_CIR_BUF_ADD_BAD_ARG)
+        //                 {
+        //                     // Something wrong with implemenation
+        //                     Debug.Assert(false);
+        //                 }
+        //                 else
+        //                 {
+        //                     // Undefined return value????
+        //                     Debug.Assert(false);
+        //                 }
+        //             }
 
-//             result = PullAndProcessAllPackets();
+        //             result = PullAndProcessAllPackets();
 
-//             // Any other response is an error
-//             Debug.Assert(result == HcomBufferReturn.HCOM_CIR_BUF_GET_FOUND_MSG ||
-//                 result == HcomBufferReturn.HCOM_CIR_BUF_GET_NONE_FOUND);
-//         }
+        //             // Any other response is an error
+        //             Debug.Assert(result == HcomBufferReturn.HCOM_CIR_BUF_GET_FOUND_MSG ||
+        //                 result == HcomBufferReturn.HCOM_CIR_BUF_GET_NONE_FOUND);
+        //         }
 
         public void PullAndProcessThread()
         {
@@ -247,7 +247,7 @@ namespace MeadowCLI.Hcom
                 are.WaitOne();
 
                 result = PullAndProcessAllPackets();
-                if(result != HcomBufferReturn.HCOM_CIR_BUF_GET_NONE_FOUND)
+                if (result != HcomBufferReturn.HCOM_CIR_BUF_GET_NONE_FOUND)
                 {
                     Console.WriteLine($"PullAndProcess returned:{result}");
                 }
@@ -294,7 +294,7 @@ namespace MeadowCLI.Hcom
                 }
 
                 int decodedSize = CobsTools.CobsDecoding(packetBuffer, --packetLength, ref decodedBuffer);
-Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-Pulled {packetLength + 1} byte msg from cirBuf, Decoded length:{decodedSize}");
+                Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-Pulled {packetLength + 1} byte msg from cirBuf, Decoded length:{decodedSize}");
                 // If a message is too short it is ignored
                 if (decodedSize < MeadowDeviceManager.ProtocolHeaderSize)
                     continue;
@@ -304,7 +304,7 @@ Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-Pulled {packetLength + 1} by
                 // Process the received packet
                 if (decodedSize > 0)
                 {
-Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-Processing decoded message");
+                    Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-Processing decoded message");
                     bool procResult = ParseAndProcessReceivedPacket(decodedBuffer, decodedSize);
                     if (procResult)
                         continue;   // See if there's another packet ready
@@ -321,7 +321,7 @@ Console.WriteLine($"==> {DateTime.Now:HH:mm:ss.fff}-Processing decoded message")
                 IReceivedMessage processor = _recvFactoryManager.CreateProcessor(receivedMsg, receivedMsgLen);
                 if (processor == null)
                 {
-                  Console.WriteLine($"==>{DateTime.Now:HH:mm:ss.fff}-packet but rejected by factory" );
+                    Console.WriteLine($"==>{DateTime.Now:HH:mm:ss.fff}-packet but rejected by factory");
                     return false;
                 }
 
