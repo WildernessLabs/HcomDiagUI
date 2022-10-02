@@ -203,7 +203,7 @@ namespace HcomDiagUi
                     if (packetLength == 1)
                         continue;
 
-                    // Don't include 
+                    // Don't include delimiter
                     int decodedSize = CobsTools.CobsDecoding(packetBuffer, --packetLength,
                         ref decodedBuffer);
 

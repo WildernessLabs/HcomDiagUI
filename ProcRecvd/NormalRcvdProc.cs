@@ -44,31 +44,31 @@ namespace HcomDiagUi
 
             switch (hostRqstData.msgClass)
             {
-                case MessageClass.None:
+                case MessageClasses.None:
                     break;
 
-                case MessageClass.Header:     // Only
+                case MessageClasses.Header:     // Only
                     DisplayHdrInfo(hdrMsg, hostRqstData, hostRqstType, messageBuffer,
                         messageLength, payloadLength);
                     break;
 
-                case MessageClass.FileInfo:   // Header with file information
+                case MessageClasses.FileInfo:   // Header with file information
                     DisplayFileInfo(hdrMsg, hostRqstData, hostRqstType, messageBuffer,
                         messageLength, payloadLength);
                     break;
 
-                case MessageClass.Text:       // Header with text string
+                case MessageClasses.Text:       // Header with text string
                     DisplayTextInfo(hdrMsg, hostRqstData, hostRqstType, messageBuffer,
                         messageLength, payloadLength);
                     break;
 
-                case MessageClass.Binary:     // Header with binary data
+                case MessageClasses.Binary:     // Header with binary data
                     DisplayBinInfo(hdrMsg, hostRqstData, hostRqstType, messageBuffer,
                         messageLength, payloadLength);
                     break;
 
                     // This is only used for files downloaded to the F7
-                case MessageClass.NoHdrBin:    // Deprecated 2-byte header + binary data
+                case MessageClasses.NoHdrBin:    // Deprecated 2-byte header + binary data
                     Debug.Assert(false);
                     break;
 

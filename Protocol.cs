@@ -29,6 +29,9 @@ namespace HcomDiagUi
         public const int HCOM_PROTOCOL_PACKET_MAX_SIZE = 512;
         public const int HCOM_PROTOCOL_ENCODED_MAX_SIZE = HCOM_PROTOCOL_PACKET_MAX_SIZE + 8;
 
+        // The maximum payload is max packet - header (12 bytes)
+        public const int HCOM_PROTOCOL_DATA_MAX_SIZE = HCOM_PROTOCOL_PACKET_MAX_SIZE - 12;
+
         static public int HcomProtoHdrMessageSize()
         {
             return Marshal.SizeOf(typeof(HcomProtoHdrMessage));
@@ -108,7 +111,7 @@ namespace HcomDiagUi
     // build. This is initially done to support ping for networking.
     [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
     public struct HcomProtoDiagCmdMsg
-    {   
+    {
         // Copy of  standard headere
         [FieldOffset(0)] public UInt16 seqNumber;
 
@@ -128,12 +131,12 @@ namespace HcomDiagUi
 
     //--------------------------------------------------------------------
     // Header plus File Info
-    // Deprecated
+    // Future - Deprecated
     [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
     struct HcomProtoFSInfoMsg
     {
         // If the sequence number is zero (0), it indicates that this is a non-data
-        // message.Non-data messages always contain basic message related
+        // message. Non-data messages always contain basic message related
         // information. Most messages fit this category.
         [FieldOffset(0)] public UInt16 seqNumber;
 
@@ -157,15 +160,21 @@ namespace HcomDiagUi
         [FieldOffset(8)] public UInt32 userData;
 
         // --- The following are not part of the standard header ---
-        // File length of the entire file
+        // Not ESP32 - File length of the entire file
         [FieldOffset(12)] public UInt32 fileSize;
 
-        // File checksum calculated by sender (not used by ESP32)
+        // Not ESP32 - File checksum calculated by sender
         [FieldOffset(16)] public UInt32 fileCheckSum;
 
-        //// File name 
-        //// Variable length
-        //[FieldOffset(20)] public byte[] fileName;
+        // ESP Only - Address of data following
+        [FieldOffset(20)] public UInt32 esp32FlashAddr;
+
+        // ESP Only - This field is 32 bytes and contains the MD5Hash
+        [FieldOffset(24)] public byte[] esp32MD5Hash;
+
+        // File name 
+        // Variable length
+        [FieldOffset(56)] public byte[] fileName;
     }
 
     //--------------------------------------------------------------------
@@ -185,7 +194,7 @@ namespace HcomDiagUi
     //--------------------------------------------------------------------------
     public enum MajorTypes : UInt16
     {
-        // PeterM-When the time comes the following Major types should reflect the
+        // When the time comes the following Major types should reflect the
         // name of the above structure is used to send it. 
         HCOM_PROTOCOL_HEADER_UNDEFINED_TYPE = 0x0000,
 
@@ -271,6 +280,8 @@ namespace HcomDiagUi
         HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD = 0x02 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
         HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD = 0x03 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
         HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD = 0x04 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
+        HCOM_MDOW_REQUEST_RTC_WAKEUP_TIME_CMD = 0x05 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
+
 
         // This is a simple type with binary data
         HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA = 0x01 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_BINARY_TYPE,

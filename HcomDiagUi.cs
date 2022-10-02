@@ -25,7 +25,7 @@ namespace HcomDiagUi
         public HcomDiagUiForm()
         {
             InitializeComponent();
-            
+
             _uiSupport = new UiSupport(this);
             _uiSupport.PopulateCommandListBox();
             _commsManager = new CommsManager(this);
@@ -41,10 +41,10 @@ namespace HcomDiagUi
             return this.comPortTextBox.Text;
         }
 
-        internal string ReadTextInformation()
-        {
-            return this.comPortTextBox.Text;
-        }
+        //internal string ReadTextInformation()
+        //{
+        //    return this.comPortTextBox.Text;
+        //}
 
         //---------------------------------------------------------
         internal void WriteMsgClassSafe(string text)
@@ -139,7 +139,7 @@ namespace HcomDiagUi
 
         private void sendButton_Click(object sender, EventArgs e)
         {
-            if(commandListBox.SelectedItem == null)
+            if (commandListBox.SelectedItem == null)
             {
                 statusTextBox.AppendText("PLEASE SELECT A COMMAND");
                 return;
