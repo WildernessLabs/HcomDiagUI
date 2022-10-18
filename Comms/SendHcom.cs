@@ -36,42 +36,44 @@ namespace HcomDiagUi
         {
             _uiSupport.WriteDebugLine($"Entered BuildAndSendFileRelatedCommand with fileSize {fileSize}, CRC {fileCheckSum}");
 
-            var hcomFsStartCmdMsg = new HcomProtoFSInfoMsg();
+            var hcomFsStartCmdMsg = new HcomProtoFSInfoMsg
+            {
+                seqNumber = 0,
+                version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER,
+                rqstType = (UInt16)requestType,
+                extraData = 0,
+                userData = userData,
 
-            hcomFsStartCmdMsg.seqNumber = 0;
-            hcomFsStartCmdMsg.version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER;
-            hcomFsStartCmdMsg.rqstType = (UInt16)requestType;
-            hcomFsStartCmdMsg.extraData = 0;
-            hcomFsStartCmdMsg.userData = userData;
+                // Non-standard header information follows
+                fileSize = fileSize,
+                fileCheckSum = fileCheckSum,
+                esp32FlashAddr = mcuAddr,
+                esp32MD5Hash = new byte[32]
+            };
 
-            // Non-standard header information follows
-            hcomFsStartCmdMsg.fileSize = fileSize;
-            hcomFsStartCmdMsg.fileCheckSum = fileCheckSum;
-            hcomFsStartCmdMsg.esp32FlashAddr = mcuAddr;
-
-            // The MD5Hash is always 32 characters
-            hcomFsStartCmdMsg.esp32MD5Hash = new byte[md5Hash.Length];
+            // Encode the md5 hash into the structure
             Encoding.ASCII.GetBytes(md5Hash, 0, md5Hash.Length, hcomFsStartCmdMsg.esp32MD5Hash, 0);
-            Array.Copy(hcomFsStartCmdMsg.esp32MD5Hash, hcomFsStartCmdMsg.esp32MD5Hash, md5Hash.Length);
 
-            // Determine the needed buffer length
-            int encodedLength = Encoding.ASCII.GetByteCount(destFileName);
+            // Determine the needed spaces lengths
+            var fsInfoHdrSize = 56;
 
-            // Include filename in buffer size
-            int totalSize = _protocolHdrSize + 4 + 4 + 4 + 32 + encodedLength;
-            byte[] msgBuffer = new byte[totalSize];
+            var encodedFileNameLen = Encoding.ASCII.GetByteCount(destFileName);
+            var totalMsgLen = fsInfoHdrSize + encodedFileNameLen;
 
-            // Copy the struct with header + extra fields to buffer
-            IntPtr tempPtr = Marshal.AllocHGlobal(totalSize);
+            // Determine the length of the entire message
+            byte[] msgBuffer = new byte[totalMsgLen];
+
+            // Copy the class to a buffer
+            IntPtr tempPtr = Marshal.AllocHGlobal(fsInfoHdrSize);
             Marshal.StructureToPtr(hcomFsStartCmdMsg, tempPtr, true);
-            Marshal.Copy(tempPtr, msgBuffer, 0, totalSize);
+            Marshal.Copy(tempPtr, msgBuffer, 0, fsInfoHdrSize);
             Marshal.FreeHGlobal(tempPtr);
 
             // Encode and copy the filename to the end of the msg buffer
-            _ = Encoding.ASCII.GetBytes(destFileName, 0, destFileName.Length, msgBuffer,
-                                        totalSize - destFileName.Length);
+            _ = Encoding.ASCII.GetBytes(destFileName, 0, encodedFileNameLen,
+                msgBuffer, fsInfoHdrSize);
 
-            EncodeAndSendPacket(msgBuffer, totalSize);
+            EncodeAndSendPacket(msgBuffer, totalMsgLen);
         }
 
         //==========================================================================
@@ -88,7 +90,8 @@ namespace HcomDiagUi
 
             // Determine the needed buffer length
             int encodedLength = Encoding.ASCII.GetByteCount(textData);
-            // Reserve space for the string
+
+            // Reserve space for the text string
             int totalSize = _protocolHdrSize + encodedLength;
             byte[] msgBuffer = new byte[totalSize];
 
@@ -105,10 +108,9 @@ namespace HcomDiagUi
         }
 
         //==========================================================================
-        // Prepare a packet containing a file data being downloaded
-        // SOMEDAY THIS MESSAGE NEED TO CHANGE AND SEND A STANDARD HEADER
-        public void BuildAndSendBinPacket(byte[] messageBytes, int messageOffset,
-            int messageSize, UInt16 seqNumb)
+        // Prepare a packet containing file data being downloaded
+        public void BuildAndSendBinPacket(byte[] binDataBytes, int binDataOffset,
+            int binDataSize, UInt16 seqNumb)
         {
             try
             {
@@ -116,14 +118,14 @@ namespace HcomDiagUi
                 byte[] seqBytes = BitConverter.GetBytes(seqNumb);
 
                 // Determine the needed buffer length
-                int totalSize = messageSize + seqBytes.Length;
+                int totalSize = binDataSize + seqBytes.Length;
                 byte[] msgBuffer = new byte[totalSize];
 
                 // Copy sequence number and data into the xmitBuffer
                 Array.Copy(seqBytes, msgBuffer, seqBytes.Length);
-                Array.Copy(messageBytes, 0, msgBuffer, seqBytes.Length, messageSize);
+                Array.Copy(binDataBytes, binDataOffset, msgBuffer, seqBytes.Length, binDataSize);
 
-                //_uiSupport.WriteDebugLine($"seq {seqNumb}, len {seqBytes.Length}, totSize {totalSize}, msgSz {messageSize}, msgLen {messageBytes.Length}");
+                //_uiSupport.WriteDebugLine($"seq {seqNumb}, len {seqBytes.Length}, totSize {totalSize}, msgSz {binDataSize}, msgLen {binDataBytes.Length}");
 
                 EncodeAndSendPacket(msgBuffer, totalSize);
             }
@@ -149,15 +151,15 @@ namespace HcomDiagUi
             MeadowRqstData rqstData;
             rqstData = ProtocolHelper.DecodeMsgToMeadow(requestType);
             
-            string xmitHeader = string.Format($"Sending  [Header-" +
-                $"Seq:{hdrMsg.stdHeader.seqNumber} ," +
-                $"Ver:{hdrMsg.stdHeader.version}, " +
-                $"Rqst:{rqstData.rqstName} (0x{hdrMsg.stdHeader.rqstType:x4}), " +
-                $"Extr:{hdrMsg.stdHeader.extraData}, " +
-                $"UDat:{hdrMsg.stdHeader.userData}]");
-
             if (Verbose)
             {
+                string xmitHeader = string.Format($"Sending  [Header-" +
+                    $"Seq:{hdrMsg.stdHeader.seqNumber} ," +
+                    $"Ver:{hdrMsg.stdHeader.version}, " +
+                    $"Rqst:{rqstData.rqstName} (0x{hdrMsg.stdHeader.rqstType:x4}), " +
+                    $"Extr:{hdrMsg.stdHeader.extraData}, " +
+                    $"UDat:{hdrMsg.stdHeader.userData}]");
+
                 _uiSupport.WriteSendReceiveTimeLine(xmitHeader);
             }
 
@@ -234,41 +236,69 @@ namespace HcomDiagUi
 
         //==========================================================================
         // Last stop before transmitting information
-        // Note: Ultimately this format should be deprecated.
+        // Note: Ultimately this format should be eleminated in favor of a standard header
         private void EncodeAndSendPacket(byte[] messageBytes, int messageSize, int messageOffset = 0)
         {
             try
             {
-                Console.WriteLine($"Sending packet with {messageSize} bytes");
+                int encodedToSend;
+                byte[] encodedBytes;
+
+                //Console.WriteLine($"Sending packet with {messageSize} bytes");
 
                 // For testing calculate the crc including the sequence number
                 //_packetCrc32 = NuttxCrc.Crc32part(messageBytes, messageSize, 0, _packetCrc32);
-
-                // The encoded size using COBS is just a bit more than the original size adding 1 byte
-                // every 254 bytes plus 1 and need room for beginning and ending delimiters.
-                byte[] encodedBytes = new byte[Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE];
-
-                // Skip over first byte so it can be a start delimiter
-                int encodedToSend = CobsTools.CobsEncoding(messageBytes, messageOffset, messageSize, ref encodedBytes, 1);
-
-                // DEBUG TESTING
-                if(encodedToSend == -1)
+                try
                 {
-                    _uiSupport.WriteDebugLine($"Error - encodedToSend == -1");
-                    return;
+                    // The encoded size using COBS is just a bit more than the original size adding 1 byte
+                    // every 254 bytes plus 1 and need room for beginning and ending delimiters.
+                    encodedBytes = new byte[Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE];
+
+                    // Skip over first byte so it can be a start delimiter
+                    encodedToSend = CobsTools.CobsEncoding(messageBytes, messageOffset, messageSize,
+                        ref encodedBytes, 1);
+
+                    // DEBUG TESTING
+                    if(encodedToSend == -1)
+                    {
+                        _uiSupport.WriteDebugLine($"Error - encodedToSend == -1");
+                        Thread.Sleep(500);    // Place for break point
+                        return;
+                    }
+
+                    if (_commsMgr.SerialPort == null)
+                    {
+                        _uiSupport.WriteDebugLine($"Error - SerialPort == null");
+                        Thread.Sleep(500);    // Place for break point
+                        throw new NotConnectedException();
+                    }
+                }
+                catch (Exception except)
+                {
+                    string msg = string.Format("Send setup Exception: {0}", except);
+                    _uiSupport.WriteStatus(msg);
+                    Thread.Sleep(500);    // Place for break point
+                    throw;
                 }
 
                 // Add delimiters to packet boundaries
-                encodedBytes[0] = 0;                // Start delimiter
-                encodedToSend++;
-                encodedBytes[encodedToSend] = 0;    // End delimiter
-                encodedToSend++;
+                try
+                {
+                    encodedBytes[0] = 0;                // Start delimiter
+                    encodedToSend++;
+                    encodedBytes[encodedToSend] = 0;    // End delimiter
+                    encodedToSend++;
+                }
+                catch (Exception encodedBytesEx)
+                {
+                    // This should drop the connection and retry
+                    Debug.WriteLine($"Adding encodeBytes delimiter threw: {encodedBytesEx}");
+                    Thread.Sleep(500);    // Place for break point
+                    throw;
+                }
 
                 try
                 {
-                    if (_commsMgr.SerialPort == null)
-                        throw new NotConnectedException();
-
                     // Send the data to Meadow
                     _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
                 }
@@ -276,24 +306,28 @@ namespace HcomDiagUi
                 {
                     string msg = string.Format("Write but port not opened. Exception: {0}", ioe);
                     _uiSupport.WriteStatus(msg);
+                    Thread.Sleep(500);    // Place for break point
                     throw;
                 }
                 catch (ArgumentOutOfRangeException aore)  // offset or count don't match buffer
                 {
                     string msg = string.Format("Write buffer, offset and count don't line up. Exception: {0}", aore);
                     _uiSupport.WriteStatus(msg);
+                    Thread.Sleep(500);    // Place for break point
                     throw;
                 }
                 catch (ArgumentException ae)  // offset plus count > buffer length
                 {
                     string msg = string.Format($"Write offset plus count > buffer length. Exception: {0}", ae);
                     _uiSupport.WriteStatus(msg);
+                    Thread.Sleep(500);    // Place for break point
                     throw;
                 }
                 catch (TimeoutException te) // Took too long to send
                 {
                     string msg = string.Format("Write took too long to send. Exception: {0}", te);
                     _uiSupport.WriteStatus(msg);
+                    Thread.Sleep(500);    // Place for break point
                     throw;
                 }
             }
@@ -301,7 +335,7 @@ namespace HcomDiagUi
             {
                 // This should drop the connection and retry
                 Debug.WriteLine($"EncodeAndSendPacket threw: {except}");
-                Thread.Sleep(1);    // Place for break point
+                Thread.Sleep(500);    // Place for break point
                 throw;
             }
         }

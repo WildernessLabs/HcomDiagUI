@@ -136,7 +136,7 @@ namespace HcomDiagUi
             HostRqstData hostRqstData = ProtocolHelper.GetHostRqstTypeData(hostRqstType);
             _uiSupport.WriteDebugLine($"Received '{hostRqstData.msgComplex}' message");
 
-            // Only 3 messages are currently complex (i.e. needed 2 or more messages
+            // Only 4 messages are currently complex (i.e. needed 2 or more messages
             // to complete their purpose)
             switch (hostRqstData.msgComplex)
             {

@@ -69,7 +69,7 @@ namespace HcomDiagUi
             this.comPortTextBox.Name = "comPortTextBox";
             this.comPortTextBox.Size = new System.Drawing.Size(172, 41);
             this.comPortTextBox.TabIndex = 1;
-            this.comPortTextBox.Text = "Com7";
+            this.comPortTextBox.Text = "Com4";
             this.comPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.comPortTextBox.TextChanged += new System.EventHandler(this.comPortTextBox_TextChanged);
             // 
