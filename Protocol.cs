@@ -131,50 +131,104 @@ namespace HcomDiagUi
 
     //--------------------------------------------------------------------
     // Header plus File Info
-    // Future - Deprecated
-    [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
-    struct HcomProtoFSInfoMsg
+    // Future - Deprecate
+    //[StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
+    //public unsafe struct HcomProtoFSInfoMsg
+    //{
+    //    // If the sequence number is zero (0), it indicates that this is a non-data
+    //    // message. Non-data messages always contain basic message related
+    //    // information. Most messages fit this category.
+    //    [FieldOffset(0)] public UInt16 seqNumber;
+
+    //    // The second header field is the 'Version' field. This value is updated for each
+    //    // breaking change to the protocol.
+    //    // The version field is considered a single number which is incremented for each
+    //    // protocol change.
+    //    [FieldOffset(2)] public UInt16 version;
+
+    //    // The third header field is the 'Request Type' which defines the type of
+    //    // message. Each message type must have a unique request type. These are
+    //    // defined below.
+    //    [FieldOffset(4)] public UInt16 rqstType;
+
+    //    // The forth header field is called Extra Data. However, it is no longer
+    //    // used and can be considered 'future'.
+    //    [FieldOffset(6)] public UInt16 extraData;
+
+    //    // The fifth and last header field is the 'User Data' field. This field can
+    //    // be used for any purpose specified by the Request Type.
+    //    [FieldOffset(8)] public UInt32 userData;
+
+    //    // --- The following are not part of the standard header ---
+    //    // Not ESP32 - File length of the entire file
+    //    [FieldOffset(12)] public UInt32 fileSize;
+
+    //    // Not ESP32 - File checksum calculated by sender
+    //    [FieldOffset(16)] public UInt32 fileCheckSum;
+
+    //    // ESP Only - Address of data following
+    //    [FieldOffset(20)] public UInt32 esp32FlashAddr;
+
+    //    // ESP Only - This field is 32 bytes and contains the MD5Hash
+    //    [FieldOffset(24)] public fixed byte esp32MD5Hash[32];
+
+    //    // File name 
+    //    // Variable length
+    //    // [FieldOffset(56)] public fixed byte fileName[1];
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public class HcomProtoFSInfoMsg
     {
         // If the sequence number is zero (0), it indicates that this is a non-data
         // message. Non-data messages always contain basic message related
         // information. Most messages fit this category.
-        [FieldOffset(0)] public UInt16 seqNumber;
+        [MarshalAs(UnmanagedType.U2)]
+        public UInt16 seqNumber;
 
         // The second header field is the 'Version' field. This value is updated for each
         // breaking change to the protocol.
         // The version field is considered a single number which is incremented for each
         // protocol change.
-        [FieldOffset(2)] public UInt16 version;
+        [MarshalAs(UnmanagedType.U2)]
+        public UInt16 version;
 
         // The third header field is the 'Request Type' which defines the type of
         // message. Each message type must have a unique request type. These are
         // defined below.
-        [FieldOffset(4)] public UInt16 rqstType;
+        [MarshalAs(UnmanagedType.U2)]
+        public UInt16 rqstType;
 
         // The forth header field is called Extra Data. However, it is no longer
         // used and can be considered 'future'.
-        [FieldOffset(6)] public UInt16 extraData;
+        [MarshalAs(UnmanagedType.U2)]
+        public UInt16 extraData;
 
         // The fifth and last header field is the 'User Data' field. This field can
         // be used for any purpose specified by the Request Type.
-        [FieldOffset(8)] public UInt32 userData;
+        [MarshalAs(UnmanagedType.U4)]
+        public UInt32 userData;
 
         // --- The following are not part of the standard header ---
         // Not ESP32 - File length of the entire file
-        [FieldOffset(12)] public UInt32 fileSize;
+        [MarshalAs(UnmanagedType.U4)]
+        public UInt32 fileSize;
 
         // Not ESP32 - File checksum calculated by sender
-        [FieldOffset(16)] public UInt32 fileCheckSum;
+        [MarshalAs(UnmanagedType.U4)]
+        public UInt32 fileCheckSum;
 
         // ESP Only - Address of data following
-        [FieldOffset(20)] public UInt32 esp32FlashAddr;
+        [MarshalAs(UnmanagedType.U4)]
+        public UInt32 esp32FlashAddr;
 
         // ESP Only - This field is 32 bytes and contains the MD5Hash
-        [FieldOffset(24)] public byte[] esp32MD5Hash;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] esp32MD5Hash;
 
         // File name 
         // Variable length
-        [FieldOffset(56)] public byte[] fileName;
+        // [FieldOffset(56)] public fixed byte fileName[1];
     }
 
     //--------------------------------------------------------------------
