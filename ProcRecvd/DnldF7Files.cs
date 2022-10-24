@@ -57,7 +57,7 @@ namespace HcomDiagUi
                 byte[] messageBuffer, int messageLength, uint payloadLength)
         {
             // Received a message while doing file download. This must be the
-            //
+            // start result. Do we stop or continue?
             switch(hostRqstType)
             {
                 case HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY:
