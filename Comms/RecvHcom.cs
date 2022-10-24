@@ -230,6 +230,13 @@ namespace HcomDiagUi
                         UInt32 payloadLength = (UInt32)(decodedSize - _hcomHdrLen);
                         HostRqstType hostRqstType = (HostRqstType)hdrMsg.stdHeader.rqstType;
 
+                        // If concluded message display the time to execute this command
+                        if(hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_CONCLUDED)
+                        {
+                            _uiSupport.Stopwatch.Stop();
+                            _uiSupport.WriteExecutionTime();
+                        }
+
                         // Route message around
                         _commsMgr.ForwardToProcessMsgs(hdrMsg, hostRqstType,
                             decodedBuffer, decodedSize, payloadLength);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -74,6 +75,24 @@ namespace HcomDiagUi
                 statusTextBox.AppendText(text);
             }
         }
+
+
+        //---------------------------------------------------------
+        // Execution Time of last command
+        internal void WriteExecTimeSafe(string text)
+        {
+            if (execTimeTextBox.InvokeRequired)
+            {
+                var d = new SafeCallDelegate(WriteExecTimeSafe);
+                execTimeTextBox.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                execTimeTextBox.Clear();
+                execTimeTextBox.AppendText(text);
+            }
+        }
+        //---------------------------------------------------------
 
         internal void WriteSendReceiveSafe(string text)
         {
@@ -148,6 +167,7 @@ namespace HcomDiagUi
             MeadowRqstData rqstInfo = (MeadowRqstData)commandListBox.SelectedItem;
             UInt32 userData = UInt32.Parse(userDataTextBox.Text);
             _commsManager.BuildMsgToSend(rqstInfo, userData);
+            _uiSupport.Stopwatch.Restart();
         }
 
         private void commandListBox_SelectedIndexChanged(object sender, EventArgs e)

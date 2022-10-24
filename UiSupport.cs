@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,13 +10,16 @@ namespace HcomDiagUi
     public class UiSupport
     {
         HcomDiagUiForm _hcomUiForm;
+        private Stopwatch stopwatch;
 
         public bool RecvHexChecked { get; internal set; }
+        public Stopwatch Stopwatch { get => stopwatch; set => stopwatch = value; }
 
         // Constructor
         public UiSupport(HcomDiagUiForm hcomUiForm)
         {
             _hcomUiForm = hcomUiForm;
+            Stopwatch = new Stopwatch();
         }
 
         internal void PopulateCommandListBox()
@@ -84,6 +88,11 @@ namespace HcomDiagUi
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"{DateTime.Now:HH:mm:ss.fff} {text}");
             _hcomUiForm.WriteSendReceiveSafe(sb.ToString());
+        }
+
+        public void WriteExecutionTime()
+        {
+            _hcomUiForm.WriteExecTimeSafe($"{Stopwatch.Elapsed}");
         }
 
         public void WriteSendReceiveLine(string text)
