@@ -41,6 +41,24 @@ namespace HcomDiagUi
             return _hcomUiForm.TextForMsg;
         }
 
+        //---------------------------------------------
+        public void WriteSendReps(int sendRepetitions)
+        {
+            _hcomUiForm.WriteSendRepsSafe(sendRepetitions.ToString());
+        }
+
+        //---------------------------------------------
+        public void WriteSendCount(int sendCount)
+        {
+            _hcomUiForm.WriteSendCountSafe(sendCount.ToString());
+        }
+
+        //---------------------------------------------
+        public int SendIterations()
+        {
+            return _hcomUiForm.SendIterations;
+        }
+
         // These support the UI
         //---------------------------------------------
         public void WriteDebugLine(string text)
@@ -50,7 +68,6 @@ namespace HcomDiagUi
             _hcomUiForm.WriteStatusSafe(sb.ToString());
         }
 
-        //---------------------------------------------
         public void WriteStatus(string text)
         {
             _hcomUiForm.WriteStatusSafe(text);
@@ -71,23 +88,23 @@ namespace HcomDiagUi
         }
 
         //---------------------------------------------
-        public void WriteSendReceive(string text)
+        public void WriteSendRecv(string text)
         {
-            _hcomUiForm.WriteSendReceiveSafe(text);
+            _hcomUiForm.WriteSendRecvSafe(text);
         }
 
-        public void WriteSendReceiveTime(string text)
+        public void WriteSendRecvTime(string text)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append($"{DateTime.Now:HH:mm:ss.fff} {text}");
-            _hcomUiForm.WriteSendReceiveSafe(sb.ToString());
+            _hcomUiForm.WriteSendRecvSafe(sb.ToString());
         }
 
-        public void WriteSendReceiveTimeLine(string text)
+        public void WriteSendRecvTimeLine(string text)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"{DateTime.Now:HH:mm:ss.fff} {text}");
-            _hcomUiForm.WriteSendReceiveSafe(sb.ToString());
+            _hcomUiForm.WriteSendRecvSafe(sb.ToString());
         }
 
         public void WriteExecutionTime()
@@ -95,11 +112,16 @@ namespace HcomDiagUi
             _hcomUiForm.WriteExecTimeSafe($"{Stopwatch.Elapsed}");
         }
 
-        public void WriteSendReceiveLine(string text)
+        public void ClearExecutionTime()
+        {
+            _hcomUiForm.WriteExecTimeSafe("Working");
+        }
+
+        public void WriteSendRecvLine(string text)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"{text}");
-            _hcomUiForm.WriteSendReceiveSafe(sb.ToString());
+            _hcomUiForm.WriteSendRecvSafe(sb.ToString());
         }
 
         public string GetHostFileInfo()

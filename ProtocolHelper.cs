@@ -325,29 +325,29 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND:
-                    commandName = "(new-internal) upload data start";
-                    commandInfo = "Tells F7 Host is ready for data to be sent. Must supply " +
+                    commandName = "(new) Upload data start [This CMD is internal]";
+                    commandInfo = "Tells F7 Host (CLI) is ready for data to be sent. Must supply " +
                                   "both F7 file name and destination path and file name";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_ABORT_DATA_SEND:
-                    commandName = "(new) upload abort";
+                    commandName = "(new) Upload abort";
                     commandInfo = "Cancel the current file being uploaded";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_START_FILE_TRANSFER:
-                    commandName = "F7 file write";
+                    commandName = "file write";
                     commandInfo = "Downloads a file to the Meadow file system";
                     msgClass = MessageClasses.FileInfo;
                     msgComplex = MessageComplex.F7FileDnld;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME:
-                    commandName = "F7 file delete";
+                    commandName = "file delete";
                     commandInfo = "Deletes a file by name from the F7 file system";
                     msgClass = MessageClasses.FileInfo;       // VERIFY
                     msgComplex = MessageComplex.Normal;
@@ -361,8 +361,9 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT:
-                    commandName = "(new) upload start";
-                    commandInfo = "Destination in 'Host File' and the F7 file name in 'F7 File Name'";
+                    commandName = "(new) Upload start";
+                    commandInfo = "Initiates uploading a file from Meadow. Put host's destination path in 'Host File' " +
+                        "field and the file name in Meadow in the  File Name' field";
                     msgClass = MessageClasses.Text;
                     msgComplex = MessageComplex.Normal;
                     break;
@@ -626,6 +627,13 @@ namespace HcomDiagUi
                     commandInfo = "...";
                     msgClass = MessageClasses.Binary;
                     msgComplex = MessageComplex.F7FileUpload;
+                    break;
+
+                case HostRqstType.HCOM_HOST_REQUEST_DNLD_FAIL_RESEND:
+                    commandName = "Download failed and timer";
+                    commandInfo = "...";
+                    msgClass = MessageClasses.FileInfo;
+                    msgComplex = MessageComplex.F7FileDnld;
                     break;
 
                 default:

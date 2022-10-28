@@ -22,6 +22,7 @@ namespace HcomDiagUi
         public ListBox CommandListBox => commandListBox;
 
         public string TextForMsg => this.textForMsgTextBox.Text;
+        public int SendIterations => int.Parse(this.sendIterationsTextBox.Text);
 
         public HcomDiagUiForm()
         {
@@ -46,6 +47,38 @@ namespace HcomDiagUi
         //{
         //    return this.comPortTextBox.Text;
         //}
+
+        //---------------------------------------------------------
+        // Current number of iterations to be executed
+        internal void WriteSendRepsSafe(string text)
+        {
+            if (sendIterationsTextBox.InvokeRequired)
+            {
+                var d = new SafeCallDelegate(WriteSendRepsSafe);
+                sendIterationsTextBox.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                sendIterationsTextBox.Clear();
+                sendIterationsTextBox.AppendText(text);
+            }
+        }
+
+        //---------------------------------------------------------
+        // Current number of iterations currently being executed
+        internal void WriteSendCountSafe(string text)
+        {
+            if (sendCountTextBox.InvokeRequired)
+            {
+                var d = new SafeCallDelegate(WriteSendCountSafe);
+                sendCountTextBox.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                sendCountTextBox.Clear();
+                sendCountTextBox.AppendText(text);
+            }
+        }
 
         //---------------------------------------------------------
         internal void WriteMsgClassSafe(string text)
@@ -76,7 +109,6 @@ namespace HcomDiagUi
             }
         }
 
-
         //---------------------------------------------------------
         // Execution Time of last command
         internal void WriteExecTimeSafe(string text)
@@ -92,13 +124,14 @@ namespace HcomDiagUi
                 execTimeTextBox.AppendText(text);
             }
         }
+
         //---------------------------------------------------------
 
-        internal void WriteSendReceiveSafe(string text)
+        internal void WriteSendRecvSafe(string text)
         {
             if (sendRecvTextBox.InvokeRequired)
             {
-                var d = new SafeCallDelegate(WriteSendReceiveSafe);
+                var d = new SafeCallDelegate(WriteSendRecvSafe);
                 sendRecvTextBox.Invoke(d, new object[] { text });
             }
             else
@@ -164,10 +197,10 @@ namespace HcomDiagUi
                 return;
             }
 
-            MeadowRqstData rqstInfo = (MeadowRqstData)commandListBox.SelectedItem;
-            UInt32 userData = UInt32.Parse(userDataTextBox.Text);
-            _commsManager.BuildMsgToSend(rqstInfo, userData);
-            _uiSupport.Stopwatch.Restart();
+            // Tell the communication manager we have work to do
+            _commsManager.BuildMsgToSend();
+
+            _uiSupport.WriteDebugLine("==> UI Thread back home.");
         }
 
         private void commandListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -182,6 +215,11 @@ namespace HcomDiagUi
         private void showRecvHexCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             _uiSupport.ShowRecvHex(showRecvHexCheckBox.Checked);
+        }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            _commsManager.SetCancelSending();
         }
     }
 }

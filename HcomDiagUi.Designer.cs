@@ -49,14 +49,18 @@ namespace HcomDiagUi
             this.HostFileTextBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.execTimeTextBox = new System.Windows.Forms.TextBox();
+            this.cancelButton = new System.Windows.Forms.Button();
+            this.sendIterationsTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.sendCountTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // sendButton
             // 
-            this.sendButton.Location = new System.Drawing.Point(1162, 388);
+            this.sendButton.Location = new System.Drawing.Point(1074, 386);
             this.sendButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.sendButton.Name = "sendButton";
-            this.sendButton.Size = new System.Drawing.Size(165, 83);
+            this.sendButton.Size = new System.Drawing.Size(150, 64);
             this.sendButton.TabIndex = 0;
             this.sendButton.Text = "Send";
             this.sendButton.UseVisualStyleBackColor = true;
@@ -184,7 +188,7 @@ namespace HcomDiagUi
             this.cmdInfoTextBox.Multiline = true;
             this.cmdInfoTextBox.Name = "cmdInfoTextBox";
             this.cmdInfoTextBox.ReadOnly = true;
-            this.cmdInfoTextBox.Size = new System.Drawing.Size(538, 250);
+            this.cmdInfoTextBox.Size = new System.Drawing.Size(538, 198);
             this.cmdInfoTextBox.TabIndex = 10;
             // 
             // cmdValueTextBox
@@ -267,13 +271,50 @@ namespace HcomDiagUi
             // 
             // execTimeTextBox
             // 
-            this.execTimeTextBox.Location = new System.Drawing.Point(1353, 411);
+            this.execTimeTextBox.Location = new System.Drawing.Point(1256, 400);
             this.execTimeTextBox.Name = "execTimeTextBox";
             this.execTimeTextBox.ReadOnly = true;
-            this.execTimeTextBox.Size = new System.Drawing.Size(274, 38);
+            this.execTimeTextBox.Size = new System.Drawing.Size(314, 38);
             this.execTimeTextBox.TabIndex = 14;
             this.execTimeTextBox.Text = "Execution Time";
             this.execTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // cancelButton
+            // 
+            this.cancelButton.Location = new System.Drawing.Point(1462, 191);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(134, 69);
+            this.cancelButton.TabIndex = 15;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
+            // 
+            // sendIterationsTextBox
+            // 
+            this.sendIterationsTextBox.Location = new System.Drawing.Point(868, 369);
+            this.sendIterationsTextBox.Name = "sendIterationsTextBox";
+            this.sendIterationsTextBox.Size = new System.Drawing.Size(102, 38);
+            this.sendIterationsTextBox.TabIndex = 16;
+            this.sendIterationsTextBox.Text = "1";
+            this.sendIterationsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(862, 334);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(131, 32);
+            this.label6.TabIndex = 17;
+            this.label6.Text = "Iterations";
+            // 
+            // sendCountTextBox
+            // 
+            this.sendCountTextBox.Location = new System.Drawing.Point(868, 422);
+            this.sendCountTextBox.Name = "sendCountTextBox";
+            this.sendCountTextBox.ReadOnly = true;
+            this.sendCountTextBox.Size = new System.Drawing.Size(102, 38);
+            this.sendCountTextBox.TabIndex = 18;
+            this.sendCountTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // HcomDiagUiForm
             // 
@@ -281,6 +322,10 @@ namespace HcomDiagUi
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1659, 1603);
+            this.Controls.Add(this.sendCountTextBox);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.sendIterationsTextBox);
+            this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.execTimeTextBox);
             this.Controls.Add(this.showRecvHexCheckBox);
             this.Controls.Add(this.HostFileTextBox);
@@ -313,10 +358,10 @@ namespace HcomDiagUi
 
         private System.Windows.Forms.Button sendButton;
         private System.Windows.Forms.TextBox comPortTextBox;
-        private System.Windows.Forms.ListBox commandListBox;
+        internal System.Windows.Forms.ListBox commandListBox;
         private System.Windows.Forms.TextBox sendRecvTextBox;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox userDataTextBox;
+        internal System.Windows.Forms.TextBox userDataTextBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox statusTextBox;
         private System.Windows.Forms.Label label4;
@@ -331,6 +376,10 @@ namespace HcomDiagUi
         private System.Windows.Forms.TextBox HostFileTextBox;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox execTimeTextBox;
+        private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.TextBox sendIterationsTextBox;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox sendCountTextBox;
     }
 }
 

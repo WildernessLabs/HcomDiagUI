@@ -29,16 +29,16 @@ namespace HcomDiagUi
             byte[] messageBuffer, int messageLength, UInt32 payloadLength)
         {
             // Display header parts
-            string hdrAsStr = string.Format($"Received [Header-" +
-                $"Seq:{hdrMsg.stdHeader.seqNumber} ," +
-                $"Ver:{hdrMsg.stdHeader.version}, " +
-                $"Rqst:'{hostRqstData.rqstName}' (0x{hdrMsg.stdHeader.rqstType:x4}), " +
-                $"Extr:{hdrMsg.stdHeader.extraData}, " +
-                $"UDat:{hdrMsg.stdHeader.userData}]");
-
             if (Verbose)
             {
-                _uiSupport.WriteSendReceiveTimeLine(hdrAsStr);
+                string hdrAsStr = string.Format($"Received [Header-" +
+                    $"Seq:{hdrMsg.stdHeader.seqNumber} ," +
+                    $"Ver:{hdrMsg.stdHeader.version}, " +
+                    $"Rqst:'{hostRqstData.rqstName}' (0x{hdrMsg.stdHeader.rqstType:x4}), " +
+                    $"Extr:{hdrMsg.stdHeader.extraData}, " +
+                    $"UDat:{hdrMsg.stdHeader.userData}]");
+
+                _uiSupport.WriteSendRecvTimeLine(hdrAsStr);
                 _uiSupport.WriteDebugLine($"Received Msg Class '{hostRqstData.msgClass}'");
             }
 
@@ -96,14 +96,14 @@ namespace HcomDiagUi
                     messageLength - _hcomHdrLen);
 
             // The text is always shown
-            _uiSupport.WriteSendReceiveTime("'");
-            _uiSupport.WriteSendReceive(hdrText);
-            _uiSupport.WriteSendReceiveLine("'");
+            _uiSupport.WriteSendRecvTime("'");
+            _uiSupport.WriteSendRecv(hdrText);
+            _uiSupport.WriteSendRecvLine("'");
 
             // Display hex if desired
             if (_uiSupport.RecvHexChecked)
             {
-                _uiSupport.WriteSendReceive(" (");
+                _uiSupport.WriteSendRecv(" (");
 
                 // BitConverter doesn't a have anyway to specify the size so we
                 // must create the right sized buffer.
@@ -111,8 +111,8 @@ namespace HcomDiagUi
                 Buffer.BlockCopy(messageBuffer, _hcomHdrLen, displayBuffer, 0,
                     (int)payloadLength);
                 string showHex = BitConverter.ToString(displayBuffer);
-                _uiSupport.WriteSendReceive(showHex);
-                _uiSupport.WriteSendReceiveLine(")");
+                _uiSupport.WriteSendRecv(showHex);
+                _uiSupport.WriteSendRecvLine(")");
             }
         }
 
@@ -121,7 +121,7 @@ namespace HcomDiagUi
             HostRqstData hostRqstData, HostRqstType hostRqstType, 
             byte[] messageBuffer, int messageLength, UInt32 payloadLength)
         {
-            _uiSupport.WriteSendReceiveTimeLine("Standard Header received");
+            _uiSupport.WriteSendRecvTimeLine("Standard Header received");
         }
 
         //--------------------------------------------------------------------
@@ -129,14 +129,14 @@ namespace HcomDiagUi
             HostRqstData hostRqstData, HostRqstType hostRqstType,
             byte[] messageBuffer, int messageLength, UInt32 payloadLength)
         {
-            _uiSupport.WriteSendReceiveTimeLine("File Information received");
+            _uiSupport.WriteSendRecvTimeLine("File Information received");
         }
 
         private void DisplayBinInfo(HcomProtoHdrMessage hdrMsg,
             HostRqstData hostRqstData, HostRqstType hostRqstType,
             byte[] messageBuffer, int messageLength, UInt32 payloadLength)
         {
-            _uiSupport.WriteSendReceive(".");
+            _uiSupport.WriteSendRecv(".");
         }
     }
 }

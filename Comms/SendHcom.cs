@@ -159,7 +159,7 @@ namespace HcomDiagUi
                     $"Extr:{hdrMsg.stdHeader.extraData}, " +
                     $"UDat:{hdrMsg.stdHeader.userData}]");
 
-                _uiSupport.WriteSendReceiveTimeLine(xmitHeader);
+                _uiSupport.WriteSendRecvTimeLine(xmitHeader);
             }
 
             byte[] msgBuffer = new byte[_protocolHdrSize];
@@ -217,7 +217,7 @@ namespace HcomDiagUi
 
         //==========================================================================
         // Build and send a message with a header and binary data
-        // Added for Visual Studio Debugging but used by others
+        // Added for Visual Studio Debugging
         internal void BuildAndSendBinaryMsg(byte[] additionalData, MeadowRqstType requestType, UInt32 userData)
         {
             //int totalMsgLength = additionalData.Length + HCOM_PROTOCOL_COMMAND_REQUIRED_HEADER_LENGTH;
@@ -243,7 +243,8 @@ namespace HcomDiagUi
                 int encodedToSend;
                 byte[] encodedBytes;
 
-                //Console.WriteLine($"Sending packet with {messageSize} bytes");
+                // For file download this is a LOT of messages
+                // _uiSupport.WriteDebugLine($"Sending packet with {messageSize} bytes");
 
                 // For testing calculate the crc including the sequence number
                 //_packetCrc32 = NuttxCrc.Crc32part(messageBytes, messageSize, 0, _packetCrc32);
@@ -332,6 +333,7 @@ namespace HcomDiagUi
             }
             catch (Exception except)
             {
+                // DID YOU RESTART MEADOW?
                 // This should drop the connection and retry
                 Debug.WriteLine($"EncodeAndSendPacket threw: {except}");
                 Thread.Sleep(500);    // Place for break point
