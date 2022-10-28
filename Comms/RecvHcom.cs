@@ -163,6 +163,7 @@ namespace HcomDiagUi
             {
                 // Wait to be signaled that something is ready
                 dataAddedEvent.WaitOne();
+
                 bufReturn = PullAndProcessAllPackets();
                 if(bufReturn != HcomBufferReturn.CIR_BUF_GET_NONE_FOUND)
                 {
@@ -229,6 +230,11 @@ namespace HcomDiagUi
                         
                         UInt32 payloadLength = (UInt32)(decodedSize - _hcomHdrLen);
                         HostRqstType hostRqstType = (HostRqstType)hdrMsg.stdHeader.rqstType;
+
+                        if(hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_CONCLUDED)
+                        {
+                            _commsMgr.CommandHasConcluded();
+                        }
 
                         // Route message around
                         _commsMgr.ForwardToProcessMsgs(hdrMsg, hostRqstType,
