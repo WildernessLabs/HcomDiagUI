@@ -293,8 +293,8 @@ namespace HcomDiagUi
                 _serialPort.Handshake = Handshake.None;
 
                 // Set the read/write timeouts
-                _serialPort.ReadTimeout = 1000;
-                _serialPort.WriteTimeout = 1000;
+                _serialPort.ReadTimeout = 10000;
+                _serialPort.WriteTimeout = 10000;
 
                 _serialPort.Open();
 

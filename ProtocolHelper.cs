@@ -325,9 +325,8 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND:
-                    commandName = "(new) Upload data start [This CMD is internal]";
-                    commandInfo = "Tells F7 Host (CLI) is ready for data to be sent. Must supply " +
-                                  "both F7 file name and destination path and file name";
+                    commandName = "(internal) Upload data start";
+                    commandInfo = "Internal for Meadow to tell CLI it's ready for data to be sent";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
@@ -361,9 +360,9 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT:
-                    commandName = "(new) Upload start";
-                    commandInfo = "Initiates uploading a file from Meadow. Put host's destination path in 'Host File' " +
-                        "field and the file name in Meadow in the  File Name' field";
+                    commandName = "(new) Start file Upload";
+                    commandInfo = "Initiates uploading a file from Meadow. Put host's destination path/filename " +
+                        "in 'Host File' field and the Meadow file name in the 'File Name' field";
                     msgClass = MessageClasses.Text;
                     msgComplex = MessageComplex.Normal;
                     break;
