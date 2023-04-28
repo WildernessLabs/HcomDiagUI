@@ -12,7 +12,7 @@ namespace HcomDiagUi
         // There is no length field. Since the packet boundaries are delimited and the
         // header is fixed length. Therefore, any additional data length is easily
         // determined.
-        public const UInt16 HCOM_PROTOCOL_HCOM_VERSION_NUMBER = 0x0006;
+        public const UInt16 HCOM_PROTOCOL_HCOM_VERSION_NUMBER = 0x0007;
 
         // COBS needs a specific delimiter. Zero seems to be traditional.
         public const UInt16 HCOM_PROTOCOL_COBS_ENCODING_DELIMITER_VALUE = 0x00;
@@ -26,10 +26,16 @@ namespace HcomDiagUi
 
         // Define the absolute maximum packet sizes for sent and receive.
         // Note: The length on the wire will be longer because it's encoded.
-        public const int HCOM_PROTOCOL_PACKET_MAX_SIZE = 512;
-        public const int HCOM_PROTOCOL_ENCODED_MAX_SIZE = HCOM_PROTOCOL_PACKET_MAX_SIZE + 8;
+        public const int HCOM_PROTOCOL_PACKET_MAX_SIZE = 8192;
 
-        // The maximum payload is max packet - header (12 bytes)
+        // The COBS encoded size varies depending on the data type. A file
+        // containing all null values (assuming the delimiter is null) will
+        // need 3 additional bytes. A text file will need to insert the
+        // protocol delimiter every 254 bytes plus the 3 bytes.
+        public const int HCOM_PROTOCOL_ENCODED_MAX_SIZE = HCOM_PROTOCOL_PACKET_MAX_SIZE + (HCOM_PROTOCOL_PACKET_MAX_SIZE / 254) + 3;
+
+        // The maximum payload (except for a data packet begin sent to Meadow)
+        // is max packet - header (12 bytes).
         public const int HCOM_PROTOCOL_DATA_MAX_SIZE = HCOM_PROTOCOL_PACKET_MAX_SIZE - 12;
 
         static public int HcomProtoHdrMessageSize()
@@ -350,6 +356,9 @@ namespace HcomDiagUi
         HCOM_MDOW_REQUEST_QSPI_FLASH_INIT = 0xf4 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,
         HCOM_MDOW_REQUEST_QSPI_FLASH_WRITE = 0xf5 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,
         HCOM_MDOW_REQUEST_QSPI_FLASH_READ = 0xf6 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,
+        HCOM_MDOW_REQUEST_OTA_REGISTER_DEVICE = 0xf7 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,
+
+        HCOM_MDOW_REQUEST_DEVELOPER = 0xf8 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,
     }
 
     //============================================================================

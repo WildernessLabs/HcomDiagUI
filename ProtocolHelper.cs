@@ -405,28 +405,36 @@ namespace HcomDiagUi
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_1:
                     commandName = "developer 1";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
+                    commandInfo = "Diagnostic\r\nObsolete, use HCOM_MDOW_REQUEST_DEVELOPER, UserData contains the needed value";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_2:
                     commandName = "developer 2";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
+                    commandInfo = "Diagnostic\r\nObsolete, use HCOM_MDOW_REQUEST_DEVELOPER, UserData contains the needed value";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_3:
                     commandName = "developer 3";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
+                    commandInfo = "Diagnostic\r\nObsolete, use HCOM_MDOW_REQUEST_DEVELOPER, UserData contains the needed value";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_4:
                     commandName = "developer 4";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
+                    commandInfo = "Diagnostic\r\nObsolete, use HCOM_MDOW_REQUEST_DEVELOPER, UserData contains the needed value";
+                    msgClass = MessageClasses.Header;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+
+                    // This replaces the 4 developer items above
+               case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER:
+                    commandName = "Developer";
+                    commandInfo = "(new) Diagnostic\r\nExtraData is developer number, UserData contains the value";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
@@ -447,6 +455,13 @@ namespace HcomDiagUi
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_READ:
                     commandName = "qspi read";
+                    commandInfo = "For testing only";
+                    msgClass = MessageClasses.Header;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+
+                case MeadowRqstType.HCOM_MDOW_REQUEST_OTA_REGISTER_DEVICE:
+                    commandName = "OTA - Register device";
                     commandInfo = "For testing only";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;

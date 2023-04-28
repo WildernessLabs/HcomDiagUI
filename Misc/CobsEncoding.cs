@@ -26,6 +26,7 @@ namespace HcomDiagUi
             int encodedOffset = 1;  // Offset into destination buffer
             int replaceOffset = 0;  // Offset where replaceValue is being tracked
             byte replaceValue = 1;  // Value of the offset to the next delimiter
+
             try
             {
                 while (sourceOffset < length + startingSkip)
@@ -39,11 +40,13 @@ namespace HcomDiagUi
                     }
                     else
                     {
+                        // Have we filled the buffer before finishing the encoding?
                         if (encodeSkip + encodedOffset == encoded.Length)
                         {
-                            Console.WriteLine($"encodeSkip + encodedOffset == encoded.Length");
+                            Console.WriteLine("Buffer over flow (encodeSkip + encodedOffset == encoded.Length)");
                             return -1;
                         }
+
                         encoded[encodeSkip + encodedOffset++] = source[sourceOffset]; // Just copy original value
                         replaceValue++;                                  // Keep zero offset tracker
 

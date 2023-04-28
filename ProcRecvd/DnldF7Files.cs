@@ -47,7 +47,7 @@ namespace HcomDiagUi
 
             // This is the start download message. Meadow will respond with a go/no go reply
             sendSerialComms.BuildAndSendFileRelatedCommand(requestType, partition,
-                fileSize, _packetCrc32, espAddress, md5Hash, meadowFileName);
+                0, fileSize, _packetCrc32, espAddress, md5Hash, meadowFileName);
         }
 
         // Wait for HCOM to respond with HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY or
@@ -86,7 +86,7 @@ namespace HcomDiagUi
                     // Convert everything after the header from a byte[] to a .net string
                     var hdrText = Encoding.ASCII.GetString(messageBuffer, headerLen,
                             messageLength - headerLen);
-                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} '{hdrText}'");
+                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} HCOM reported:{hdrText}");
                     break;
 
                 default:
@@ -100,7 +100,7 @@ namespace HcomDiagUi
         {
             UInt16 seqNumb = 0;
 
-            uiSupport.WriteDebugLine("Entered ReadPrepareFilePackets(), sending data");
+            uiSupport.WriteDebugLine("Entered SendFilePackets(), sending data");
 
             // Open the specified file by name and read the data
             string hostFileInfo = uiSupport.GetHostFileInfo();
@@ -110,22 +110,26 @@ namespace HcomDiagUi
                 // The maximum data bytes is max packet size - 2 bytes for the sequence number
                 byte[] dataBuff = new byte[Protocol.HCOM_PROTOCOL_PACKET_MAX_SIZE - 2];
                 int bytesRead;
+
                 do
-                {
+                {   
+
+                    // Did user cancel?
                     if(commsManager.IsCancelSendingSet())
                         return;
 
                     seqNumb++;
                     bytesRead = fs.Read(dataBuff, 0, dataBuff.Length);
                     sendSerialComms.BuildAndSendBinPacket(dataBuff, 0, bytesRead, seqNumb);
+
                 }
                 while (bytesRead > 0);
             }
 
-            uiSupport.WriteDebugLine($"Sending End msg (sent {seqNumb} data packets");
+            uiSupport.WriteDebugLine($"Sending End msg (sent {seqNumb} data packets)");
 
             // Send the End message
-            sendSerialComms.BuildAndSendHdrMessage(MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER, 0);
+            sendSerialComms.BuildAndSendHdrMessage(MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER, 0, 0);
         }
     }
 }
