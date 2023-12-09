@@ -183,16 +183,30 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_LIST_PARTITION_FILES:
-                    commandName = "file list";
+                    commandName = "file list (CLIv1)";
                     commandInfo = "Returns a list of files in the file system";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_LIST_PART_FILES_AND_CRC:
-                    commandName = "file list + crc";
+                    commandName = "file list with CRC (CLIv1)";
                     commandInfo = "Returns a list of files in the file system with CRC checksum";
                     msgClass = MessageClasses.Header;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+
+                case MeadowRqstType.HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR:
+                    commandName = "File List (CLIv2)";
+                    commandInfo = "Returns a list of files and directories in the file system";
+                    msgClass = MessageClasses.Text;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+
+                case MeadowRqstType.HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR_CRC:
+                    commandName = "File List with CRC (CLIv2)";
+                    commandInfo = "Returns a list of files and directories with file CRC checksums";
+                    msgClass = MessageClasses.Text;
                     msgComplex = MessageComplex.Normal;
                     break;
 
@@ -325,14 +339,14 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND:
-                    commandName = "(internal) Upload data start";
-                    commandInfo = "Internal for Meadow to tell CLI it's ready for data to be sent";
+                    commandName = "(internal) file read start";
+                    commandInfo = "Internal used by Meadow to tell CLI it's ready for data to be sent";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_ABORT_DATA_SEND:
-                    commandName = "(new) Upload abort";
+                    commandName = "(new) file read abort";
                     commandInfo = "Cancel the current file being uploaded";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
@@ -360,9 +374,9 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT:
-                    commandName = "(new) Start file Upload";
-                    commandInfo = "Initiates uploading a file from Meadow. Put host's destination path/filename " +
-                        "in 'Host File' field and the Meadow file name in the 'File Name' field";
+                    commandName = "(new) file read (aka upload)";
+                    commandInfo = "Initiates reading a file from Meadow. Put host's destination pathname " +
+                        "in 'Host File' field and the Meadow path name in the 'File Name' field";
                     msgClass = MessageClasses.Text;
                     msgComplex = MessageComplex.Normal;
                     break;
@@ -403,30 +417,10 @@ namespace HcomDiagUi
                     msgComplex = MessageComplex.Normal;
                     break;
 
-                case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_1:
-                    commandName = "developer 1";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
-                    msgClass = MessageClasses.Header;
-                    msgComplex = MessageComplex.Normal;
-                    break;
-
-                case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_2:
-                    commandName = "developer 2";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
-                    msgClass = MessageClasses.Header;
-                    msgComplex = MessageComplex.Normal;
-                    break;
-
-                case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_3:
-                    commandName = "developer 3";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
-                    msgClass = MessageClasses.Header;
-                    msgComplex = MessageComplex.Normal;
-                    break;
-
-                case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER_4:
-                    commandName = "developer 4";
-                    commandInfo = "Diagnostic\r\nUserData contains the needed value";
+                    // This replaces the 4 developer items above
+               case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER:
+                    commandName = "Developer";
+                    commandInfo = "(new) Diagnostic\r\nExtraData is developer number, UserData contains the value";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
@@ -447,6 +441,13 @@ namespace HcomDiagUi
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_QSPI_FLASH_READ:
                     commandName = "qspi read";
+                    commandInfo = "For testing only";
+                    msgClass = MessageClasses.Header;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+
+                case MeadowRqstType.HCOM_MDOW_REQUEST_OTA_REGISTER_DEVICE:
+                    commandName = "OTA - Register device";
                     commandInfo = "For testing only";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;

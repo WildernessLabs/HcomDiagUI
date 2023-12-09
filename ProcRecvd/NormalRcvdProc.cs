@@ -83,6 +83,8 @@ namespace HcomDiagUi
             HostRqstData hostRqstData, HostRqstType hostRqstType,
             byte[] messageBuffer, int messageLength, UInt32 payloadLength)
         {
+            // _uiSupport.WriteDebugLine("Entered DisplayTextInfo()");
+
             // This message may or may not have text. Depends on payloadLength.
             if (payloadLength == 0)
             {

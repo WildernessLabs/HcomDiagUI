@@ -30,7 +30,7 @@ namespace HcomDiagUi
         //==========================================================================
         // This is used for starting a file download.
         internal void BuildAndSendFileRelatedCommand(MeadowRqstType requestType,
-            UInt32 userData, UInt32 fileSize, UInt32 fileCheckSum,
+            UInt32 userData, UInt16 extraData, UInt32 fileSize, UInt32 fileCheckSum,
             UInt32 mcuAddr, string md5Hash, string destFileName)
         {
             _uiSupport.WriteDebugLine($"Entered BuildAndSendFileRelatedCommand with fileSize {fileSize}, CRC {fileCheckSum}");
@@ -40,7 +40,7 @@ namespace HcomDiagUi
                 seqNumber = 0,
                 version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER,
                 rqstType = (UInt16)requestType,
-                extraData = 0,
+                extraData = extraData,
                 userData = userData,
 
                 // Non-standard header information follows
@@ -78,13 +78,15 @@ namespace HcomDiagUi
         //==========================================================================
         // Build and send a message with a header plus text
         internal void BuildAndSendTextMsg(MeadowRqstType requestType,
-            UInt32 userData, string textData)
+            UInt32 userData, UInt16 extraData, string textData)
         {
+            // _uiSupport.WriteDebugLine($"--> Sending Text Data:{textData}");
+
             var hcomHdrMsg = new HcomProtoHdrMessage();
             hcomHdrMsg.stdHeader.seqNumber = 0;
             hcomHdrMsg.stdHeader.version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER;
             hcomHdrMsg.stdHeader.rqstType = (UInt16)requestType;
-            hcomHdrMsg.stdHeader.extraData = 0;
+            hcomHdrMsg.stdHeader.extraData = extraData;
             hcomHdrMsg.stdHeader.userData = userData;
 
             // Determine the needed buffer length
@@ -138,18 +140,18 @@ namespace HcomDiagUi
 
         //==========================================================================
         // Build and send a "simple" message with only a header
-        internal void BuildAndSendHdrMessage(MeadowRqstType requestType, UInt32 userData)
+        internal void BuildAndSendHdrMessage(MeadowRqstType requestType, UInt32 userData, UInt16 extraData)
         {
             var hdrMsg = new HcomProtoHdrMessage();
             hdrMsg.stdHeader.seqNumber = 0;
             hdrMsg.stdHeader.version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER;
             hdrMsg.stdHeader.rqstType = (UInt16) requestType;
-            hdrMsg.stdHeader.extraData = 0;
+            hdrMsg.stdHeader.extraData = extraData;
             hdrMsg.stdHeader.userData = userData;
 
             MeadowRqstData rqstData;
             rqstData = ProtocolHelper.DecodeMsgToMeadow(requestType);
-            
+
             if (Verbose)
             {
                 string xmitHeader = string.Format($"Sending  [Header-" +
@@ -176,7 +178,7 @@ namespace HcomDiagUi
         //==========================================================================
         // Build and send a message with a header, text length plus text
         internal void BuildAndSendDiagCmdMsg(MeadowRqstType requestType,
-            UInt32 userData, string textData)
+            UInt32 userData, UInt16 extraData, string textData)
         {
             // Copy the encoded string to the buffer
             var hcomDiagCmdMsg = new HcomProtoDiagCmdMsg();
@@ -186,12 +188,14 @@ namespace HcomDiagUi
             hcomDiagCmdMsg.seqNumber = 0;
             hcomDiagCmdMsg.version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER;
             hcomDiagCmdMsg.rqstType = (UInt16)requestType;
-            hcomDiagCmdMsg.extraData = 0;
+            hcomDiagCmdMsg.extraData = extraData;
             hcomDiagCmdMsg.userData = userData;
 
             // Determine the needed buffer for text length
             UInt16 encodedLength = (UInt16)Encoding.ASCII.GetByteCount(textData);
-            hcomDiagCmdMsg.argListLen = encodedLength;    // This is the only difference
+            Debug.WriteLine($"Sending Diag CMD '{textData}' with length {encodedLength}");
+
+            hcomDiagCmdMsg.argListLen = encodedLength;    // Adding the length is the only difference
 
             // Reserve space for the string
             int totalSize = protocolDiagCmdSize + encodedLength;
@@ -211,6 +215,8 @@ namespace HcomDiagUi
             // the structure
             _ = Encoding.ASCII.GetBytes(textData, 0, textData.Length, msgBuffer,
                         protocolDiagCmdSize);
+
+            Debug.WriteLine($"Non-encoded Message Hex:'{BitConverter.ToString(msgBuffer)}'");
 
             EncodeAndSendPacket(msgBuffer, totalSize);
         }
@@ -251,18 +257,19 @@ namespace HcomDiagUi
                 try
                 {
                     // The encoded size using COBS is just a bit more than the original size adding 1 byte
-                    // every 254 bytes plus 1 and need room for beginning and ending delimiters.
+                    // for every 254 bytes plus 1 and need room for beginning and ending delimiters.
                     encodedBytes = new byte[Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE];
 
-                    // Skip over first byte so it can be a start delimiter
+                    // Skip over first byte so it can become the start delimiter
                     encodedToSend = CobsTools.CobsEncoding(messageBytes, messageOffset, messageSize,
                         ref encodedBytes, 1);
 
                     // DEBUG TESTING
+                    // HOW BIG MUST THE BUFFER BE FOR 4094 BYTE FILE SIZE
                     if(encodedToSend == -1)
                     {
                         _uiSupport.WriteDebugLine($"Error - encodedToSend == -1");
-                        Thread.Sleep(500);    // Place for break point
+                        Thread.Sleep(5000);    // Place for break point
                         return;
                     }
 
@@ -288,6 +295,8 @@ namespace HcomDiagUi
                     encodedToSend++;
                     encodedBytes[encodedToSend] = 0;    // End delimiter
                     encodedToSend++;
+                    Debug.WriteLine($"COBS-encoded Message Hex:'{BitConverter.ToString(encodedBytes, 0, encodedToSend)}'");
+
                 }
                 catch (Exception encodedBytesEx)
                 {

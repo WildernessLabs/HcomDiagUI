@@ -19,11 +19,13 @@ namespace HcomDiagUi
         {
             internal MeadowRqstData rqstInfo;
             internal UInt32 userData;
+            internal UInt16 extraData;
 
-            public NeededUiData(MeadowRqstData rqstInfo, UInt32 userData)
+            public NeededUiData(MeadowRqstData rqstInfo, UInt32 userData, UInt16 extraData)
             {
                 this.rqstInfo = rqstInfo;
                 this.userData = userData;
+                this.extraData = extraData;
             }
         }
         UiSupport _uiSupport;
@@ -71,9 +73,9 @@ namespace HcomDiagUi
         }
 
         //=======================================================================
-        public void BuildHdrMsgToSend(MeadowRqstType rqstType, UInt32 userData)
+        public void BuildHdrMsgToSend(MeadowRqstType rqstType, UInt32 userData, UInt16 extraData)
         {
-            _sendSerialComms.BuildAndSendHdrMessage(rqstType, userData);
+            _sendSerialComms.BuildAndSendHdrMessage(rqstType, userData, extraData);
         }
 
         //=======================================================================
@@ -83,7 +85,8 @@ namespace HcomDiagUi
             // Necessary because only the UI thread can access UI elements
             MeadowRqstData rqstInfo = (MeadowRqstData)_hcomUiForm.commandListBox.SelectedItem;
             UInt32 userData = UInt32.Parse(_hcomUiForm.userDataTextBox.Text);
-            var UIData = new NeededUiData(rqstInfo, userData);
+            UInt16 extraData = UInt16.Parse(_hcomUiForm.extraDataTextBox.Text);
+            var UIData = new NeededUiData(rqstInfo, userData, extraData);
 
             // Some commands can take a minute or more. Therefore, we need to free this
             // UI thread to return to UI duties and not worry about sending messages.
@@ -103,6 +106,7 @@ namespace HcomDiagUi
             NeededUiData uiData = (NeededUiData)state;
             MeadowRqstData rqstInfo = uiData.rqstInfo;
             UInt32 userData = uiData.userData;
+            UInt16 extraData = uiData.extraData;
             int dispCount = 0;
             int iterations;
 
@@ -118,6 +122,7 @@ namespace HcomDiagUi
             {
                 dispCount++;
                 _uiSupport.WriteSendRecvTimeLine($"Iteration {dispCount}");
+
                 // Update UI too
                 _uiSupport.WriteSendCount(dispCount);
                 iterations--;
@@ -127,20 +132,24 @@ namespace HcomDiagUi
                 switch (rqstInfo.msgClass)
                 {
                     case MessageClasses.Header:
-                        _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData);
+                        _uiSupport.WriteDebugLine("--> This is MessageClass.Header");
+                       _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
                         break;
 
                     case MessageClasses.Text:
                         // Pick up the Text data that is in the UI
+                        _uiSupport.WriteDebugLine("--> This is MessageClass.Text");
                         if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
                         {
+                            _uiSupport.WriteDebugLine("--> This is the text diagnostic message");
                             // Special case for of text message that includes a field for the number
                             // of arguments in the text.
-                            _sendSerialComms.BuildAndSendDiagCmdMsg(rqstInfo.rqstType, userData,
+                            _sendSerialComms.BuildAndSendDiagCmdMsg(rqstInfo.rqstType, userData, extraData,
                                 _uiSupport.TextForMsg());
                         }
                         else if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD)
-                        {   
+                        {
+                            _uiSupport.WriteDebugLine("--> This is Set Time text msg");
                             // For setting the time we'll read the time and send it immediately
                             // Special text - build and format current time as UTC
                             // Since NTP provides time in UTC we'll do the same
@@ -154,7 +163,7 @@ namespace HcomDiagUi
                             // 'u' = 2022-04-01 21:38:59Z - Notice UTC time & no 'T'
                             //
                             var timeStringUtc = DateTimeOffset.UtcNow.ToString("o");
-                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData,
+                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
                                       timeStringUtc);
 
                             // Send local time (both UTC and local can be sent at the same time)
@@ -165,15 +174,18 @@ namespace HcomDiagUi
                         else
                         {
                             // Normal case UserTextBox string is sent
-                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData,
+                            _uiSupport.WriteDebugLine("--> This is the normal text msg");
+                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
                                 _uiSupport.TextForMsg());
                         }
                         break;
 
                     case MessageClasses.Binary:
+                        _uiSupport.WriteDebugLine("--> This is MessageClass.Binary");
                         break;
 
                     case MessageClasses.FileInfo:
+                        _uiSupport.WriteDebugLine("--> This is MessageClass.FileInfo");
                         // Need to initiate a file download (userData is partition). Note: This returns
                         // after only sending the start download message and receiving a response.
                         // After this a thread pool thread is used for the execution of actual data
@@ -183,6 +195,7 @@ namespace HcomDiagUi
                         break;
 
                     case MessageClasses.NoHdrBin: // Needs to be Deprecate
+                        _uiSupport.WriteDebugLine("--> This is MessageClass.NoHdrBin");
                         break;
 
                     default:

@@ -43,7 +43,6 @@ namespace HcomDiagUi
             this.cmdInfoTextBox = new System.Windows.Forms.TextBox();
             this.cmdValueTextBox = new System.Windows.Forms.TextBox();
             this.textForMsgTextBox = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.showRecvHexCheckBox = new System.Windows.Forms.CheckBox();
             this.msgClassTextBox = new System.Windows.Forms.TextBox();
             this.HostFileTextBox = new System.Windows.Forms.TextBox();
@@ -53,6 +52,9 @@ namespace HcomDiagUi
             this.sendIterationsTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.sendCountTextBox = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.extraDataTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // sendButton
@@ -74,7 +76,7 @@ namespace HcomDiagUi
             this.comPortTextBox.Name = "comPortTextBox";
             this.comPortTextBox.Size = new System.Drawing.Size(67, 21);
             this.comPortTextBox.TabIndex = 1;
-            this.comPortTextBox.Text = "Com9";
+            this.comPortTextBox.Text = "Com12";
             this.comPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.comPortTextBox.TextChanged += new System.EventHandler(this.comPortTextBox_TextChanged);
             // 
@@ -88,7 +90,7 @@ namespace HcomDiagUi
             this.commandListBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.commandListBox.Name = "commandListBox";
             this.commandListBox.ScrollAlwaysVisible = true;
-            this.commandListBox.Size = new System.Drawing.Size(222, 184);
+            this.commandListBox.Size = new System.Drawing.Size(222, 169);
             this.commandListBox.Sorted = true;
             this.commandListBox.TabIndex = 2;
             this.commandListBox.SelectedIndexChanged += new System.EventHandler(this.commandListBox_SelectedIndexChanged);
@@ -121,7 +123,7 @@ namespace HcomDiagUi
             // userDataTextBox
             // 
             this.userDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.userDataTextBox.Location = new System.Drawing.Point(14, 166);
+            this.userDataTextBox.Location = new System.Drawing.Point(6, 159);
             this.userDataTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.userDataTextBox.Name = "userDataTextBox";
             this.userDataTextBox.Size = new System.Drawing.Size(65, 21);
@@ -132,7 +134,7 @@ namespace HcomDiagUi
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 148);
+            this.label3.Location = new System.Drawing.Point(9, 141);
             this.label3.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(55, 13);
@@ -221,17 +223,7 @@ namespace HcomDiagUi
             this.textForMsgTextBox.Name = "textForMsgTextBox";
             this.textForMsgTextBox.Size = new System.Drawing.Size(601, 21);
             this.textForMsgTextBox.TabIndex = 12;
-            this.textForMsgTextBox.Text = "meadow.config.yaml";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 235);
-            this.label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(278, 13);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Text, Data or Meadow File Name (e.g. \'ping google.com\') ";
+            this.textForMsgTextBox.Text = "/meadow0/dir1x/dir2x/dir3x/dir4x/dir5x/dir6x/TestFile2k-1.txt";
             // 
             // showRecvHexCheckBox
             // 
@@ -267,7 +259,7 @@ namespace HcomDiagUi
             this.HostFileTextBox.Name = "HostFileTextBox";
             this.HostFileTextBox.Size = new System.Drawing.Size(600, 21);
             this.HostFileTextBox.TabIndex = 12;
-            this.HostFileTextBox.Text = "C:\\DnldHcom\\Upld\\meadow.config.yaml";
+            this.HostFileTextBox.Text = "C:\\HcomFiles\\Read\\Text\\17Nov-TestFile2k-1.txt";
             // 
             // label7
             // 
@@ -281,18 +273,18 @@ namespace HcomDiagUi
             // 
             // execTimeTextBox
             // 
-            this.execTimeTextBox.Location = new System.Drawing.Point(493, 166);
+            this.execTimeTextBox.Location = new System.Drawing.Point(526, 166);
             this.execTimeTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.execTimeTextBox.Name = "execTimeTextBox";
             this.execTimeTextBox.ReadOnly = true;
-            this.execTimeTextBox.Size = new System.Drawing.Size(120, 20);
+            this.execTimeTextBox.Size = new System.Drawing.Size(86, 20);
             this.execTimeTextBox.TabIndex = 14;
             this.execTimeTextBox.Text = "Execution Time";
             this.execTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(326, 86);
+            this.cancelButton.Location = new System.Drawing.Point(325, 105);
             this.cancelButton.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(50, 29);
@@ -331,12 +323,45 @@ namespace HcomDiagUi
             this.sendCountTextBox.TabIndex = 18;
             this.sendCountTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 87);
+            this.label8.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(57, 13);
+            this.label8.TabIndex = 19;
+            this.label8.Text = "Extra Data";
+            // 
+            // extraDataTextBox
+            // 
+            this.extraDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.extraDataTextBox.Location = new System.Drawing.Point(5, 105);
+            this.extraDataTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.extraDataTextBox.Name = "extraDataTextBox";
+            this.extraDataTextBox.Size = new System.Drawing.Size(65, 21);
+            this.extraDataTextBox.TabIndex = 20;
+            this.extraDataTextBox.Text = "0";
+            this.extraDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(9, 235);
+            this.label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(337, 13);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Meadow:Text, Data, Path Name or CMD Line (e.g. \'ping google.com\') ";
+            // 
             // HcomDiagUiForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(632, 647);
+            this.Controls.Add(this.extraDataTextBox);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.sendCountTextBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.sendIterationsTextBox);
@@ -385,7 +410,6 @@ namespace HcomDiagUi
         private System.Windows.Forms.TextBox cmdInfoTextBox;
         private System.Windows.Forms.TextBox cmdValueTextBox;
         private System.Windows.Forms.TextBox textForMsgTextBox;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox showRecvHexCheckBox;
         private System.Windows.Forms.TextBox msgClassTextBox;
         private System.Windows.Forms.TextBox HostFileTextBox;
@@ -395,6 +419,9 @@ namespace HcomDiagUi
         private System.Windows.Forms.TextBox sendIterationsTextBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox sendCountTextBox;
+        private System.Windows.Forms.Label label8;
+        internal System.Windows.Forms.TextBox extraDataTextBox;
+        private System.Windows.Forms.Label label2;
     }
 }
 

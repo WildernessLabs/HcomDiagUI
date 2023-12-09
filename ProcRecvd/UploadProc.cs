@@ -91,7 +91,7 @@ namespace HcomDiagUi
 
                 // Tell F7 we are ready so start sending data
                 _commsMgr.BuildHdrMsgToSend(
-                    MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND, 0);
+                    MeadowRqstType.HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND, 0, 0);
                 return;
             }
 
