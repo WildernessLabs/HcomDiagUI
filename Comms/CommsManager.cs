@@ -132,8 +132,7 @@ namespace HcomDiagUi
                 switch (rqstInfo.msgClass)
                 {
                     case MessageClasses.Header:
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.Header");
-                       _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
+                        _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
                         break;
 
                     case MessageClasses.Text:
@@ -174,7 +173,6 @@ namespace HcomDiagUi
                         else
                         {
                             // Normal case UserTextBox string is sent
-                            _uiSupport.WriteDebugLine("--> This is the normal text msg");
                             _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
                                 _uiSupport.TextForMsg());
                         }
