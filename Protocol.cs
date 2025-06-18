@@ -348,6 +348,14 @@ namespace HcomDiagUi
         // This is a simple type with binary data
         HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA = 0x01 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_BINARY_TYPE,
 
+        // >>> Breaking protocol change.
+        // This should be move our of the 0xfx range since it has nothing to do with
+        // diagnostics
+        // Old set developer 4 now used to get file and directory listing. At this
+        // time (Oct23) CLIv1 only uses it to find nested temporary files in a fixed
+        // set of directories
+        HCOM_MDOW_REQUEST_GET_FILES_AND_FOLDERS = 0xf3 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,
+
         // Testing QSPI flash
         HCOM_MDOW_REQUEST_QSPI_FLASH_INIT = 0xf4 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,
         HCOM_MDOW_REQUEST_QSPI_FLASH_WRITE = 0xf5 | MajorTypes.HCOM_PROTOCOL_HEADER_ONLY_TYPE,

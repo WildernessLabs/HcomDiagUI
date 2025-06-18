@@ -76,7 +76,7 @@ namespace HcomDiagUi
             this.comPortTextBox.Name = "comPortTextBox";
             this.comPortTextBox.Size = new System.Drawing.Size(172, 41);
             this.comPortTextBox.TabIndex = 1;
-            this.comPortTextBox.Text = "Com12";
+            this.comPortTextBox.Text = "Com5";
             this.comPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.comPortTextBox.TextChanged += new System.EventHandler(this.comPortTextBox_TextChanged);
             // 
@@ -90,7 +90,7 @@ namespace HcomDiagUi
             this.commandListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.commandListBox.Name = "commandListBox";
             this.commandListBox.ScrollAlwaysVisible = true;
-            this.commandListBox.Size = new System.Drawing.Size(222, 169);
+            this.commandListBox.Size = new System.Drawing.Size(542, 400);
             this.commandListBox.Sorted = true;
             this.commandListBox.TabIndex = 2;
             this.commandListBox.SelectedIndexChanged += new System.EventHandler(this.commandListBox_SelectedIndexChanged);
@@ -101,13 +101,13 @@ namespace HcomDiagUi
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.sendRecvTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.sendRecvTextBox.Location = new System.Drawing.Point(27, 1219);
+            this.sendRecvTextBox.Location = new System.Drawing.Point(30, 1199);
             this.sendRecvTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.sendRecvTextBox.Multiline = true;
             this.sendRecvTextBox.Name = "sendRecvTextBox";
             this.sendRecvTextBox.ReadOnly = true;
             this.sendRecvTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.sendRecvTextBox.Size = new System.Drawing.Size(1601, 295);
+            this.sendRecvTextBox.Size = new System.Drawing.Size(1963, 373);
             this.sendRecvTextBox.TabIndex = 3;
             // 
             // label1
@@ -115,15 +115,15 @@ namespace HcomDiagUi
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(19, 24);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(133, 32);
+            this.label1.Size = new System.Drawing.Size(132, 32);
             this.label1.TabIndex = 5;
             this.label1.Text = "Com Port";
             // 
             // userDataTextBox
             // 
             this.userDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.userDataTextBox.Location = new System.Drawing.Point(6, 159);
-            this.userDataTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.userDataTextBox.Location = new System.Drawing.Point(10, 374);
+            this.userDataTextBox.Margin = new System.Windows.Forms.Padding(1);
             this.userDataTextBox.Name = "userDataTextBox";
             this.userDataTextBox.Size = new System.Drawing.Size(167, 41);
             this.userDataTextBox.TabIndex = 7;
@@ -133,10 +133,10 @@ namespace HcomDiagUi
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 141);
+            this.label3.Location = new System.Drawing.Point(13, 326);
             this.label3.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(141, 32);
+            this.label3.Size = new System.Drawing.Size(140, 32);
             this.label3.TabIndex = 5;
             this.label3.Text = "User Data";
             // 
@@ -145,13 +145,13 @@ namespace HcomDiagUi
             this.statusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.statusTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusTextBox.Location = new System.Drawing.Point(37, 694);
+            this.statusTextBox.Location = new System.Drawing.Point(10, 685);
             this.statusTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.statusTextBox.Multiline = true;
             this.statusTextBox.Name = "statusTextBox";
             this.statusTextBox.ReadOnly = true;
             this.statusTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.statusTextBox.Size = new System.Drawing.Size(1591, 407);
+            this.statusTextBox.Size = new System.Drawing.Size(1973, 407);
             this.statusTextBox.TabIndex = 8;
             // 
             // label4
@@ -159,7 +159,7 @@ namespace HcomDiagUi
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(21, 651);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(96, 32);
+            this.label4.Size = new System.Drawing.Size(95, 32);
             this.label4.TabIndex = 5;
             this.label4.Text = "Status";
             // 
@@ -168,7 +168,7 @@ namespace HcomDiagUi
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(29, 1142);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(209, 32);
+            this.label5.Size = new System.Drawing.Size(208, 32);
             this.label5.TabIndex = 5;
             this.label5.Text = "Send/Received";
             // 
@@ -181,7 +181,7 @@ namespace HcomDiagUi
             this.cmdSelTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cmdSelTextBox.Name = "cmdSelTextBox";
             this.cmdSelTextBox.ReadOnly = true;
-            this.cmdSelTextBox.Size = new System.Drawing.Size(553, 41);
+            this.cmdSelTextBox.Size = new System.Drawing.Size(1943, 41);
             this.cmdSelTextBox.TabIndex = 9;
             this.cmdSelTextBox.Text = "Cmd Description";
             // 
@@ -195,7 +195,7 @@ namespace HcomDiagUi
             this.cmdInfoTextBox.Multiline = true;
             this.cmdInfoTextBox.Name = "cmdInfoTextBox";
             this.cmdInfoTextBox.ReadOnly = true;
-            this.cmdInfoTextBox.Size = new System.Drawing.Size(553, 269);
+            this.cmdInfoTextBox.Size = new System.Drawing.Size(918, 269);
             this.cmdInfoTextBox.TabIndex = 10;
             // 
             // cmdValueTextBox
@@ -228,7 +228,7 @@ namespace HcomDiagUi
             this.showRecvHexCheckBox.Location = new System.Drawing.Point(304, 1140);
             this.showRecvHexCheckBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.showRecvHexCheckBox.Name = "showRecvHexCheckBox";
-            this.showRecvHexCheckBox.Size = new System.Drawing.Size(103, 36);
+            this.showRecvHexCheckBox.Size = new System.Drawing.Size(102, 36);
             this.showRecvHexCheckBox.TabIndex = 13;
             this.showRecvHexCheckBox.Text = "Hex";
             this.showRecvHexCheckBox.UseVisualStyleBackColor = true;
@@ -256,32 +256,32 @@ namespace HcomDiagUi
             this.HostFileTextBox.Name = "HostFileTextBox";
             this.HostFileTextBox.Size = new System.Drawing.Size(1593, 41);
             this.HostFileTextBox.TabIndex = 12;
-            this.HostFileTextBox.Text = "C:\\HcomFiles\\Read\\Text\\17Nov-TestFile2k-1.txt";
+            this.HostFileTextBox.Text = "\\\\wsl.localhost\\Ubuntu-22.04\\home\\peter\\wl\\Meadow\\nuttx\\Meadow.OS.Runtime.bin";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(24, 451);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(127, 32);
+            this.label7.Size = new System.Drawing.Size(126, 32);
             this.label7.TabIndex = 5;
             this.label7.Text = "Host File";
             // 
             // execTimeTextBox
             // 
-            this.execTimeTextBox.Location = new System.Drawing.Point(526, 166);
-            this.execTimeTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.execTimeTextBox.Location = new System.Drawing.Point(597, 427);
+            this.execTimeTextBox.Margin = new System.Windows.Forms.Padding(1);
             this.execTimeTextBox.Name = "execTimeTextBox";
             this.execTimeTextBox.ReadOnly = true;
-            this.execTimeTextBox.Size = new System.Drawing.Size(86, 20);
+            this.execTimeTextBox.Size = new System.Drawing.Size(239, 38);
             this.execTimeTextBox.TabIndex = 14;
             this.execTimeTextBox.Text = "Execution Time";
             this.execTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(325, 105);
-            this.cancelButton.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.cancelButton.Location = new System.Drawing.Point(1367, 381);
+            this.cancelButton.Margin = new System.Windows.Forms.Padding(1);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(133, 69);
             this.cancelButton.TabIndex = 15;
@@ -304,37 +304,37 @@ namespace HcomDiagUi
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(872, 334);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(132, 32);
+            this.label6.Size = new System.Drawing.Size(131, 32);
             this.label6.TabIndex = 17;
             this.label6.Text = "Iterations";
             // 
             // sendCountTextBox
             // 
-            this.sendCountTextBox.Location = new System.Drawing.Point(891, 422);
+            this.sendCountTextBox.Location = new System.Drawing.Point(869, 427);
             this.sendCountTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.sendCountTextBox.Name = "sendCountTextBox";
             this.sendCountTextBox.ReadOnly = true;
-            this.sendCountTextBox.Size = new System.Drawing.Size(103, 38);
+            this.sendCountTextBox.Size = new System.Drawing.Size(125, 38);
             this.sendCountTextBox.TabIndex = 18;
             this.sendCountTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 87);
+            this.label8.Location = new System.Drawing.Point(6, 164);
             this.label8.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(57, 13);
+            this.label8.Size = new System.Drawing.Size(147, 32);
             this.label8.TabIndex = 19;
             this.label8.Text = "Extra Data";
             // 
             // extraDataTextBox
             // 
             this.extraDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.extraDataTextBox.Location = new System.Drawing.Point(5, 105);
-            this.extraDataTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            this.extraDataTextBox.Location = new System.Drawing.Point(10, 213);
+            this.extraDataTextBox.Margin = new System.Windows.Forms.Padding(1);
             this.extraDataTextBox.Name = "extraDataTextBox";
-            this.extraDataTextBox.Size = new System.Drawing.Size(65, 21);
+            this.extraDataTextBox.Size = new System.Drawing.Size(165, 41);
             this.extraDataTextBox.TabIndex = 20;
             this.extraDataTextBox.Text = "0";
             this.extraDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -342,10 +342,10 @@ namespace HcomDiagUi
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 235);
+            this.label2.Location = new System.Drawing.Point(45, 551);
             this.label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(337, 13);
+            this.label2.Size = new System.Drawing.Size(886, 32);
             this.label2.TabIndex = 5;
             this.label2.Text = "Meadow:Text, Data, Path Name or CMD Line (e.g. \'ping google.com\') ";
             // 
@@ -354,7 +354,7 @@ namespace HcomDiagUi
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(632, 647);
+            this.ClientSize = new System.Drawing.Size(2022, 1624);
             this.Controls.Add(this.extraDataTextBox);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.sendCountTextBox);
