@@ -304,7 +304,8 @@ namespace HcomDiagUi
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_MONO_UPDATE_RUNTIME:
                     commandName = "mono update rt";
-                    commandInfo = "Downloads and flashes mono runtime image to Meadow";
+                    commandInfo = "Downloads and flashes mono runtime image to Meadow " +
+                                  "This command is not implemented in HcomDiagUi";
                     msgClass = MessageClasses.FileInfo;
                     msgComplex = MessageComplex.Normal;
                     break;
@@ -421,6 +422,13 @@ namespace HcomDiagUi
                case MeadowRqstType.HCOM_MDOW_REQUEST_DEVELOPER:
                     commandName = "Developer";
                     commandInfo = "(new) Diagnostic\r\nExtraData is developer number, UserData contains the value";
+                    msgClass = MessageClasses.Header;
+                    msgComplex = MessageComplex.Normal;
+                    break;
+
+               case MeadowRqstType.HCOM_MDOW_REQUEST_GET_FILES_AND_FOLDERS:
+                    commandName = "file list & dev nested";
+                    commandInfo = "Returns a list of all devices and files";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
