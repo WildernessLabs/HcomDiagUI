@@ -76,7 +76,7 @@ namespace HcomDiagUi
             this.comPortTextBox.Name = "comPortTextBox";
             this.comPortTextBox.Size = new System.Drawing.Size(172, 41);
             this.comPortTextBox.TabIndex = 1;
-            this.comPortTextBox.Text = "Com5";
+            this.comPortTextBox.Text = "Com8";
             this.comPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.comPortTextBox.TextChanged += new System.EventHandler(this.comPortTextBox_TextChanged);
             // 
@@ -261,7 +261,7 @@ namespace HcomDiagUi
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(24, 451);
+            this.label7.Location = new System.Drawing.Point(19, 457);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(126, 32);
             this.label7.TabIndex = 5;
@@ -342,12 +342,12 @@ namespace HcomDiagUi
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(45, 551);
+            this.label2.Location = new System.Drawing.Point(24, 562);
             this.label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(886, 32);
+            this.label2.Size = new System.Drawing.Size(1598, 80);
             this.label2.TabIndex = 5;
-            this.label2.Text = "Meadow:Text, Data, Path Name or CMD Line (e.g. \'ping google.com\') ";
+            this.label2.Text = "Command Info: (Number, Text, Data, Path Name) ";
             // 
             // HcomDiagUiForm
             // 

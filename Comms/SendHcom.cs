@@ -342,7 +342,7 @@ namespace HcomDiagUi
             }
             catch (Exception except)
             {
-                // DID YOU RESTART MEADOW?
+                // DID YOU RESTART MEADOW and break connection?
                 // This should drop the connection and retry
                 Debug.WriteLine($"EncodeAndSendPacket threw: {except}");
                 Thread.Sleep(500);    // Place for break point

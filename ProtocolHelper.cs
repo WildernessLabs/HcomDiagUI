@@ -247,14 +247,14 @@ namespace HcomDiagUi
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_NO_TRACE_TO_HOST:
                     commandName = "trace disable";
-                    commandInfo = "Disables trace output from being displayed on CLI";
+                    commandInfo = "Disables trace output from being displayed on CLI Host";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_SEND_TRACE_TO_HOST:
                     commandName = "trace enable";
-                    commandInfo = "Enables trace output to be displayed on CLI";
+                    commandInfo = "Enables trace output to be displayed on CLI Host";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
@@ -281,7 +281,7 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_MONO_FLASH:
-                    commandName = "mono flash";
+                    commandName = "mono flash (Not in CLI, may not work)";
                     commandInfo = "Flashes the mono image already download to file system. " +
                                   "Not used much since 'mono upload rt' downloads and flashes";
                     msgClass = MessageClasses.Header;
@@ -289,15 +289,17 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_SEND_TRACE_TO_UART:
-                    commandName = "uart trace -e";
-                    commandInfo = "Directs trace output to uart1";
+                    commandName = "uart trace enable";
+                    commandInfo = "Enables trace output to the UART defined in the build.\r\n" +
+                                  "Not Implemented - In User Data field:UART1 [0 or 1],\r\n" +
+                                  "UART4 [4], UART6 [6], Distant future SWO [15].";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_NO_TRACE_TO_UART:
-                    commandName = "uart trace";
-                    commandInfo = "Stops trace output from going to uart1";
+                    commandName = "uart trace disable";
+                    commandInfo = "Stops trace output from going to defined UART";
                     msgClass = MessageClasses.Header;
                     msgComplex = MessageComplex.Normal;
                     break;
