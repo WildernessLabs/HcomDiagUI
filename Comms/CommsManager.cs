@@ -33,7 +33,8 @@ namespace HcomDiagUi
         string _serialPortName;
         SerialPort _serialPort;
         bool _cancelSending;
-        ManualResetEventSlim _concludedRecvdEvent;
+        bool _sendingInProgress;
+        AutoResetEvent _concludedRecvdEvent;
 
         RecvSerialComms _recvSerialComms;
         SendSerialComms _sendSerialComms;
@@ -48,15 +49,14 @@ namespace HcomDiagUi
         {
             _hcomUiForm = hcomUiForm;
             _uiSupport = _hcomUiForm.UiSupport;
+            _sendingInProgress = false;
 
-            // Create the serial port and Receiver and Sender
-            _serialPort = new SerialPort();
-
-            // Initially nosignaled
-            _concludedRecvdEvent = new ManualResetEventSlim();
+            // Initially not signaled
+            _concludedRecvdEvent = new AutoResetEvent(false);
 
             // Read the serial port name and open the serial port
             _serialPortName = _hcomUiForm.ReadPortName();
+
             bool result = OpenSerialPort(_serialPortName);
             if (result)
                 _uiSupport.WriteStatusLine($"Com Port '{_serialPortName}' opened successfully");
@@ -82,6 +82,14 @@ namespace HcomDiagUi
         // All send button clicks come here to begin sending to Meadow
         public void BuildMsgToSend()
         {
+            Thread.BeginCriticalRegion();
+
+            if(_sendingInProgress)
+            {
+                Thread.EndCriticalRegion();
+                return;     // All ready active
+            }
+
             // Necessary because only the UI thread can access UI elements
             MeadowRqstData rqstInfo = (MeadowRqstData)_hcomUiForm.commandListBox.SelectedItem;
             UInt32 userData = UInt32.Parse(_hcomUiForm.userDataTextBox.Text);
@@ -96,125 +104,139 @@ namespace HcomDiagUi
                 //_uiSupport.WriteDebugLine("ThreadPool.QueueUserWorkItem error");
                 throw new Exception("ThreadPool.QueueUserWorkItem(BuildMsgToSendHelper)");
             }
+            Thread.EndCriticalRegion();
         }
         
         //=======================================================================
         // A thread pool thread will do the work
         public void BuildMsgToSendHelper(Object state)
         {
-            // Grab the UI information
-            NeededUiData uiData = (NeededUiData)state;
-            MeadowRqstData rqstInfo = uiData.rqstInfo;
-            UInt32 userData = uiData.userData;
-            UInt16 extraData = uiData.extraData;
-            int dispCount = 0;
-            int iterations;
+            _sendingInProgress = true;
 
-            _uiSupport.ClearExecutionTime();
-            _uiSupport.Stopwatch.Restart();
-
-            _concludedRecvdEvent.Reset();       // Reset to nonsignaled
-
-            // Read UI iteration field. Always at least 1
-            iterations = _uiSupport.SendIterations() > 1 ? _uiSupport.SendIterations() : 1;
-
-            do
+            try
             {
-                dispCount++;
-                _uiSupport.WriteSendRecvTimeLine($"Iteration {dispCount}");
+                // Grab the UI information
+                NeededUiData uiData = (NeededUiData)state;
+                MeadowRqstData rqstInfo = uiData.rqstInfo;
+                UInt32 userData = uiData.userData;
+                UInt16 extraData = uiData.extraData;
+                int dispCount = 0;
+                int iterations;
 
-                // Update UI too
-                _uiSupport.WriteSendCount(dispCount);
-                iterations--;
+                _uiSupport.ClearExecutionTime();
+                _uiSupport.Stopwatch.Restart();
 
-                // Pull together the needed information
-                // The message classification determines what needs to be sent
-                switch (rqstInfo.msgClass)
+                // Read UI iteration field. Always at least 1
+                iterations = _uiSupport.SendIterations() > 1 ? _uiSupport.SendIterations() : 1;
+
+                do
                 {
-                    case MessageClasses.Header:
-                        _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
+                    dispCount++;
+                    _uiSupport.WriteSendRecvTimeLine($"Iteration {dispCount}");
+
+                    // Update UI too
+                    _uiSupport.WriteSendCount(dispCount);
+                    iterations--;
+
+                    // Pull together the needed information
+                    // The message classification determines what needs to be sent
+                    switch (rqstInfo.msgClass)
+                    {
+                        case MessageClasses.Header:
+                            _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
+                            break;
+
+                        case MessageClasses.Text:
+                            // Pick up the Text data that is in the UI
+                            _uiSupport.WriteDebugLine("--> This is MessageClass.Text");
+                            if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
+                            {
+                                _uiSupport.WriteDebugLine("--> This is the text diagnostic message");
+                                // Special case for of text message that includes a field for the number
+                                // of arguments in the text.
+                                _sendSerialComms.BuildAndSendDiagCmdMsg(rqstInfo.rqstType, userData, extraData,
+                                    _uiSupport.TextForMsg());
+                            }
+                            else if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD)
+                            {
+                                _uiSupport.WriteDebugLine("--> This is Set Time text msg");
+                                // For setting the time we'll read the time and send it immediately
+                                // Special text - build and format current time as UTC
+                                // Since NTP provides time in UTC we'll do the same
+                                // Using UtcNow, the formats are:
+                                // 's' = 2022-04-01T21:34:05
+                                // 'o' = 2022-04-01T21:35:03.9174375+00:00
+                                // 'u' = 2022-04-01 21:35:31Z - Notice no 'T' but a space
+                                // Using Now (local time in Pacific timezone with DST true), the formats are:
+                                // 's' = 2022-04-01T14:37:34
+                                // 'o' = 2022-04-01T14:38:25.1838288-07:00
+                                // 'u' = 2022-04-01 21:38:59Z - Notice UTC time & no 'T'
+                                //
+                                var timeStringUtc = DateTimeOffset.UtcNow.ToString("o");
+                                _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
+                                          timeStringUtc);
+
+                                // Send local time (both UTC and local can be sent at the same time)
+                                //var timeString = DateTimeOffset.Now.ToString("o");
+                                //_sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData,
+                                //          timeString);
+                            }
+                            else
+                            {
+                                // Normal case UserTextBox string is sent
+                                _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
+                                    _uiSupport.TextForMsg());
+                            }
+                            break;
+
+                        case MessageClasses.Binary:
+                            _uiSupport.WriteDebugLine("--> This is MessageClass.Binary");
+                            break;
+
+                        case MessageClasses.FileInfo:
+                            _uiSupport.WriteDebugLine("--> This is MessageClass.FileInfo");
+                            // Need to initiate a file download. Note: This returns after only
+                            // sending the start download message and receiving a response.
+                            // After this a thread pool thread is used for the execution of actual data
+                            // and end message download.
+                            _recvF7DownloadMsgs.FileExistsDownloadInfo(rqstInfo.rqstType, userData,
+                                            _uiSupport.TextForMsg(), _hcomUiForm.ReadHostFileInfo());
+                            break;
+
+                        case MessageClasses.NoHdrBin: // Needs to be Deprecate
+                            _uiSupport.WriteDebugLine("--> This is MessageClass.NoHdrBin");
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    // Must consider that some commands return before the command is actually
+                    // finished. However, all are required to send a 'Completed' message.
+
+                    // This will block until the concluded message is received or an error occurs.
+                    _concludedRecvdEvent.WaitOne();     // Halts thread and waits till concluded recvd
+
+                    // If cancelled exit now
+                    if (IsCancelSendingSet())
                         break;
 
-                    case MessageClasses.Text:
-                        // Pick up the Text data that is in the UI
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.Text");
-                        if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
-                        {
-                            _uiSupport.WriteDebugLine("--> This is the text diagnostic message");
-                            // Special case for of text message that includes a field for the number
-                            // of arguments in the text.
-                            _sendSerialComms.BuildAndSendDiagCmdMsg(rqstInfo.rqstType, userData, extraData,
-                                _uiSupport.TextForMsg());
-                        }
-                        else if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD)
-                        {
-                            _uiSupport.WriteDebugLine("--> This is Set Time text msg");
-                            // For setting the time we'll read the time and send it immediately
-                            // Special text - build and format current time as UTC
-                            // Since NTP provides time in UTC we'll do the same
-                            // Using UtcNow, the formats are:
-                            // 's' = 2022-04-01T21:34:05
-                            // 'o' = 2022-04-01T21:35:03.9174375+00:00
-                            // 'u' = 2022-04-01 21:35:31Z - Notice no 'T' but a space
-                            // Using Now (local time in Pacific timezone with DST true), the formats are:
-                            // 's' = 2022-04-01T14:37:34
-                            // 'o' = 2022-04-01T14:38:25.1838288-07:00
-                            // 'u' = 2022-04-01 21:38:59Z - Notice UTC time & no 'T'
-                            //
-                            var timeStringUtc = DateTimeOffset.UtcNow.ToString("o");
-                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
-                                      timeStringUtc);
+                } while (iterations > 0);
 
-                            // Send local time (both UTC and local can be sent at the same time)
-                            //var timeString = DateTimeOffset.Now.ToString("o");
-                            //_sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData,
-                            //          timeString);
-                        }
-                        else
-                        {
-                            // Normal case UserTextBox string is sent
-                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
-                                _uiSupport.TextForMsg());
-                        }
-                        break;
-
-                    case MessageClasses.Binary:
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.Binary");
-                        break;
-
-                    case MessageClasses.FileInfo:
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.FileInfo");
-                        // Need to initiate a file download (userData is partition). Note: This returns
-                        // after only sending the start download message and receiving a response.
-                        // After this a thread pool thread is used for the execution of actual data
-                        // and end message download.
-                        _recvF7DownloadMsgs.FindDownloadFileInformation(rqstInfo.rqstType, userData,
-                                        _uiSupport.TextForMsg(), _hcomUiForm.ReadHostFileInfo());
-                        break;
-
-                    case MessageClasses.NoHdrBin: // Needs to be Deprecate
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.NoHdrBin");
-                        break;
-
-                    default:
-                        break;
-                }
-
-                // Must consider that some commands return before the command is actually
-                // finished. However, all are expected to send a 'Completed' message.
-                //
-                // This will block until the concluded message is received or an error occurs.
-                _concludedRecvdEvent.Wait();        // Halts thread and waits till concluded recvd
-                _concludedRecvdEvent.Reset();       // Manual reset event must be reset for next rep
-
-                // If cancelled exit now
-                if (IsCancelSendingSet())
-                    break;
-
-            } while (iterations > 0);
-
-            _uiSupport.Stopwatch.Stop();
-            _uiSupport.WriteExecutionTime();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"An exception was caught in BuildMsgToSendHelper: {e}");
+                throw;      // Pass it up
+            }
+            finally
+            {
+                // Allow restarting
+                _sendingInProgress = false;
+                _uiSupport.SendButtonEnable(true);
+                _uiSupport.Stopwatch.Stop();
+                _uiSupport.WriteExecutionTime();
+            }
         }
 
         //=======================================================================
@@ -291,7 +313,6 @@ namespace HcomDiagUi
         //-------------------------------------------------------------------------------
         public bool OpenSerialPort(string portName)
         {
-            _serialPort = null;
             try
             {
                 // Create a new SerialPort object with default settings.
@@ -301,7 +322,9 @@ namespace HcomDiagUi
                 _serialPort.Parity = Parity.None;
                 _serialPort.DataBits = 8;
                 _serialPort.StopBits = StopBits.One;
-                _serialPort.Handshake = Handshake.None;
+                // _serialPort.Handshake = Handshake.XOnXOff;
+                // _serialPort.DtrEnable = true;
+                // _serialPort.RtsEnable = true;
 
                 // Set the read/write timeouts
                 _serialPort.ReadTimeout = 10000;

@@ -81,6 +81,8 @@ namespace HcomDiagUi
         private async Task ReadPortAsync()
         {
             byte[] buffer = new byte[512];
+
+            // Wait for port to open if need be
             while(!_commsMgr.SerialPort.IsOpen)
             {
                 Thread.Sleep(50);
@@ -125,7 +127,7 @@ namespace HcomDiagUi
             while (true)
             {
                 result = msgCirBuffer.AddBytes(buffer, 0, availableBytes);
-                dataAddedEvent.Set(); // wake up display thread
+                dataAddedEvent.Set(); // wake up read buffer thread
 
                 if (result == HcomBufferReturn.CIR_BUF_ADD_SUCCESS)
                 {
@@ -133,10 +135,13 @@ namespace HcomDiagUi
                 }
                 else if (result == HcomBufferReturn.CIR_BUF_ADD_WONT_FIT)
                 {
+                    // [--]
+                    _uiSupport.WriteSendRecvTimeLine("CirBuf Add won't fit");
+
                     // Wasn't possible to put these bytes in the buffer. We need
                     // to wait for a few packets to be processed and then retry to
-                    // add this data
-                    dataAddedEvent.Set(); // wake up display thread if sleeping
+                    // add this data.
+                    dataAddedEvent.Set(); // Wake up read buffer thread again
                     Thread.Sleep(250);
                     continue;
                 }
@@ -231,9 +236,13 @@ namespace HcomDiagUi
                         UInt32 payloadLength = (UInt32)(decodedSize - _hcomHdrLen);
                         HostRqstType hostRqstType = (HostRqstType)hdrMsg.stdHeader.rqstType;
 
+                        // Unique case that is expected after every command
                         if(hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_CONCLUDED)
                         {
                             _commsMgr.CommandHasConcluded();
+                            
+                            // [--]
+                            _uiSupport.WriteSendRecvTimeLine($"[r] Concluded msg received");
                         }
 
                         // Route message around

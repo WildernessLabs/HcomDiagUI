@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace HcomDiagUi
 {
@@ -15,6 +16,7 @@ namespace HcomDiagUi
     {
         // Define a delegate
         private delegate void SafeCallDelegate(string text);
+        private delegate void SafeCallDelegateBool(bool enabled);
         CommsManager _commsManager;
         readonly UiSupport _uiSupport;
 
@@ -197,10 +199,10 @@ namespace HcomDiagUi
                 return;
             }
 
+            _uiSupport.SendButtonEnable(false);
+
             // Tell the communication manager we have work to do
             _commsManager.BuildMsgToSend();
-
-            // _uiSupport.WriteDebugLine("==> UI Thread back home.");
         }
 
         private void commandListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -220,6 +222,20 @@ namespace HcomDiagUi
         private void cancelButton_Click(object sender, EventArgs e)
         {
             _commsManager.SetCancelSending();
+        }
+
+        // Prevent double clicking
+        public void sendButtonEnabled(bool sendEnabled)
+        {
+            if (sendButton.InvokeRequired)
+            {
+                var d = new SafeCallDelegateBool(sendButtonEnabled);
+                sendButton.Invoke(d, new object[] { sendEnabled });
+            }
+            else
+            {
+                sendButton.Enabled = sendEnabled;
+            }
         }
     }
 }

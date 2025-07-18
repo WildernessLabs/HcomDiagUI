@@ -21,14 +21,14 @@ namespace HcomDiagUi
         }
 
         // This is start of file download
-        public void FindDownloadFileInformation(MeadowRqstType requestType,
+        public void FileExistsDownloadInfo(MeadowRqstType requestType,
                 UInt32 partition, string meadowFileName,
                 string sourceFileName)
         {
             // Make sure file exists on this PC
             if (!File.Exists(sourceFileName))
             {
-                string msgFail = string.Format($"Please enter a valid file name {sourceFileName} doesn't exist.");
+                string msgFail = string.Format($"Please enter a valid file name {sourceFileName}, doesn't exist.");
                 uiSupport.WriteStatus(msgFail);
                 return;
             }
@@ -44,6 +44,8 @@ namespace HcomDiagUi
             // Call to send the initial header
             UInt32 espAddress = 0;
             string md5Hash = "12345678901234567890123456789012";        // Must be 32 bytes
+
+            // uiSupport.WriteSendRecvTimeLine($"[s] Next call BuildAndSendFileRelatedCommand");
 
             // This is the start download message. Meadow will respond with a go/no go reply
             sendSerialComms.BuildAndSendFileRelatedCommand(requestType, partition,
@@ -63,10 +65,10 @@ namespace HcomDiagUi
             switch (hostRqstType)
             {
                 case HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY:
-                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} Indicates dnld start success");
+                    uiSupport.WriteSendRecvTimeLine($"[r] Request type {hostRqstType} indicates HCOM is ready for data");
 
                     // We must allow the thread that pulls messages from the circular
-                    // queue to return so it can get message to display, so we'll use
+                    // queue to return so it can get messages to display, so we'll use
                     // a thread pool thread.
                     // Start sending file data to the Meadow using a thread pool thread
                     if (!ThreadPool.QueueUserWorkItem(SendFilePackets))
@@ -77,7 +79,7 @@ namespace HcomDiagUi
                     break;
 
                 case HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_FAIL:
-                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} Indicates dnld start failure");
+                    uiSupport.WriteSendRecvTimeLine($"[r]Request type {hostRqstType} Indicates HCOM couldn't get ready");
                     break;
 
                 case HostRqstType.HCOM_HOST_REQUEST_DNLD_FAIL_RESEND:
@@ -86,7 +88,7 @@ namespace HcomDiagUi
                     // Convert everything after the header from a byte[] to a .net string
                     var hdrText = Encoding.ASCII.GetString(messageBuffer, headerLen,
                             messageLength - headerLen);
-                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} HCOM reported:{hdrText}");
+                    uiSupport.WriteSendRecvTimeLine($"[r]Request type {hostRqstType} HCOM reported:{hdrText}");
                     break;
 
                 default:
@@ -100,7 +102,7 @@ namespace HcomDiagUi
         {
             UInt16 seqNumb = 0;
 
-            uiSupport.WriteDebugLine("Entered SendFilePackets(), sending data");
+            // uiSupport.WriteDebugLine("Entered SendFilePackets(), start sending data");
 
             // Open the specified file by name and read the data
             string hostFileInfo = uiSupport.GetHostFileInfo();
@@ -112,8 +114,7 @@ namespace HcomDiagUi
                 int bytesRead;
 
                 do
-                {   
-
+                {
                     // Did user cancel?
                     if(commsManager.IsCancelSendingSet())
                         return;
@@ -121,12 +122,12 @@ namespace HcomDiagUi
                     seqNumb++;
                     bytesRead = fs.Read(dataBuff, 0, dataBuff.Length);
                     sendSerialComms.BuildAndSendBinPacket(dataBuff, 0, bytesRead, seqNumb);
-
                 }
                 while (bytesRead > 0);
             }
 
-            uiSupport.WriteDebugLine($"Sending End msg (sent {seqNumb} data packets)");
+            // [--]
+            uiSupport.WriteDebugLine($"Sending End msg (Done, sent {seqNumb} data packets)");
 
             // Send the End message
             sendSerialComms.BuildAndSendHdrMessage(MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER, 0, 0);

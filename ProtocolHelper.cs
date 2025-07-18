@@ -356,7 +356,7 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_START_FILE_TRANSFER:
-                    commandName = "file write";
+                    commandName = "File Write";
                     commandInfo = "Downloads a file to the Meadow file system";
                     msgClass = MessageClasses.FileInfo;
                     msgComplex = MessageComplex.F7FileDnld;

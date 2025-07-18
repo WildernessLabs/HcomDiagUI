@@ -39,7 +39,9 @@ namespace HcomDiagUi
                     $"UDat:{hdrMsg.stdHeader.userData}]");
 
                 _uiSupport.WriteSendRecvTimeLine(hdrAsStr);
-                _uiSupport.WriteDebugLine($"Received Msg Class '{hostRqstData.msgClass}'");
+
+                // [--]
+                _uiSupport.WriteDebugLine($"[r]Received Msg Class '{hostRqstData.msgClass}'");
             }
 
             switch (hostRqstData.msgClass)
@@ -68,7 +70,7 @@ namespace HcomDiagUi
                     break;
 
                     // This is only used for files downloaded to the F7
-                case MessageClasses.NoHdrBin:    // Deprecated 2-byte header + binary data
+                case MessageClasses.NoHdrBin:    // Should be deprecated 2-byte header + binary data
                     Debug.Assert(false);
                     break;
 
@@ -98,7 +100,7 @@ namespace HcomDiagUi
                     messageLength - _hcomHdrLen);
 
             // The text is always shown
-            _uiSupport.WriteSendRecvTime("'");
+            _uiSupport.WriteSendRecvTime("[r] '");
             _uiSupport.WriteSendRecv(hdrText);
             _uiSupport.WriteSendRecvLine("'");
 

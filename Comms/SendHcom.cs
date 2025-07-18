@@ -33,8 +33,6 @@ namespace HcomDiagUi
             UInt32 userData, UInt16 extraData, UInt32 fileSize, UInt32 fileCheckSum,
             UInt32 mcuAddr, string md5Hash, string destFileName)
         {
-            _uiSupport.WriteDebugLine($"Entered BuildAndSendFileRelatedCommand with fileSize {fileSize}, CRC {fileCheckSum}");
-
             var hcomFsStartCmdMsg = new HcomProtoFSInfoMsg
             {
                 seqNumber = 0,
@@ -72,6 +70,7 @@ namespace HcomDiagUi
             _ = Encoding.ASCII.GetBytes(destFileName, 0, encodedFileNameLen,
                 msgBuffer, fsInfoHdrSize);
 
+            //_uiSupport.WriteSendRecvTimeLine($"Exiting BuildAndSendFileRelatedCommand");
             EncodeAndSendPacket(msgBuffer, totalMsgLen);
         }
 
@@ -249,6 +248,8 @@ namespace HcomDiagUi
                 int encodedToSend;
                 byte[] encodedBytes;
 
+                // _uiSupport.WriteSendRecvTimeLine($"Entered EncodeAndSendPacket {messageSize}");
+
                 // For file download this is a LOT of messages
                 // _uiSupport.WriteDebugLine($"Sending packet with {messageSize} bytes");
 
@@ -265,7 +266,6 @@ namespace HcomDiagUi
                         ref encodedBytes, 1);
 
                     // DEBUG TESTING
-                    // HOW BIG MUST THE BUFFER BE FOR 4094 BYTE FILE SIZE
                     if(encodedToSend == -1)
                     {
                         _uiSupport.WriteDebugLine($"Error - encodedToSend == -1");
@@ -295,8 +295,7 @@ namespace HcomDiagUi
                     encodedToSend++;
                     encodedBytes[encodedToSend] = 0;    // End delimiter
                     encodedToSend++;
-                    Debug.WriteLine($"COBS-encoded Message Hex:'{BitConverter.ToString(encodedBytes, 0, encodedToSend)}'");
-
+                    // Debug.WriteLine($"COBS-encoded Message Hex:'{BitConverter.ToString(encodedBytes, 0, encodedToSend)}'");
                 }
                 catch (Exception encodedBytesEx)
                 {
@@ -309,6 +308,7 @@ namespace HcomDiagUi
                 try
                 {
                     // Send the data to Meadow
+                    // _uiSupport.WriteSendRecvTimeLine($"Writing {encodedToSend} bytes to COM port");
                     _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
                 }
                 catch (InvalidOperationException ioe)  // Port not opened
@@ -339,6 +339,10 @@ namespace HcomDiagUi
                     Thread.Sleep(500);    // Place for break point
                     throw;
                 }
+                // finally
+                // {
+                //     _uiSupport.WriteSendRecvTimeLine($"Exiting EncodeAndSendPacket (inner finally)");
+                // }
             }
             catch (Exception except)
             {
