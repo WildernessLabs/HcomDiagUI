@@ -300,6 +300,7 @@ namespace HcomDiagUi
         //-------------------------------------------------------------------------------
         public void CommandHasConcluded()
         {
+
             _concludedRecvdEvent.Set();
         }
 
@@ -322,9 +323,9 @@ namespace HcomDiagUi
                 _serialPort.Parity = Parity.None;
                 _serialPort.DataBits = 8;
                 _serialPort.StopBits = StopBits.One;
-                // _serialPort.Handshake = Handshake.XOnXOff;
-                // _serialPort.DtrEnable = true;
-                // _serialPort.RtsEnable = true;
+                _serialPort.Handshake = Handshake.XOnXOff;
+                _serialPort.DtrEnable = true;
+                _serialPort.RtsEnable = true;
 
                 // Set the read/write timeouts
                 _serialPort.ReadTimeout = 10000;
