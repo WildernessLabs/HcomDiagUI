@@ -18,7 +18,7 @@ namespace HcomDiagUi
         CommsManager _commsMgr;
         UiSupport _uiSupport;
         int _hcomHdrLen;
-        Thread thread;
+        Thread pullMsgThread;
         readonly AutoResetEvent dataAddedEvent = new AutoResetEvent(false);
 
         CircularBuffer msgCirBuffer;
@@ -54,13 +54,21 @@ namespace HcomDiagUi
             //}
 
             msgCirBuffer = new CircularBuffer();
-            msgCirBuffer.Init(Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE * 8, _uiSupport); 
+            msgCirBuffer.Init(Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE * 8, _uiSupport);
 
-            // Start thread to processed received data
-            thread = new Thread(new ThreadStart(PullAndProcessThread));
-            thread.Start();
+            //// Start a thread to processed received data
+            //pullMsgThread = new Thread(new ThreadStart(PullAndProcessThread));
+            //pullMsgThread.Start();
 
-            // Start receiving from meadow
+            //var t = ReadPortAsync();
+        }
+
+        internal void sendButtonClicked()
+        {
+            // Start a thread to processed received data
+            pullMsgThread = new Thread(new ThreadStart(PullAndProcessThread));
+            pullMsgThread.Start();
+
             var t = ReadPortAsync();
         }
 
@@ -81,6 +89,8 @@ namespace HcomDiagUi
         private async Task ReadPortAsync()
         {
             byte[] buffer = new byte[512];
+
+            // Wait for port to open if need be
             while(!_commsMgr.SerialPort.IsOpen)
             {
                 Thread.Sleep(50);
@@ -125,19 +135,21 @@ namespace HcomDiagUi
             while (true)
             {
                 result = msgCirBuffer.AddBytes(buffer, 0, availableBytes);
-                dataAddedEvent.Set(); // wake up display thread
+                dataAddedEvent.Set(); // wake up read buffer thread
 
                 if (result == HcomBufferReturn.CIR_BUF_ADD_SUCCESS)
                 {
+                    //_uiSupport.WriteSendRecvTimeLine("--->CirBuf Add Success");
                     break;
                 }
                 else if (result == HcomBufferReturn.CIR_BUF_ADD_WONT_FIT)
                 {
+                    _uiSupport.WriteSendRecvTimeLine("--->CirBuf Add won't fit");
+
                     // Wasn't possible to put these bytes in the buffer. We need
-                    // to wait for a few packets to be processed and then retry to
-                    // add this data
-                    dataAddedEvent.Set(); // wake up display thread if sleeping
-                    Thread.Sleep(250);
+                    // to wait for the other thread and then retry to add this
+                    // data and set dataAddedEvent again.
+                    Thread.Sleep(1);      // Time to see above message
                     continue;
                 }
                 else if (result == HcomBufferReturn.CIR_BUF_ADD_BAD_ARG)
@@ -154,26 +166,40 @@ namespace HcomDiagUi
         }
 
         //===========================================================
-        // Second thread for display otherwise loose data
+        // Second thread for processing commands to be sent
         public void PullAndProcessThread()
         {
             HcomBufferReturn bufReturn;
 
-            while (true)
+            try
             {
-                // Wait to be signaled that something is ready
-                dataAddedEvent.WaitOne();
-
-                bufReturn = PullAndProcessAllPackets();
-                if(bufReturn != HcomBufferReturn.CIR_BUF_GET_NONE_FOUND)
+                while (true)
                 {
-                    string msg = string.Format($"PullAndProcess returned:{bufReturn}");
-                    _uiSupport.WriteStatus(msg);
+                    // Wait to be signaled that something is ready or timeout
+                    var waitReturn = dataAddedEvent.WaitOne(5000);
+
+                    // Loop till circular buffer empty
+                    do
+                    {
+                        bufReturn = PullAndProcessAllPackets();
+
+                    } while (bufReturn == HcomBufferReturn.CIR_BUF_GET_FOUND_MSG);
+
+                    if (bufReturn != HcomBufferReturn.CIR_BUF_GET_NONE_FOUND)
+                    {
+                        // Unexpected return value from cirbuf
+                        _uiSupport.WriteDebugLine($"Error: PullAndProcess returned:{bufReturn}. Ignored");
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                _uiSupport.WriteDebugLine($"Exception: PullAndProcess:{e}");
+            }  
         }
 
         //===========================================================
+        // Loop here finding all valid packets
         HcomBufferReturn PullAndProcessAllPackets()
         {
             byte[] packetBuffer = new byte[Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE];
@@ -182,6 +208,7 @@ namespace HcomDiagUi
             int packetLength;
             HcomBufferReturn result;
             ConsoleColor origForeground = Console.ForegroundColor;
+            HostRqstType hostRqstType = HostRqstType.HCOM_HOST_REQUEST_UNDEFINED_REQUEST;
 
             while (true)
             {
@@ -217,9 +244,9 @@ namespace HcomDiagUi
 
                     if (decodedSize > 0)
                     {
-                        // The hcom header is present in all messages from Meadow.
-                        // There may be more information but this will tell us
-                        // enough to continue processing.
+                        // The hcom header is present in all non-data messages from
+                        // Meadow. There may be more information but this will tell
+                        // us enough to continue processing.
                         HcomProtoHdrMessage hdrMsg;
                         int size = Marshal.SizeOf(typeof(HcomProtoHdrMessage));
                         IntPtr ptr = Marshal.AllocHGlobal(size);
@@ -229,15 +256,11 @@ namespace HcomDiagUi
                         Marshal.FreeHGlobal(ptr);
                         
                         UInt32 payloadLength = (UInt32)(decodedSize - _hcomHdrLen);
-                        HostRqstType hostRqstType = (HostRqstType)hdrMsg.stdHeader.rqstType;
+                        hostRqstType = (HostRqstType)hdrMsg.stdHeader.rqstType;
 
-                        if(hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_CONCLUDED)
-                        {
-                            _commsMgr.CommandHasConcluded();
-                        }
-
-                        // Route message around
-                        _commsMgr.ForwardToProcessMsgs(hdrMsg, hostRqstType,
+                        // Route message around. This mostly displays a message and returns.
+                        // Unless we are doing something more complex. 
+                        _commsMgr.ProcessRecvdMsgByType(hdrMsg, hostRqstType,
                             decodedBuffer, decodedSize, payloadLength);
                     }
                 }

@@ -178,5 +178,10 @@ namespace HcomDiagUi
         {
             RecvHexChecked = @checked;
         }
+
+        internal void SendButtonEnable(bool sendEnabled)
+        {
+            _hcomUiForm.sendButtonEnabled(sendEnabled);
+        }
     }
 }

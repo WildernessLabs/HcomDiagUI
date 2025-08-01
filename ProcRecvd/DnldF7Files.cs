@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -8,32 +9,39 @@ namespace HcomDiagUi
 {
     public class DnldF7Files
     {
-        private CommsManager commsManager;
+        private CommsManager _commsMgr;
         private UiSupport uiSupport;
         private SendSerialComms sendSerialComms;
         private UInt32 _packetCrc32;
+        private bool _isFileDnldActive;
 
         public DnldF7Files(CommsManager commsManager, UiSupport uiSupport, SendSerialComms sendSerialComms)
         {
-            this.commsManager = commsManager;
+            this._commsMgr = commsManager;
             this.sendSerialComms = sendSerialComms;
             this.uiSupport = uiSupport;
+            _isFileDnldActive = false;
         }
 
-        // This is start of file download
-        public void FindDownloadFileInformation(MeadowRqstType requestType,
-                UInt32 partition, string meadowFileName,
+        public bool IsFileDnldActive {
+            get { return _isFileDnldActive; }
+            set { _isFileDnldActive = value; } }
+
+        //============================================================================
+        // 1. This is start of F7 file download. We tell Meadow about the file
+        public void DnldStartFileInfo(MeadowRqstType requestType,
+                UInt32 userData, string meadowFileName,
                 string sourceFileName)
         {
-            // Make sure file exists on this PC
+            // Make sure file to send exists on this PC
             if (!File.Exists(sourceFileName))
             {
-                string msgFail = string.Format($"Please enter a valid file name {sourceFileName} doesn't exist.");
+                string msgFail = string.Format($"Please enter a valid sending file name. {sourceFileName} not found.");
                 uiSupport.WriteStatus(msgFail);
                 return;
             }
 
-            commsManager.ClearCancelSending();
+            _commsMgr.ClearCancelSending();
 
             // Read the entire file for size and CRC32 checksum
             byte[] dataBuff = File.ReadAllBytes(sourceFileName);
@@ -43,68 +51,87 @@ namespace HcomDiagUi
 
             // Call to send the initial header
             UInt32 espAddress = 0;
-            string md5Hash = "12345678901234567890123456789012";        // Must be 32 bytes
+            string md5Hash = "12345678901234567890123456789012";    // Must be 32 bytes
 
-            // This is the start download message. Meadow will respond with a go/no go reply
-            sendSerialComms.BuildAndSendFileRelatedCommand(requestType, partition,
+            //uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]Step #1 Send 'Start' msg to Meadow");
+
+            // This is the start of a download. Meadow will respond with a go/no go reply
+            sendSerialComms.BuildAndSendFileDnldCommand(requestType, userData,
                 0, fileSize, _packetCrc32, espAddress, md5Hash, meadowFileName);
         }
 
-        // Wait for HCOM to respond with HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY or
-        // HCOM_HOST_REQUEST_INIT_DOWNLOAD_FAIL message.
-
+        //============================================================================
+        // 2. Wait for HCOM to respond with HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY
+        // or HCOM_HOST_REQUEST_INIT_DOWNLOAD_FAIL message.
         // Execute by the Receive Thread that pulls message from the circular queue
-        public void ProcessRcvdF7Dnld(HcomProtoHdrMessage hdrMsg,
+        public void DnldChkF7ReadyMsg(HcomProtoHdrMessage hdrMsg,
                 HostRqstData hostRqstData, HostRqstType hostRqstType,
                 byte[] messageBuffer, int messageLength, uint payloadLength)
         {
-            // Received a message while doing file download. This must be the
+            uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}](s) Step #2 Recvd Meadow response");
+
+            // Received a message while in file download mode. This must be the
             // start result. Do we stop or continue?
             switch (hostRqstType)
             {
                 case HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY:
-                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} Indicates dnld start success");
+                    uiSupport.WriteSendRecvTimeLine($"(r) Meadow msg indicating HCOM is ready for data");
+
+                    lock (this)
+                    {
+                        if (_isFileDnldActive)
+                            return;     // All ready active
+                        else
+                            _isFileDnldActive = true;
+                    }
 
                     // We must allow the thread that pulls messages from the circular
-                    // queue to return so it can get message to display, so we'll use
+                    // queue to return so it can get grab more messages to display, so we'll use
                     // a thread pool thread.
                     // Start sending file data to the Meadow using a thread pool thread
-                    if (!ThreadPool.QueueUserWorkItem(SendFilePackets))
+                    if (!ThreadPool.QueueUserWorkItem(DnldF7DataPackets))
                     {
-                        // Grabing a thread from the thread pool failed
-                        throw new Exception("ThreadPool.QueueUserWorkItem(SendFilePackets)");
+                        // Getting a thread from the thread pool failed
+                        _isFileDnldActive = false;
+                        throw new Exception("ThreadPool.QueueUserWorkItem(DnldF7DataPackets)");
                     }
                     break;
 
                 case HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_FAIL:
-                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} Indicates dnld start failure");
+                    _isFileDnldActive = false;
+                    uiSupport.WriteSendRecvTimeLine($"(r)FAILURE-HCOM couldn't get files system ready");
                     break;
 
+                // This message indicates that during data download the Meadow watchdog
+                // timer timed out, because no data was received for x seconds.
                 case HostRqstType.HCOM_HOST_REQUEST_DNLD_FAIL_RESEND:
+                    _isFileDnldActive = false;
                     var headerLen = Protocol.HcomProtoHdrMessageSize();
 
                     // Convert everything after the header from a byte[] to a .net string
                     var hdrText = Encoding.ASCII.GetString(messageBuffer, headerLen,
                             messageLength - headerLen);
-                    uiSupport.WriteSendRecvTimeLine($"Request type {hostRqstType} HCOM reported:{hdrText}");
+                    uiSupport.WriteSendRecvTimeLine($"(r)FAILURE-Request type {hostRqstType} HCOM reported:{hdrText}");
                     break;
 
                 default:
+                    // How did this request type get here?
+                    Debug.Assert(false);
                     break;
             }
         }
 
-        // Reads the file data and sends it to Meadow, one packet at a time, using the
-        // thread pool thread.
-        public void SendFilePackets(Object state)
+        //============================================================================
+        // 3. Read the file data and sends it to Meadow, one packet at a time, using
+        // the thread pool thread. Each download of file data gets a new thread.
+        public void DnldF7DataPackets(Object state)
         {
-            UInt16 seqNumb = 0;
+            UInt16 seqNumb = 1;      // The first data packet needs to be 1
 
-            uiSupport.WriteDebugLine("Entered SendFilePackets(), sending data");
+            //uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Start sending file data");
 
             // Open the specified file by name and read the data
             string hostFileInfo = uiSupport.GetHostFileInfo();
-
             using (FileStream fs = File.OpenRead(hostFileInfo))
             {
                 // The maximum data bytes is max packet size - 2 bytes for the sequence number
@@ -112,24 +139,26 @@ namespace HcomDiagUi
                 int bytesRead;
 
                 do
-                {   
-
+                {
                     // Did user cancel?
-                    if(commsManager.IsCancelSendingSet())
+                    if(_commsMgr.IsCancelSendingSet())
                         return;
 
-                    seqNumb++;
                     bytesRead = fs.Read(dataBuff, 0, dataBuff.Length);
                     sendSerialComms.BuildAndSendBinPacket(dataBuff, 0, bytesRead, seqNumb);
-
+                    seqNumb++;
                 }
                 while (bytesRead > 0);
             }
 
-            uiSupport.WriteDebugLine($"Sending End msg (sent {seqNumb} data packets)");
+            //--------------------------------------------------------------
+            // 4. Send the End message to Meadow so it can close the file and cleanup
+            Thread.Sleep(500);  // Brief pause
 
-            // Send the End message
+            //uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Sending End msg to Meadow after {seqNumb} data packets");
             sendSerialComms.BuildAndSendHdrMessage(MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER, 0, 0);
+
+            _isFileDnldActive = false;
         }
     }
 }
