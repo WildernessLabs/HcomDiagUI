@@ -181,7 +181,8 @@ namespace HcomDiagUi
 
         internal void SendButtonEnable(bool sendEnabled)
         {
-            _hcomUiForm.sendButtonEnabled(sendEnabled);
+            // I don't think I need this anymore
+            // _hcomUiForm.sendButtonEnabled(sendEnabled);
         }
     }
 }

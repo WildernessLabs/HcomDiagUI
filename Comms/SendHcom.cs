@@ -72,7 +72,7 @@ namespace HcomDiagUi
 
             EncodeAndSendPacket(msgBuffer, requestType, totalMsgLen);
 
-            // _uiSupport.WriteSendRecvTimeLine($"Sent file start msg");
+            _uiSupport.WriteSendRecvTimeLine($"Sent file start msg {requestType}");
         }
 
         //==========================================================================
@@ -80,7 +80,7 @@ namespace HcomDiagUi
         internal void BuildAndSendTextMsg(MeadowRqstType requestType,
             UInt32 userData, UInt16 extraData, string textData)
         {
-            // _uiSupport.WriteDebugLine($"--> Sending Text Data:{textData}");
+            _uiSupport.WriteDebugLine($"--> Sending Text Data:{textData}");
 
             var hcomHdrMsg = new HcomProtoHdrMessage();
             hcomHdrMsg.stdHeader.seqNumber = 0;
@@ -149,6 +149,7 @@ namespace HcomDiagUi
             hdrMsg.stdHeader.extraData = extraData;
             hdrMsg.stdHeader.userData = userData;
 
+            _uiSupport.WriteDebugLine($"--> Sending Header Message RqstType:{requestType}");
             MeadowRqstData rqstData;
             rqstData = ProtocolHelper.DecodeMsgToMeadow(requestType);
 

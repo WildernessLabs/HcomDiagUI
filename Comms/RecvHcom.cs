@@ -20,7 +20,7 @@ namespace HcomDiagUi
         int _hcomHdrLen;
         Thread pullMsgThread;
         readonly AutoResetEvent dataAddedEvent = new AutoResetEvent(false);
-
+        bool _threadsCreated = false;
         CircularBuffer msgCirBuffer;
 
         //StreamWriter streamWriter;
@@ -55,20 +55,20 @@ namespace HcomDiagUi
 
             msgCirBuffer = new CircularBuffer();
             msgCirBuffer.Init(Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE * 8, _uiSupport);
-
-            //// Start a thread to processed received data
-            //pullMsgThread = new Thread(new ThreadStart(PullAndProcessThread));
-            //pullMsgThread.Start();
-
-            //var t = ReadPortAsync();
         }
 
         internal void sendButtonClicked()
         {
+            if (_threadsCreated)
+                return;
+
+            _threadsCreated = true;
+
             // Start a thread to processed received data
             pullMsgThread = new Thread(new ThreadStart(PullAndProcessThread));
             pullMsgThread.Start();
 
+            // This thread will do the receiving
             var t = ReadPortAsync();
         }
 
@@ -229,7 +229,7 @@ namespace HcomDiagUi
                 if (result == HcomBufferReturn.CIR_BUF_GET_FOUND_MSG)
                 {
                     if (packetLength == 1)
-                        continue;
+                        continue;           // Too short
 
                     // Don't include delimiter
                     int decodedSize = CobsTools.CobsDecoding(packetBuffer, --packetLength,
@@ -257,6 +257,8 @@ namespace HcomDiagUi
                         
                         UInt32 payloadLength = (UInt32)(decodedSize - _hcomHdrLen);
                         hostRqstType = (HostRqstType)hdrMsg.stdHeader.rqstType;
+
+                        //_uiSupport.WriteSendRecvTimeLine($"-->COBS Decoded Rcv'd Message. RqstType:{hostRqstType}");
 
                         // Route message around. This mostly displays a message and returns.
                         // Unless we are doing something more complex. 

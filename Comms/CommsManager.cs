@@ -101,7 +101,6 @@ namespace HcomDiagUi
                     _sendingInProgress = true;
             }
 
-            // This MUST ONLY BE CALLED ONCE!!!!!
             _recvSerialComms.sendButtonClicked();
 
             // Necessary because only the UI thread can access UI elements
@@ -126,6 +125,9 @@ namespace HcomDiagUi
         // This code is executed by a thread pool thread.
         internal void BuildMsgIterations(Object state)
         {
+            _uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Entered Do loop");
+
+            bool waitResult;
             int displayCount = 0;
             int loopCount = _uiSupport.SendIterations() > 1 ? _uiSupport.SendIterations() : 1;
 
@@ -148,7 +150,7 @@ namespace HcomDiagUi
                     //_uiSupport.WriteSendRecvTimeLine($"Iteration {displayCount}");
                     _uiSupport.WriteSendCount(displayCount);
                 
-                    // Send a single message to host
+                    // Send a single request to host
                     //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Do loop, ready to start {displayCount} to Meadow");
                     BuildMsgToSendHelper(state);
 
@@ -158,9 +160,13 @@ namespace HcomDiagUi
                     // it is signalled before or after the thread reaches this point,
                     // the thread will always be released. A problem was observed
                     // with AutoResetEvent, and a Manual reset event was the answer.
-                    //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Entering Wait for concluded msg");
+                    waitResult = _concludedRecvdEvent.WaitOne(-1);     // -1 Wait forever
+                    //waitResult = _concludedRecvdEvent.WaitOne(30 * 1000);
 
-                    _concludedRecvdEvent.WaitOne(-1);     // -1 Wait forever
+                    if(! waitResult)
+                    {
+                        _uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Concluded msg event timeout");
+                    }
                     //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Recvd concluded msg, next loop");
 
                     _concludedRecvdEvent.Reset();
@@ -176,7 +182,7 @@ namespace HcomDiagUi
                 _uiSupport.SendButtonEnable(true);
                 _sendingInProgress = false;
             }
-            _uiSupport.WriteSendRecvTimeLine($"==>Interation Loop thread exiting");
+            _uiSupport.WriteSendRecvTimeLine($"==>Exiting Interation Loop{Environment.NewLine}");
         }
 
         //=======================================================================
@@ -196,12 +202,14 @@ namespace HcomDiagUi
                 switch (rqstInfo.msgClass)
                 {
                     case MessageClasses.Header:
+                        _uiSupport.WriteSendRecvTimeLine("-->This is MessageClass.Header");
                         _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
                         break;
 
                     case MessageClasses.Text:
+                        _uiSupport.WriteSendRecvTimeLine("-->This is MessageClass.Text");
+
                         // Pick up the WriteSendRecvTimeLine data that is in the UI
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.Text");
                         if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
                         {
                             _uiSupport.WriteSendRecvTimeLine("--> Text diagnostic message");
@@ -248,7 +256,8 @@ namespace HcomDiagUi
                         break;
 
                     case MessageClasses.FileInfo:
-                        _uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Start of File Download");
+                        _uiSupport.WriteSendRecvTimeLine("--> MessageClass.FileInfo");
+                        //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Start of File Download");
                         // Need to initiate a file download.
                         // Note: This thread returns after only sending the start download
                         // message and receiving a response.
@@ -258,11 +267,12 @@ namespace HcomDiagUi
                                         _uiSupport.TextForMsg(), _hcomUiForm.ReadHostFileInfo());
                         break;
 
-                    case MessageClasses.NoHdrBin: // Needs to be Deprecate
+                    case MessageClasses.NoHdrBin: // Needs to be Deprecated
                         _uiSupport.WriteSendRecvTimeLine("--> MessageClass.NoHdrBin");
                         break;
 
                     default:
+                        _uiSupport.WriteSendRecvTimeLine("--> MessageClass.DEFAULT???");
                         break;
                 }
             }
@@ -317,7 +327,7 @@ namespace HcomDiagUi
                     break;
             }
 
-            // Special message processing for download finished
+            // Special message processing
             if (hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_CONCLUDED)
             {
                 if (IsFileDnldActive)
@@ -355,7 +365,7 @@ namespace HcomDiagUi
         internal void setConcludedEvent()
         {
             _concludedRecvdEvent.Set();
-            _uiSupport.WriteSendRecvTimeLine($"(r) Just set Concluded Event");
+            _uiSupport.WriteSendRecvTimeLine($"Set Concluded Event");
         }
 
         //-------------------------------------------------------------------------------
