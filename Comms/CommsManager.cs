@@ -4,11 +4,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+// Install the nuget package.
+// Note: this code only works on Windows and Linux.
+// See https://github.com/jcurl/RJCP.DLL.SerialPortStream for details.
+// In this solution find all the "// RJCP" entries and uncommment the
+// code. Also comment out all the "// .Net" titled entries.
+// RJCP
+// using RJCP.IO.Ports;
+// .Net
+using System.IO.Ports;
 
 namespace HcomDiagUi
 {
@@ -32,9 +40,10 @@ namespace HcomDiagUi
         UiSupport _uiSupport;
         HcomDiagUiForm _hcomUiForm;
         string _serialPortName;
-        SerialPort _serialPort;
         bool _cancelSending;
         bool _sendingInProgress;
+        //SerialPortStream _serialPort; // RJCP
+        SerialPort _serialPort;     // .Net
 
         // Note: using ManualResetEvent because the code setting the
         // event may execute before or after the wait.
@@ -75,7 +84,7 @@ namespace HcomDiagUi
 
             // Port opened so we can proceed
             _recvSerialComms = new RecvSerialComms(this, _uiSupport);
-            _sendSerialComms = new SendSerialComms(this, _uiSupport);
+            _sendSerialComms = new SendSerialComms(this, _uiSupport, _recvSerialComms.GetCircularBuffer());
             _recvNormalMsgs = new NormalRcvdProc(this, _uiSupport);
             _recvUploadMsgs = new UploadProcessing(this, _uiSupport);
             _recvF7DownloadMsgs = new DnldF7Files(this, _uiSupport, _sendSerialComms);
@@ -147,19 +156,18 @@ namespace HcomDiagUi
                     displayCount++;
 
                     // Update UI too
-                    //_uiSupport.WriteSendRecvTimeLine($"Iteration {displayCount}");
                     _uiSupport.WriteSendCount(displayCount);
                 
                     // Send a single request to host
-                    //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Do loop, ready to start {displayCount} to Meadow");
+                    _uiSupport.WriteSendRecvTimeLine($"Iteration {displayCount} calling BuildMsgToSendHelper to send command");
                     BuildMsgToSendHelper(state);
 
                     // This Event will block the execution of the next command until
                     // the 'Concluded' message is received (or an error occurs) from
                     // Meadow. Because this is a ManualResetEvent it doesn't matter if
                     // it is signalled before or after the thread reaches this point,
-                    // the thread will always be released. A problem was observed
-                    // with AutoResetEvent, and a Manual reset event was the answer.
+                    // the thread will always be released, and only reset after it
+                    // reaches this point.
                     waitResult = _concludedRecvdEvent.WaitOne(-1);     // -1 Wait forever
                     //waitResult = _concludedRecvdEvent.WaitOne(30 * 1000);
 
@@ -167,10 +175,8 @@ namespace HcomDiagUi
                     {
                         _uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Concluded msg event timeout");
                     }
-                    //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Recvd concluded msg, next loop");
 
                     _concludedRecvdEvent.Reset();
-                    //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Looping for next iteration");
 
                 } while (loopCount > 0);
             }
@@ -189,6 +195,7 @@ namespace HcomDiagUi
         // Send a single message to Meadow
         public void BuildMsgToSendHelper(Object state)
         {
+            //_uiSupport.WriteSendRecvTimeLine("-->Entered BuildMsgToSendHelper");
             try
             {
                 // Grab the UI information from the state
@@ -202,12 +209,12 @@ namespace HcomDiagUi
                 switch (rqstInfo.msgClass)
                 {
                     case MessageClasses.Header:
-                        _uiSupport.WriteSendRecvTimeLine("-->This is MessageClass.Header");
+                        _uiSupport.WriteSendRecvTimeLine("-->Sending MessageClass.Header");
                         _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
                         break;
 
                     case MessageClasses.Text:
-                        _uiSupport.WriteSendRecvTimeLine("-->This is MessageClass.Text");
+                        _uiSupport.WriteSendRecvTimeLine("-->Sending MessageClass.Text");
 
                         // Pick up the WriteSendRecvTimeLine data that is in the UI
                         if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
@@ -245,19 +252,18 @@ namespace HcomDiagUi
                         else
                         {
                             // Normal case UserTextBox string is sent
-                            _uiSupport.WriteSendRecvTimeLine("--> Normal userData text");
+                            _uiSupport.WriteSendRecvTimeLine("--> Sending Normal userData text");
                             _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
                                 _uiSupport.TextForMsg());
                         }
                         break;
 
                     case MessageClasses.Binary:
-                        _uiSupport.WriteSendRecvTimeLine("--> MessageClass.Binary");
+                        _uiSupport.WriteSendRecvTimeLine("--> Sending MessageClass.Binary");
                         break;
 
                     case MessageClasses.FileInfo:
-                        _uiSupport.WriteSendRecvTimeLine("--> MessageClass.FileInfo");
-                        //_uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Start of File Download");
+                        _uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Start of File Download");
                         // Need to initiate a file download.
                         // Note: This thread returns after only sending the start download
                         // message and receiving a response.
@@ -268,11 +274,11 @@ namespace HcomDiagUi
                         break;
 
                     case MessageClasses.NoHdrBin: // Needs to be Deprecated
-                        _uiSupport.WriteSendRecvTimeLine("--> MessageClass.NoHdrBin");
+                        _uiSupport.WriteSendRecvTimeLine("--> Sending MessageClass.NoHdrBin");
                         break;
 
                     default:
-                        _uiSupport.WriteSendRecvTimeLine("--> MessageClass.DEFAULT???");
+                        _uiSupport.WriteSendRecvTimeLine("--> Sending MessageClass.DEFAULT???");
                         break;
                 }
             }
@@ -342,6 +348,9 @@ namespace HcomDiagUi
         }
 
         //-------------------------------------------------------------------------------
+        // RJCP
+        // public SerialPortStream SerialPort { get => _serialPort; set => _serialPort = value; }
+        // .Net
         public SerialPort SerialPort { get => _serialPort; set => _serialPort = value; }
 
 
@@ -381,6 +390,9 @@ namespace HcomDiagUi
             try
             {
                 // Create a new SerialPort object with default settings.
+                // RJCP
+                //_serialPort = new SerialPortStream();
+                // .Net
                 _serialPort = new SerialPort();
                 _serialPort.PortName = portName;
                 _serialPort.BaudRate = 115200;       // This value is ignored when using ACM

@@ -136,7 +136,7 @@ namespace HcomDiagUi
                     break;
 
                 case MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER:
-                    commandName = "(internal) indicates EOF for F/S";
+                    commandName = "(internal) indicates EOF for download";
                     commandInfo = "When the CLI has sent all the F/S data for download, this is sent";
                     msgClass = MessageClasses.Header;
                     procState = CurrentProcState.Normal;

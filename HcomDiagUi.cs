@@ -128,7 +128,7 @@ namespace HcomDiagUi
         }
 
         //---------------------------------------------------------
-
+        // This call uses the UI thread for the textbox
         internal void WriteSendRecvSafe(string text)
         {
             if (sendRecvTextBox.InvokeRequired)

@@ -56,7 +56,7 @@ namespace HcomDiagUi
             //uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]Step #1 Send 'Start' msg to Meadow");
 
             // This is the start of a download. Meadow will respond with a go/no go reply
-            sendSerialComms.BuildAndSendFileDnldCommand(requestType, userData,
+            sendSerialComms.BuildAndSendF7FileDnldCommand(requestType, userData,
                 0, fileSize, _packetCrc32, espAddress, md5Hash, meadowFileName);
         }
 
@@ -138,24 +138,30 @@ namespace HcomDiagUi
                 byte[] dataBuff = new byte[Protocol.HCOM_PROTOCOL_PACKET_MAX_SIZE - 2];
                 int bytesRead;
 
-                do
+                // While data send data packets, previous sent an extra
+                // data packet
+                while (true)
                 {
                     // Did user cancel?
-                    if(_commsMgr.IsCancelSendingSet())
+                    if (_commsMgr.IsCancelSendingSet())
                         return;
 
                     bytesRead = fs.Read(dataBuff, 0, dataBuff.Length);
+                    if (bytesRead <= 0)
+                        break;
+
                     sendSerialComms.BuildAndSendBinPacket(dataBuff, 0, bytesRead, seqNumb);
+                    //uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Sent data packet {seqNumb}");
                     seqNumb++;
                 }
-                while (bytesRead > 0);
             }
 
             //--------------------------------------------------------------
             // 4. Send the End message to Meadow so it can close the file and cleanup
-            Thread.Sleep(500);  // Brief pause
-
             //uiSupport.WriteSendRecvTimeLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Sending End msg to Meadow after {seqNumb} data packets");
+
+            // Note: This is no longer needed, but left to simulate current
+            // CLI behavior.
             sendSerialComms.BuildAndSendHdrMessage(MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER, 0, 0);
 
             _isFileDnldActive = false;
