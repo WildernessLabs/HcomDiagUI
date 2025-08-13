@@ -59,7 +59,7 @@ namespace HcomDiagUi
             return _hcomUiForm.SendIterations;
         }
 
-        // These support the UI
+        // These support the Status TextBox
         //---------------------------------------------
         public void WriteDebugLine(string text)
         {
@@ -87,6 +87,7 @@ namespace HcomDiagUi
             _hcomUiForm.WriteStatusSafe(sb.ToString());
         }
 
+        // These support the Send/Receive TextBox
         //---------------------------------------------
         public void WriteSendRecv(string text)
         {

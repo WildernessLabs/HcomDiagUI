@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO.Ports;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.InteropServices;
+// RJCP
+// using RJCP.IO.Ports;
+// .Net
+using System.IO.Ports;
 
 namespace HcomDiagUi
 {
@@ -13,23 +16,27 @@ namespace HcomDiagUi
         CommsManager _commsMgr;
         UiSupport _uiSupport;
         int _protocolHdrSize;
+        CircularBuffer _msgCirBuffer;
 
         public bool Verbose { get; set; }
 
         //==========================================================================
         // Constructor
-        public SendSerialComms(CommsManager commsMgr, UiSupport uiSupport)
+        public SendSerialComms(CommsManager commsMgr, UiSupport uiSupport, CircularBuffer circularBuffer)
         {
 		    _uiSupport = uiSupport;
             _commsMgr = commsMgr;
+            _msgCirBuffer = circularBuffer;
+
+            Verbose = false;
 
             // Save this often used value
             _protocolHdrSize = Marshal.SizeOf(typeof(HcomProtoHdrMessage));
         }
 
         //==========================================================================
-        // This is used for starting a file download.
-        internal void BuildAndSendFileDnldCommand(MeadowRqstType requestType,
+        // This is used for starting a F7 file download.
+        internal void BuildAndSendF7FileDnldCommand(MeadowRqstType requestType,
             UInt32 userData, UInt16 extraData, UInt32 fileSize, UInt32 fileCheckSum,
             UInt32 mcuAddr, string md5Hash, string destFileName)
         {
@@ -41,7 +48,7 @@ namespace HcomDiagUi
                 extraData = extraData,
                 userData = userData,
 
-                // Non-standard header information follows
+                // Non-standard header file information follows
                 fileSize = fileSize,
                 fileCheckSum = fileCheckSum,
                 esp32FlashAddr = mcuAddr,
@@ -72,7 +79,8 @@ namespace HcomDiagUi
 
             EncodeAndSendPacket(msgBuffer, requestType, totalMsgLen);
 
-            _uiSupport.WriteSendRecvTimeLine($"Sent file start msg {requestType}");
+            int cachedByteCount = _msgCirBuffer.GetCachedByteCount();
+            _uiSupport.WriteSendRecvTimeLine($"Sent 'Start Dnld msg' {requestType}, {totalMsgLen} bytes (cached {cachedByteCount})");
         }
 
         //==========================================================================
@@ -311,6 +319,10 @@ namespace HcomDiagUi
                 {
                     // This is the normal method
                     _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
+                    
+                    // RJCP Only
+                    // Don't return till everything is sent, new with RJCP version
+                    // _commsMgr.SerialPort.Flush();
 
                     // Try sending 1 byte at a time in loop. This turns out to be
                     // super slow but it may reveal timing issues.
@@ -381,7 +393,10 @@ namespace HcomDiagUi
                 // DID YOU RESTART MEADOW and break connection?
                 // This should drop the connection and retry
                 Debug.WriteLine($"EncodeAndSendPacket threw: {except}");
-                Thread.Sleep(500);    // Place for break point
+                while (true)    // So UI keeps working after error
+                {
+                    Thread.Sleep(500);  // Place for break point
+                }
                 throw;
             }
             //finally
