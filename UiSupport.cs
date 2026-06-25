@@ -59,7 +59,7 @@ namespace HcomDiagUi
             return _hcomUiForm.SendIterations;
         }
 
-        // These support the Status TextBox
+        // These support the UI
         //---------------------------------------------
         public void WriteDebugLine(string text)
         {
@@ -87,7 +87,6 @@ namespace HcomDiagUi
             _hcomUiForm.WriteStatusSafe(sb.ToString());
         }
 
-        // These support the Send/Receive TextBox
         //---------------------------------------------
         public void WriteSendRecv(string text)
         {
@@ -180,10 +179,10 @@ namespace HcomDiagUi
             RecvHexChecked = @checked;
         }
 
-        internal void SendButtonEnable(bool sendEnabled)
+        //---------------------------------------------
+        public void SendButtonEnable(bool enabled)
         {
-            // I don't think I need this anymore
-            // _hcomUiForm.sendButtonEnabled(sendEnabled);
+            _hcomUiForm.sendButtonEnabled(enabled);
         }
     }
 }

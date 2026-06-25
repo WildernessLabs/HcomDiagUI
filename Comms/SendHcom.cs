@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO.Ports;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.InteropServices;
-// RJCP
-// using RJCP.IO.Ports;
-// .Net
-using System.IO.Ports;
 
 namespace HcomDiagUi
 {
@@ -16,30 +13,28 @@ namespace HcomDiagUi
         CommsManager _commsMgr;
         UiSupport _uiSupport;
         int _protocolHdrSize;
-        CircularBuffer _msgCirBuffer;
 
         public bool Verbose { get; set; }
 
         //==========================================================================
         // Constructor
-        public SendSerialComms(CommsManager commsMgr, UiSupport uiSupport, CircularBuffer circularBuffer)
+        public SendSerialComms(CommsManager commsMgr, UiSupport uiSupport)
         {
 		    _uiSupport = uiSupport;
             _commsMgr = commsMgr;
-            _msgCirBuffer = circularBuffer;
-
-            Verbose = false;
 
             // Save this often used value
             _protocolHdrSize = Marshal.SizeOf(typeof(HcomProtoHdrMessage));
         }
 
         //==========================================================================
-        // This is used for starting a F7 file download.
-        internal void BuildAndSendF7FileDnldCommand(MeadowRqstType requestType,
+        // This is used for starting a file download.
+        internal void BuildAndSendFileRelatedCommand(MeadowRqstType requestType,
             UInt32 userData, UInt16 extraData, UInt32 fileSize, UInt32 fileCheckSum,
             UInt32 mcuAddr, string md5Hash, string destFileName)
         {
+            _uiSupport.WriteDebugLine($"Entered BuildAndSendFileRelatedCommand with fileSize {fileSize}, CRC {fileCheckSum}");
+
             var hcomFsStartCmdMsg = new HcomProtoFSInfoMsg
             {
                 seqNumber = 0,
@@ -48,7 +43,7 @@ namespace HcomDiagUi
                 extraData = extraData,
                 userData = userData,
 
-                // Non-standard header file information follows
+                // Non-standard header information follows
                 fileSize = fileSize,
                 fileCheckSum = fileCheckSum,
                 esp32FlashAddr = mcuAddr,
@@ -77,10 +72,7 @@ namespace HcomDiagUi
             _ = Encoding.ASCII.GetBytes(destFileName, 0, encodedFileNameLen,
                 msgBuffer, fsInfoHdrSize);
 
-            EncodeAndSendPacket(msgBuffer, requestType, totalMsgLen);
-
-            int cachedByteCount = _msgCirBuffer.GetCachedByteCount();
-            _uiSupport.WriteSendRecvTimeLine($"Sent 'Start Dnld msg' {requestType}, {totalMsgLen} bytes (cached {cachedByteCount})");
+            EncodeAndSendPacket(msgBuffer, totalMsgLen);
         }
 
         //==========================================================================
@@ -88,7 +80,7 @@ namespace HcomDiagUi
         internal void BuildAndSendTextMsg(MeadowRqstType requestType,
             UInt32 userData, UInt16 extraData, string textData)
         {
-            _uiSupport.WriteDebugLine($"--> Sending Text Data:{textData}");
+            // _uiSupport.WriteDebugLine($"--> Sending Text Data:{textData}");
 
             var hcomHdrMsg = new HcomProtoHdrMessage();
             hcomHdrMsg.stdHeader.seqNumber = 0;
@@ -113,7 +105,7 @@ namespace HcomDiagUi
             // Encode and copy the text to the buffer
             _ = Encoding.ASCII.GetBytes(textData, 0, textData.Length, msgBuffer, _protocolHdrSize);
 
-            EncodeAndSendPacket(msgBuffer, requestType, totalSize);
+            EncodeAndSendPacket(msgBuffer, totalSize);
         }
 
         //==========================================================================
@@ -136,7 +128,7 @@ namespace HcomDiagUi
 
                 //_uiSupport.WriteDebugLine($"seq {seqNumb}, len {seqBytes.Length}, totSize {totalSize}, msgSz {binDataSize}, msgLen {binDataBytes.Length}");
 
-                EncodeAndSendPacket(msgBuffer, 0, totalSize);
+                EncodeAndSendPacket(msgBuffer, totalSize);
             }
             catch (Exception except)
             {
@@ -157,7 +149,6 @@ namespace HcomDiagUi
             hdrMsg.stdHeader.extraData = extraData;
             hdrMsg.stdHeader.userData = userData;
 
-            _uiSupport.WriteDebugLine($"--> Sending Header Message RqstType:{requestType}");
             MeadowRqstData rqstData;
             rqstData = ProtocolHelper.DecodeMsgToMeadow(requestType);
 
@@ -181,7 +172,7 @@ namespace HcomDiagUi
             Marshal.Copy(tempBuf, msgBuffer, 0, _protocolHdrSize);
             Marshal.FreeHGlobal(tempBuf);
 
-            EncodeAndSendPacket(msgBuffer, requestType, _protocolHdrSize);
+            EncodeAndSendPacket(msgBuffer, _protocolHdrSize);
         }
 
         //==========================================================================
@@ -227,7 +218,7 @@ namespace HcomDiagUi
 
             Debug.WriteLine($"Non-encoded Message Hex:'{BitConverter.ToString(msgBuffer)}'");
 
-            EncodeAndSendPacket(msgBuffer, requestType, totalSize);
+            EncodeAndSendPacket(msgBuffer, totalSize);
         }
 
         //==========================================================================
@@ -250,18 +241,16 @@ namespace HcomDiagUi
 
         //==========================================================================
         // Last stop before transmitting information
-        // Note: Ultimately this format should be replaced in favor of a standard header
-        private void EncodeAndSendPacket(byte[] messageBytes, MeadowRqstType requestType, int messageSize, int messageOffset = 0)
+        // Note: Ultimately this format should be eleminated in favor of a standard header
+        private void EncodeAndSendPacket(byte[] messageBytes, int messageSize, int messageOffset = 0)
         {
-            //Monitor.Enter(serialWriteLock);
             try
             {
                 int encodedToSend;
                 byte[] encodedBytes;
 
                 // For file download this is a LOT of messages
-                //_uiSupport.WriteDebugLine($"[{Thread.CurrentThread.ManagedThreadId}]==>Sending packet with {messageSize} bytes");
-                //_uiSupport.WriteSendRecvTimeLine($"Entered EncodeAndSendPacket {messageSize}");
+                // _uiSupport.WriteDebugLine($"Sending packet with {messageSize} bytes");
 
                 // For testing calculate the crc including the sequence number
                 //_packetCrc32 = NuttxCrc.Crc32part(messageBytes, messageSize, 0, _packetCrc32);
@@ -276,6 +265,7 @@ namespace HcomDiagUi
                         ref encodedBytes, 1);
 
                     // DEBUG TESTING
+                    // HOW BIG MUST THE BUFFER BE FOR 4094 BYTE FILE SIZE
                     if(encodedToSend == -1)
                     {
                         _uiSupport.WriteDebugLine($"Error - encodedToSend == -1");
@@ -305,7 +295,10 @@ namespace HcomDiagUi
                     encodedToSend++;
                     encodedBytes[encodedToSend] = 0;    // End delimiter
                     encodedToSend++;
-                    // Debug.WriteLine($"COBS-encoded Message Hex:'{BitConverter.ToString(encodedBytes, 0, encodedToSend)}'");
+#if DEBUG
+                    Debug.WriteLine($"COBS-encoded Message Hex:'{BitConverter.ToString(encodedBytes, 0, encodedToSend)}'");
+#endif
+
                 }
                 catch (Exception encodedBytesEx)
                 {
@@ -317,43 +310,8 @@ namespace HcomDiagUi
 
                 try
                 {
-                    // This is the normal method
-                    _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
-                    
-                    // RJCP Only
-                    // Don't return till everything is sent, new with RJCP version
-                    // _commsMgr.SerialPort.Flush();
-
-                    // Try sending 1 byte at a time in loop. This turns out to be
-                    // super slow but it may reveal timing issues.
-                    // for (int i = 0; i < encodedToSend; i++)
-                    // {
-                    //     _commsMgr.SerialPort.Write(encodedBytes, i, 1);
-                    // }
-
                     // Send the data to Meadow
-                    // if(encodedToSend == 80)
-                    // 0x0201 is START FILE TRANSFER
-                    //if((ushort)requestType == (ushort)MeadowRqstType.HCOM_MDOW_REQUEST_START_FILE_TRANSFER)
-                    //{
-                    //    _uiSupport.WriteSendRecvTimeLine($"Sending {encodedToSend} bytes to Meadow");
-                    //    _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
-                    //    _uiSupport.WriteSendRecvTimeLine($"Sent {encodedToSend} bytes to Meadow");
-                    //}
-                    //else
-                    //{
-                    //    _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
-                    //}
-                    //int bytes2Write;
-
-                    // This doesn't help it always shows 0 bytes to write
-                    //do
-                    //{
-                    //    _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
-                    //    //bytes2Write = _commsMgr.SerialPort.BytesToWrite;
-                    //    // _uiSupport.WriteSendRecvTimeLine($"Still {_commsMgr.SerialPort.BytesToWrite} bytes to Write");
-
-                    //} while (_commsMgr.SerialPort.BytesToWrite > 0);
+                    _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
                 }
                 catch (InvalidOperationException ioe)  // Port not opened
                 {
@@ -383,26 +341,22 @@ namespace HcomDiagUi
                     Thread.Sleep(500);    // Place for break point
                     throw;
                 }
-                //finally
-                //{
-                //    _uiSupport.WriteSendRecvTimeLine($"Exiting EncodeAndSendPacket");
-                //}
+                catch (Exception otherExcept) // Took too long to send
+                {
+                    string msg = string.Format("Generic exception: {0}", otherExcept);
+                    _uiSupport.WriteStatus(msg);
+                    Thread.Sleep(500);    // Place for break point
+                    throw;
+                }
             }
             catch (Exception except)
             {
-                // DID YOU RESTART MEADOW and break connection?
+                // DID YOU RESTART MEADOW?
                 // This should drop the connection and retry
                 Debug.WriteLine($"EncodeAndSendPacket threw: {except}");
-                while (true)    // So UI keeps working after error
-                {
-                    Thread.Sleep(500);  // Place for break point
-                }
+                Thread.Sleep(500);    // Place for break point
                 throw;
             }
-            //finally
-            //{
-            //    Monitor.Exit(serialWriteLock);
-            //}
         }
     }
 

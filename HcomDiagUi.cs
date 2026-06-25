@@ -203,6 +203,8 @@ namespace HcomDiagUi
 
             // Tell the communication manager we have work to do
             _commsManager.BuildMsgToSend();
+
+            // _uiSupport.WriteDebugLine("==> UI Thread back home.");
         }
 
         private void commandListBox_SelectedIndexChanged(object sender, EventArgs e)

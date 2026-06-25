@@ -9,7 +9,7 @@ namespace HcomDiagUi
     // This circular buffer was written for the Meadow F7. Unlike the classic
     // version, this version has a byte array as input (received data) and
     // returns a byte array consisting of everything from the head to the
-    // first delimiter found (0). It's designed to work with the COBS
+    // first byte whose value is 0. It's designed to work with the COBS
     // encoding scheme.
     public enum HcomBufferReturn
     {
@@ -62,28 +62,6 @@ namespace HcomDiagUi
                 return tail - head - 1;
             else
                 return ((top - bottom) - (head - tail)) - 1;
-        }
-
-        //------------------------------------------------------------------------------
-        /// <summary>
-        /// Returns the number of bytes currently cached in the circular buffer
-        /// </summary>
-        /// <returns>Number of bytes available to read from the buffer</returns>
-        public int GetCachedByteCount()
-        {
-            lock (bufferLock)
-            {
-                if (head >= tail)
-                {
-                    // Simple case (no wrap around) or buffer is empty
-                    return head - tail;
-                }
-                else
-                {
-                    // Wrap around case
-                    return (top - tail) + (head - bottom);
-                }
-            }
         }
 
         //------------------------------------------------------------------------------
