@@ -19,6 +19,14 @@ namespace HcomDiagUi
         UiSupport _uiSupport;
         int _hcomHdrLen;
         Thread thread;
+
+        // The port this receiver was created for. Captured so that after a
+        // reconnect an old receiver never reads from the new port.
+        readonly SerialPort _serialPort;
+
+        // Set by Shutdown() so the read task and processing thread exit and
+        // an intentional close is not mistaken for a dropped connection.
+        volatile bool _stopping;
         readonly AutoResetEvent dataAddedEvent = new AutoResetEvent(false);
 
         CircularBuffer msgCirBuffer;
@@ -38,6 +46,7 @@ namespace HcomDiagUi
         {
             _uiSupport = uiSupport;
             _commsMgr = commsMgr;
+            _serialPort = commsMgr.SerialPort;
 
             _hcomHdrLen = Protocol.HcomProtoHdrMessageSize();
 
@@ -57,7 +66,9 @@ namespace HcomDiagUi
             msgCirBuffer.Init(Protocol.HCOM_PROTOCOL_ENCODED_MAX_SIZE * 8, _uiSupport); 
 
             // Start thread to processed received data
+            // Background so it never keeps the process alive after the form closes
             thread = new Thread(new ThreadStart(PullAndProcessThread));
+            thread.IsBackground = true;
             thread.Start();
 
             // Start receiving from meadow
@@ -68,11 +79,15 @@ namespace HcomDiagUi
         internal void Close()
         {
             //streamWriter.Close();
-            _commsMgr.SerialPort.Close();
+            _serialPort.Close();
         }
 
+        // Stops the read task and processing thread. Does not wait for them,
+        // since the processing thread may be blocked in a UI Invoke.
         public void Shutdown()
         {
+            _stopping = true;
+            dataAddedEvent.Set();   // Wake the processing thread so it can exit
             Close();
         }
 
@@ -81,24 +96,28 @@ namespace HcomDiagUi
         private async Task ReadPortAsync()
         {
             byte[] buffer = new byte[512];
-            while(!_commsMgr.SerialPort.IsOpen)
+            while(!_serialPort.IsOpen && !_stopping)
             {
                 Thread.Sleep(50);
             }
 
             try
             {
-                while (true)
+                while (!_stopping)
                 {
-                    //var byteCount = Math.Min(_commsMgr.SerialPort.BytesToRead, buffer.Length);
+                    //var byteCount = Math.Min(_serialPort.BytesToRead, buffer.Length);
                     var byteCount = buffer.Length;
                     if (byteCount > 0)
                     {
-                        var receivedLength = await _commsMgr.SerialPort.BaseStream.ReadAsync(buffer, 0, byteCount).ConfigureAwait(false);
+                        var receivedLength = await _serialPort.BaseStream.ReadAsync(buffer, 0, byteCount).ConfigureAwait(false);
                         AddAndProcessData(buffer, receivedLength);
                     }
                     await Task.Delay(1).ConfigureAwait(false);
                 }
+            }
+            catch (Exception) when (_stopping)
+            {
+                // Port closed by Shutdown(); not a dropped connection
             }
             catch (ThreadAbortException tae)
             {
@@ -145,6 +164,8 @@ namespace HcomDiagUi
                     // to wait for a few packets to be processed and then retry to
                     // add this data
                     dataAddedEvent.Set(); // wake up display thread if sleeping
+                    if (_stopping)
+                        break;
                     Thread.Sleep(250);
                     continue;
                 }
@@ -171,6 +192,8 @@ namespace HcomDiagUi
             {
                 // Wait to be signaled that something is ready
                 dataAddedEvent.WaitOne();
+                if (_stopping)
+                    break;
 
                 bufReturn = PullAndProcessAllPackets();
                 if(bufReturn != HcomBufferReturn.CIR_BUF_GET_NONE_FOUND)

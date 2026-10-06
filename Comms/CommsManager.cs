@@ -36,6 +36,15 @@ namespace HcomDiagUi
         bool _cancelSending;
         ManualResetEventSlim _concludedRecvdEvent;
 
+        // Serializes Connect, Disconnect and ReOpenSerialPort, which run on
+        // the UI thread and the receive task respectively. The generation is
+        // bumped on every Connect/Disconnect so an in-progress reopen loop can
+        // tell that the user has since taken over the connection. Never make a
+        // synchronous UI call (Invoke) while holding this lock: the UI thread
+        // may be blocked waiting for it.
+        readonly object _portLock = new object();
+        int _connectionGeneration;
+
         RecvSerialComms _recvSerialComms;
         SendSerialComms _sendSerialComms;
         NormalRcvdProc _recvNormalMsgs;
@@ -50,27 +59,104 @@ namespace HcomDiagUi
             _hcomUiForm = hcomUiForm;
             _uiSupport = _hcomUiForm.UiSupport;
 
-            // Create the serial port and Receiver and Sender
-            _serialPort = new SerialPort();
-
             // Initially nosignaled
             _concludedRecvdEvent = new ManualResetEventSlim();
 
-            // Read the serial port name and open the serial port
-            _serialPortName = _hcomUiForm.ReadPortName();
-            bool result = OpenSerialPort(_serialPortName);
-            if (result)
-                _uiSupport.WriteStatusLine($"Com Port '{_serialPortName}' opened successfully");
-            else
-                _uiSupport.WriteStatusLine($"Com Port '{_serialPortName}' failed to open");
+            // The serial port is not opened here. The UI calls Connect() once
+            // the user (or the remembered setting) has chosen a port.
+        }
 
-            // Port opened so we can proceed
+        //-------------------------------------------------------------------------------
+        public string PortName => _serialPortName;
+        public bool IsConnected => _serialPort != null && _serialPort.IsOpen;
+
+        //-------------------------------------------------------------------------------
+        // Open the named port and start the receive/process handlers. Any
+        // existing connection is closed first. Called on the UI thread.
+        public bool Connect(string portName)
+        {
+            bool connected;
+
+            lock (_portLock)
+            {
+                _connectionGeneration++;
+                CloseConnection();
+
+                _serialPortName = portName;
+                connected = OpenSerialPort(portName);
+                if (connected)
+                {
+                    ClearCancelSending();
+                    CreateHandlers();
+                }
+            }
+
+            if (connected)
+                _uiSupport.WriteStatusLine($"Com Port '{portName}' opened successfully");
+            else
+                _uiSupport.WriteStatusLine($"Com Port '{portName}' failed to open");
+
+            _hcomUiForm.ShowConnectionStateSafe();
+            return connected;
+        }
+
+        //-------------------------------------------------------------------------------
+        // Called on the UI thread
+        public void Disconnect()
+        {
+            bool wasConnected;
+
+            lock (_portLock)
+            {
+                _connectionGeneration++;
+                wasConnected = IsConnected;
+                CloseConnection();
+            }
+
+            // Release a send that is blocked waiting for a 'Concluded' message
+            // that can no longer arrive.
+            SetCancelSending();
+            CommandHasConcluded();
+
+            if (wasConnected)
+                _uiSupport.WriteStatusLine($"Com Port '{_serialPortName}' closed");
+
+            _hcomUiForm.ShowConnectionStateSafe();
+        }
+
+        //-------------------------------------------------------------------------------
+        // Caller must hold _portLock
+        void CreateHandlers()
+        {
             _recvSerialComms = new RecvSerialComms(this, _uiSupport);
             _sendSerialComms = new SendSerialComms(this, _uiSupport);
             _recvNormalMsgs = new NormalRcvdProc(this, _uiSupport);
             _recvUploadMsgs = new UploadProcessing(this, _uiSupport);
             _recvF7DownloadMsgs = new DnldF7Files(this, _uiSupport, _sendSerialComms);
             _recvEspDownloadMsgs = new DnldEsp32Files(this, _uiSupport);
+        }
+
+        //-------------------------------------------------------------------------------
+        // Stop the receive handlers and close the port. Caller must hold _portLock
+        void CloseConnection()
+        {
+            if (_recvSerialComms != null)
+            {
+                _recvSerialComms.Shutdown();
+                _recvSerialComms = null;
+            }
+
+            if (_serialPort != null)
+            {
+                try
+                {
+                    _serialPort.Close();
+                }
+                catch (IOException)
+                {
+                    // The device may already be gone (e.g. Meadow reset)
+                }
+            }
         }
 
         //=======================================================================
@@ -290,13 +376,9 @@ namespace HcomDiagUi
         }
 
         //-------------------------------------------------------------------------------
-        // Called when port name changes
-        public void UpdateSerialPortName()
-        {
-            _serialPortName = _hcomUiForm.ReadPortName();
-        }
-
-        //-------------------------------------------------------------------------------
+        // Called from the receive task when the connection drops (e.g. Meadow
+        // reset). Retries the same port for up to reSeconds. Gives up early if
+        // the user connects or disconnects in the meantime.
         public bool ReOpenSerialPort(int reSeconds)
         {
             const int sleepTimeMs = 100;
@@ -304,44 +386,50 @@ namespace HcomDiagUi
             const int MsPerSec = 1000;
             int sleepConst = MsPerSec / sleepTimeMs;
             int totalTryCount = reSeconds * sleepConst;
+            int generation;
+
+            lock (_portLock)
+            {
+                generation = _connectionGeneration;
+                CloseConnection();
+            }
+            _hcomUiForm.ShowConnectionStateSafe();
 
             for(int i = 0; i < totalTryCount; i++)
             {
-                _serialPort.Close();
+                bool successOpen;
 
-                UpdateSerialPortName();
-
-                bool successOpen = OpenSerialPort(_serialPortName, true);
-                if(successOpen)
+                lock (_portLock)
                 {
-                    // Port opened so we can proceed
-                    _recvSerialComms = null;
-                    _sendSerialComms = null;
-                    _recvNormalMsgs = null;
-                    _recvUploadMsgs = null;
-                    _recvF7DownloadMsgs = null;
-                    _recvEspDownloadMsgs = null;
+                    if (generation != _connectionGeneration)
+                        return false;
 
-                    Thread.Sleep(100);  // Let GC catchup
+                    successOpen = OpenSerialPort(_serialPortName, true);
+                    if(successOpen)
+                    {
+                        // Port opened so we can proceed
+                        CreateHandlers();
+                    }
+                }
 
-                    _recvSerialComms = new RecvSerialComms(this, _uiSupport);
-                    _sendSerialComms = new SendSerialComms(this, _uiSupport);
-                    _recvNormalMsgs = new NormalRcvdProc(this, _uiSupport);
-                    _recvUploadMsgs = new UploadProcessing(this, _uiSupport);
-                    _recvF7DownloadMsgs = new DnldF7Files(this, _uiSupport, _sendSerialComms);
-                    _recvEspDownloadMsgs = new DnldEsp32Files(this, _uiSupport);
-
+                if (successOpen)
+                {
                     string msg = string.Format($"Serial Port:{_serialPortName} reopened\n");
                     _uiSupport.WriteStatusLine(msg);
+                    _hcomUiForm.ShowConnectionStateSafe();
                     return true;
                 }
                 Thread.Sleep(sleepTimeMs);
             }
+
+            _uiSupport.WriteStatusLine($"Serial Port:{_serialPortName} could not be reopened after {reSeconds} seconds");
             return false;
         }
 
         //-------------------------------------------------------------------------------
-        public bool OpenSerialPort(string portName, bool retrying = false)
+        // Returns false if the port could not be opened; never throws for a
+        // missing or busy port. Status is only reported when not retrying.
+        bool OpenSerialPort(string portName, bool retrying = false)
         {
             _serialPort = null;
             try
@@ -365,19 +453,38 @@ namespace HcomDiagUi
             }
             catch (IOException ioe)
             {
+                _serialPort = null;
                 if (retrying)
                     return false;
 
-                string msg = string.Format($"The specified port '{0}' could not be found or opened. {1}Exception:'{2}'",
-                    portName, Environment.NewLine, ioe);
+                string msg = string.Format("The specified port '{0}' could not be found or opened.{1}Exception:'{2}'{1}",
+                    portName, Environment.NewLine, ioe.Message);
                 _uiSupport.WriteStatus(msg);
-                throw;
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Port exists but another program (e.g. Meadow.CLI) has it open
+                _serialPort = null;
+                if (retrying)
+                    return false;
+
+                string msg = string.Format("The specified port '{0}' is in use by another program.{1}",
+                    portName, Environment.NewLine);
+                _uiSupport.WriteStatus(msg);
+                return false;
             }
             catch (Exception except)
             {
-                string msg = string.Format($"Unknown Open Serial Port exception:{0}", except);
+                // e.g. ArgumentException for an empty or malformed port name
+                _serialPort = null;
+                if (retrying)
+                    return false;
+
+                string msg = string.Format("Unknown Open Serial Port exception:{0}{1}", except,
+                    Environment.NewLine);
                 _uiSupport.WriteStatus(msg);
-                throw;
+                return false;
             }
         }
     }

@@ -30,10 +30,11 @@ namespace HcomDiagUi
         private void InitializeComponent()
         {
             this.sendButton = new System.Windows.Forms.Button();
-            this.comPortTextBox = new System.Windows.Forms.TextBox();
+            this.comPortComboBox = new System.Windows.Forms.ComboBox();
+            this.refreshPortsButton = new System.Windows.Forms.Button();
+            this.connectButton = new System.Windows.Forms.Button();
             this.commandListBox = new System.Windows.Forms.ListBox();
             this.sendRecvTextBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.userDataTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.statusTextBox = new System.Windows.Forms.TextBox();
@@ -50,16 +51,18 @@ namespace HcomDiagUi
             this.execTimeTextBox = new System.Windows.Forms.TextBox();
             this.cancelButton = new System.Windows.Forms.Button();
             this.sendIterationsTextBox = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
             this.sendCountTextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.extraDataTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // sendButton
             // 
-            this.sendButton.Location = new System.Drawing.Point(1075, 386);
+            this.sendButton.Location = new System.Drawing.Point(918, 356);
             this.sendButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.sendButton.Name = "sendButton";
             this.sendButton.Size = new System.Drawing.Size(149, 64);
@@ -68,17 +71,37 @@ namespace HcomDiagUi
             this.sendButton.UseVisualStyleBackColor = true;
             this.sendButton.Click += new System.EventHandler(this.sendButton_Click);
             // 
-            // comPortTextBox
+            // comPortComboBox
             // 
-            this.comPortTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.comPortTextBox.Location = new System.Drawing.Point(11, 62);
-            this.comPortTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.comPortTextBox.Name = "comPortTextBox";
-            this.comPortTextBox.Size = new System.Drawing.Size(172, 41);
-            this.comPortTextBox.TabIndex = 1;
-            this.comPortTextBox.Text = "Com10";
-            this.comPortTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.comPortTextBox.TextChanged += new System.EventHandler(this.comPortTextBox_TextChanged);
+            this.comPortComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.comPortComboBox.FormattingEnabled = true;
+            this.comPortComboBox.Location = new System.Drawing.Point(12, 36);
+            this.comPortComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.comPortComboBox.Name = "comPortComboBox";
+            this.comPortComboBox.Size = new System.Drawing.Size(226, 44);
+            this.comPortComboBox.TabIndex = 1;
+            // 
+            // refreshPortsButton
+            // 
+            this.refreshPortsButton.Location = new System.Drawing.Point(12, 170);
+            this.refreshPortsButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.refreshPortsButton.Name = "refreshPortsButton";
+            this.refreshPortsButton.Size = new System.Drawing.Size(226, 50);
+            this.refreshPortsButton.TabIndex = 26;
+            this.refreshPortsButton.Text = "Scan";
+            this.refreshPortsButton.UseVisualStyleBackColor = true;
+            this.refreshPortsButton.Click += new System.EventHandler(this.refreshPortsButton_Click);
+            // 
+            // connectButton
+            // 
+            this.connectButton.Location = new System.Drawing.Point(11, 102);
+            this.connectButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.connectButton.Name = "connectButton";
+            this.connectButton.Size = new System.Drawing.Size(227, 50);
+            this.connectButton.TabIndex = 27;
+            this.connectButton.Text = "Connect";
+            this.connectButton.UseVisualStyleBackColor = true;
+            this.connectButton.Click += new System.EventHandler(this.connectButton_Click);
             // 
             // commandListBox
             // 
@@ -86,11 +109,11 @@ namespace HcomDiagUi
             this.commandListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.commandListBox.FormattingEnabled = true;
             this.commandListBox.ItemHeight = 36;
-            this.commandListBox.Location = new System.Drawing.Point(235, 24);
+            this.commandListBox.Location = new System.Drawing.Point(264, 24);
             this.commandListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.commandListBox.Name = "commandListBox";
             this.commandListBox.ScrollAlwaysVisible = true;
-            this.commandListBox.Size = new System.Drawing.Size(542, 400);
+            this.commandListBox.Size = new System.Drawing.Size(608, 436);
             this.commandListBox.Sorted = true;
             this.commandListBox.TabIndex = 2;
             this.commandListBox.SelectedIndexChanged += new System.EventHandler(this.commandListBox_SelectedIndexChanged);
@@ -110,22 +133,13 @@ namespace HcomDiagUi
             this.sendRecvTextBox.Size = new System.Drawing.Size(1963, 373);
             this.sendRecvTextBox.TabIndex = 3;
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(19, 24);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(132, 32);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Com Port";
-            // 
             // userDataTextBox
             // 
             this.userDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.userDataTextBox.Location = new System.Drawing.Point(10, 374);
+            this.userDataTextBox.Location = new System.Drawing.Point(16, 397);
             this.userDataTextBox.Margin = new System.Windows.Forms.Padding(1);
             this.userDataTextBox.Name = "userDataTextBox";
-            this.userDataTextBox.Size = new System.Drawing.Size(167, 41);
+            this.userDataTextBox.Size = new System.Drawing.Size(227, 41);
             this.userDataTextBox.TabIndex = 7;
             this.userDataTextBox.Text = "0";
             this.userDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -133,7 +147,7 @@ namespace HcomDiagUi
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(13, 326);
+            this.label3.Location = new System.Drawing.Point(1, 364);
             this.label3.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(140, 32);
@@ -177,11 +191,11 @@ namespace HcomDiagUi
             this.cmdSelTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdSelTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmdSelTextBox.Location = new System.Drawing.Point(1075, 24);
+            this.cmdSelTextBox.Location = new System.Drawing.Point(1115, 24);
             this.cmdSelTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cmdSelTextBox.Name = "cmdSelTextBox";
             this.cmdSelTextBox.ReadOnly = true;
-            this.cmdSelTextBox.Size = new System.Drawing.Size(1943, 41);
+            this.cmdSelTextBox.Size = new System.Drawing.Size(1903, 41);
             this.cmdSelTextBox.TabIndex = 9;
             this.cmdSelTextBox.Text = "Cmd Description";
             // 
@@ -190,18 +204,18 @@ namespace HcomDiagUi
             this.cmdInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdInfoTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmdInfoTextBox.Location = new System.Drawing.Point(1075, 81);
+            this.cmdInfoTextBox.Location = new System.Drawing.Point(1115, 81);
             this.cmdInfoTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cmdInfoTextBox.Multiline = true;
             this.cmdInfoTextBox.Name = "cmdInfoTextBox";
             this.cmdInfoTextBox.ReadOnly = true;
-            this.cmdInfoTextBox.Size = new System.Drawing.Size(918, 269);
+            this.cmdInfoTextBox.Size = new System.Drawing.Size(878, 245);
             this.cmdInfoTextBox.TabIndex = 10;
             // 
             // cmdValueTextBox
             // 
             this.cmdValueTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmdValueTextBox.Location = new System.Drawing.Point(840, 24);
+            this.cmdValueTextBox.Location = new System.Drawing.Point(878, 24);
             this.cmdValueTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cmdValueTextBox.Name = "cmdValueTextBox";
             this.cmdValueTextBox.ReadOnly = true;
@@ -236,7 +250,7 @@ namespace HcomDiagUi
             // msgClassTextBox
             // 
             this.msgClassTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.msgClassTextBox.Location = new System.Drawing.Point(840, 107);
+            this.msgClassTextBox.Location = new System.Drawing.Point(878, 114);
             this.msgClassTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.msgClassTextBox.Name = "msgClassTextBox";
             this.msgClassTextBox.ReadOnly = true;
@@ -268,18 +282,18 @@ namespace HcomDiagUi
             // 
             // execTimeTextBox
             // 
-            this.execTimeTextBox.Location = new System.Drawing.Point(563, 427);
+            this.execTimeTextBox.Location = new System.Drawing.Point(1115, 370);
             this.execTimeTextBox.Margin = new System.Windows.Forms.Padding(1);
             this.execTimeTextBox.Name = "execTimeTextBox";
             this.execTimeTextBox.ReadOnly = true;
-            this.execTimeTextBox.Size = new System.Drawing.Size(273, 38);
+            this.execTimeTextBox.Size = new System.Drawing.Size(264, 38);
             this.execTimeTextBox.TabIndex = 14;
             this.execTimeTextBox.Text = "Execution Time";
             this.execTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(1367, 381);
+            this.cancelButton.Location = new System.Drawing.Point(1640, 356);
             this.cancelButton.Margin = new System.Windows.Forms.Padding(1);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(133, 69);
@@ -290,7 +304,7 @@ namespace HcomDiagUi
             // 
             // sendIterationsTextBox
             // 
-            this.sendIterationsTextBox.Location = new System.Drawing.Point(869, 370);
+            this.sendIterationsTextBox.Location = new System.Drawing.Point(918, 238);
             this.sendIterationsTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.sendIterationsTextBox.Name = "sendIterationsTextBox";
             this.sendIterationsTextBox.Size = new System.Drawing.Size(125, 38);
@@ -298,18 +312,9 @@ namespace HcomDiagUi
             this.sendIterationsTextBox.Text = "1";
             this.sendIterationsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(872, 334);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(131, 32);
-            this.label6.TabIndex = 17;
-            this.label6.Text = "Iterations";
-            // 
             // sendCountTextBox
             // 
-            this.sendCountTextBox.Location = new System.Drawing.Point(869, 427);
+            this.sendCountTextBox.Location = new System.Drawing.Point(918, 288);
             this.sendCountTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.sendCountTextBox.Name = "sendCountTextBox";
             this.sendCountTextBox.ReadOnly = true;
@@ -320,7 +325,7 @@ namespace HcomDiagUi
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 164);
+            this.label8.Location = new System.Drawing.Point(3, 266);
             this.label8.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(147, 32);
@@ -330,10 +335,10 @@ namespace HcomDiagUi
             // extraDataTextBox
             // 
             this.extraDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.extraDataTextBox.Location = new System.Drawing.Point(10, 213);
+            this.extraDataTextBox.Location = new System.Drawing.Point(16, 309);
             this.extraDataTextBox.Margin = new System.Windows.Forms.Padding(1);
             this.extraDataTextBox.Name = "extraDataTextBox";
-            this.extraDataTextBox.Size = new System.Drawing.Size(165, 41);
+            this.extraDataTextBox.Size = new System.Drawing.Size(227, 41);
             this.extraDataTextBox.TabIndex = 20;
             this.extraDataTextBox.Text = "0";
             this.extraDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -347,6 +352,27 @@ namespace HcomDiagUi
             this.label2.Size = new System.Drawing.Size(886, 32);
             this.label2.TabIndex = 5;
             this.label2.Text = "Meadow:Text, Data, Path Name or CMD Line (e.g. \'ping google.com\') ";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.connectButton);
+            this.groupBox1.Controls.Add(this.comPortComboBox);
+            this.groupBox1.Controls.Add(this.refreshPortsButton);
+            this.groupBox1.Location = new System.Drawing.Point(7, 24);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(251, 239);
+            this.groupBox1.TabIndex = 28;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Comm Port";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(883, 194);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(200, 32);
+            this.label6.TabIndex = 17;
+            this.label6.Text = "Iteration Count";
             // 
             // HcomDiagUiForm
             // 
@@ -375,14 +401,16 @@ namespace HcomDiagUi
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.sendRecvTextBox);
             this.Controls.Add(this.commandListBox);
-            this.Controls.Add(this.comPortTextBox);
             this.Controls.Add(this.sendButton);
+            this.Controls.Add(this.groupBox1);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "HcomDiagUiForm";
             this.Text = "HcomDiagUi";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.HcomDiagUiForm_FormClosing);
+            this.Shown += new System.EventHandler(this.HcomDiagUiForm_Shown);
+            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -391,10 +419,11 @@ namespace HcomDiagUi
         #endregion
 
         private System.Windows.Forms.Button sendButton;
-        private System.Windows.Forms.TextBox comPortTextBox;
+        private System.Windows.Forms.ComboBox comPortComboBox;
+        private System.Windows.Forms.Button refreshPortsButton;
+        private System.Windows.Forms.Button connectButton;
         internal System.Windows.Forms.ListBox commandListBox;
         private System.Windows.Forms.TextBox sendRecvTextBox;
-        private System.Windows.Forms.Label label1;
         internal System.Windows.Forms.TextBox userDataTextBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox statusTextBox;
@@ -411,11 +440,12 @@ namespace HcomDiagUi
         private System.Windows.Forms.TextBox execTimeTextBox;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.TextBox sendIterationsTextBox;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox sendCountTextBox;
         private System.Windows.Forms.Label label8;
         internal System.Windows.Forms.TextBox extraDataTextBox;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label label6;
     }
 }
 

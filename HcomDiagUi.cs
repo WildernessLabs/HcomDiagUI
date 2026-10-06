@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,10 @@ namespace HcomDiagUi
         public string TextForMsg => this.textForMsgTextBox.Text;
         public int SendIterations => int.Parse(this.sendIterationsTextBox.Text);
 
+        // Send is only allowed while connected and no send is in progress
+        bool _connected;
+        bool _sendBusy;
+
         public HcomDiagUiForm()
         {
             InitializeComponent();
@@ -33,16 +38,123 @@ namespace HcomDiagUi
             _uiSupport = new UiSupport(this);
             _uiSupport.PopulateCommandListBox();
             _commsManager = new CommsManager(this);
+
+            RefreshPortList(Properties.Settings.Default.LastComPort);
+            ShowConnectionState();
         }
 
-        private void comPortTextBox_TextChanged(object sender, EventArgs e)
+        //---------------------------------------------------------
+        // Reconnect to the port used last time, if it is present
+        private void HcomDiagUiForm_Shown(object sender, EventArgs e)
         {
-            _commsManager.UpdateSerialPortName();
+            string lastPort = Properties.Settings.Default.LastComPort;
+            if (!string.IsNullOrEmpty(lastPort) &&
+                comPortComboBox.Items.Cast<string>().Contains(lastPort, StringComparer.OrdinalIgnoreCase))
+            {
+                ConnectToSelectedPort();
+            }
+            else
+            {
+                _uiSupport.WriteStatusLine("Not connected. Select a Com Port and press Connect.");
+            }
         }
 
-        internal string ReadPortName()
+        private void HcomDiagUiForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            return this.comPortTextBox.Text;
+            _commsManager.Disconnect();
+        }
+
+        //---------------------------------------------------------
+        // Fill the port list from the ports Windows currently reports.
+        // preferredPort is selected if present, otherwise the current entry
+        // is kept. The combo box stays editable so an unlisted port name can
+        // still be typed in.
+        private void RefreshPortList(string preferredPort = null)
+        {
+            string wanted = string.IsNullOrEmpty(preferredPort) ? comPortComboBox.Text : preferredPort;
+
+            // Sort COM3 before COM10
+            var ports = SerialPort.GetPortNames()
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(p => p.Length)
+                .ThenBy(p => p, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            comPortComboBox.BeginUpdate();
+            comPortComboBox.Items.Clear();
+            comPortComboBox.Items.AddRange(ports);
+            comPortComboBox.EndUpdate();
+
+            int index = Array.FindIndex(ports, p => string.Equals(p, wanted, StringComparison.OrdinalIgnoreCase));
+            if (index >= 0)
+                comPortComboBox.SelectedIndex = index;
+            else if (!string.IsNullOrEmpty(wanted))
+                comPortComboBox.Text = wanted;
+            else if (ports.Length > 0)
+                comPortComboBox.SelectedIndex = 0;
+        }
+
+        private void refreshPortsButton_Click(object sender, EventArgs e)
+        {
+            RefreshPortList();
+        }
+
+        private void connectButton_Click(object sender, EventArgs e)
+        {
+            if (_connected)
+                _commsManager.Disconnect();
+            else
+                ConnectToSelectedPort();
+        }
+
+        private void ConnectToSelectedPort()
+        {
+            string portName = comPortComboBox.Text.Trim();
+            if (portName.Length == 0)
+            {
+                _uiSupport.WriteStatusLine("PLEASE SELECT A COM PORT");
+                return;
+            }
+
+            if (_commsManager.Connect(portName))
+            {
+                Properties.Settings.Default.LastComPort = portName;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        //---------------------------------------------------------
+        // Called by CommsManager from any thread when the connection may have
+        // changed. BeginInvoke (not Invoke) because CommsManager may call this
+        // while the UI thread is waiting on one of its locks. The state is
+        // read when the update runs, so a late update can't show stale state.
+        internal void ShowConnectionStateSafe()
+        {
+            if (InvokeRequired)
+            {
+                if (IsHandleCreated && !IsDisposed)
+                    BeginInvoke(new MethodInvoker(ShowConnectionState));
+            }
+            else
+            {
+                ShowConnectionState();
+            }
+        }
+
+        private void ShowConnectionState()
+        {
+            bool connected = _commsManager.IsConnected;
+
+            _connected = connected;
+            connectButton.Text = connected ? "Disconnect" : "Connect";
+            comPortComboBox.Enabled = !connected;
+            refreshPortsButton.Enabled = !connected;
+            UpdateSendButton();
+        }
+
+        private void UpdateSendButton()
+        {
+            sendButton.Enabled = _connected && !_sendBusy;
         }
 
         //internal string ReadTextInformation()
@@ -231,12 +343,17 @@ namespace HcomDiagUi
         {
             if (sendButton.InvokeRequired)
             {
+                // A send released by Disconnect() while the form is closing
+                if (IsDisposed || !IsHandleCreated)
+                    return;
+
                 var d = new SafeCallDelegateBool(sendButtonEnabled);
                 sendButton.Invoke(d, new object[] { sendEnabled });
             }
             else
             {
-                sendButton.Enabled = sendEnabled;
+                _sendBusy = !sendEnabled;
+                UpdateSendButton();
             }
         }
     }
