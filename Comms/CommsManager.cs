@@ -281,8 +281,12 @@ namespace HcomDiagUi
             // Meadow explains a refused or failed request with an error text
             // (e.g. 'Mono must be disabled for file download'). It is also shown
             // in Send/Received, but there it's easy to miss.
+            // An unknown request (e.g. one removed from Meadow.OS) is answered with
+            // a rejected text
             if (hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_ERROR)
-                ReportMeadowError(messageBuffer, messageLength);
+                ReportMeadowError("error", messageBuffer, messageLength);
+            else if (hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_REJECTED)
+                ReportMeadowError("rejected", messageBuffer, messageLength);
 
             try
             {
@@ -297,7 +301,7 @@ namespace HcomDiagUi
             }
         }
 
-        void ReportMeadowError(byte[] messageBuffer, int messageLength)
+        void ReportMeadowError(string what, byte[] messageBuffer, int messageLength)
         {
             int hdrLen = Protocol.HcomProtoHdrMessageSize();
             string text = messageLength > hdrLen
@@ -306,8 +310,8 @@ namespace HcomDiagUi
 
             string command = _lastCommandName;
             _uiSupport.WriteStatusLine(command == null
-                ? $"Meadow error: {text}"
-                : $"Meadow error ('{command}'): {text}");
+                ? $"Meadow {what}: {text}"
+                : $"Meadow {what} ('{command}'): {text}");
         }
 
         void ForwardToProcessMsgsHelper(HcomProtoHdrMessage hdrMsg, HostRqstData hostRqstData,
