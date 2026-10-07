@@ -12,7 +12,8 @@ WSL/Linux, as a compile check only). The executable is written to
 `bin/Debug/net10.0-windows/HcomDiagUi.exe` and needs the .NET 10 Desktop Runtime.
 
 The form is laid out at 100% scaling and the app runs DPI-unaware (Program.cs).
-When editing the form, run the WinForms Designer at 100% too, otherwise Visual
-Studio re-scales the whole layout to your display's scaling on save. On a scaled
-main display, start Visual Studio with `devenv.exe /noScale` (or use the
-Designer's 'DPI-unaware mode' notice).
+The project forces the WinForms Designer to 100% as well
+(`ForceDesignerDPIUnaware` in HcomDiagUi.csproj), so the layout is not re-scaled
+when the form is saved on a scaled display; Visual Studio's notice about display
+scaling can be ignored. If the app ever reports at startup that the form layout
+was saved at another scaling, revert HcomDiagUi.Designer.cs and redo the edit.

@@ -53,11 +53,28 @@ namespace HcomDiagUi
 
             _uiSupport = new UiSupport(this);
             _uiSupport.ReportCommandTableProblems();
+            ReportLayoutScale();
             _uiSupport.PopulateCommandListBox(showHiddenCommandsCheckBox.Checked);
             _commsManager = new CommsManager(this);
 
             RefreshPortList(Properties.Settings.Default.LastComPort);
             ShowConnectionState();
+        }
+
+        //---------------------------------------------------------
+        // The form layout is stored at 100% scaling (see README 'Building').
+        // If the Designer saved it at another scaling, every position and size
+        // in HcomDiagUi.Designer.cs was re-scaled; say so before it is committed.
+        private void ReportLayoutScale()
+        {
+            var expected = new SizeF(6F, 13F);
+            if (AutoScaleDimensions != expected)
+            {
+                int percent = (int)Math.Round(AutoScaleDimensions.Height / expected.Height * 100);
+                _uiSupport.WriteStatusLine($"Form layout was saved at about {percent}% scaling " +
+                    $"(AutoScaleDimensions {AutoScaleDimensions.Width}x{AutoScaleDimensions.Height}, " +
+                    $"expected 6x13) - see README 'Building'");
+            }
         }
 
         //---------------------------------------------------------
@@ -438,7 +455,7 @@ namespace HcomDiagUi
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
-            _commsManager.SetCancelSending();
+            _commsManager.CancelCommand();
         }
 
         // Prevent double clicking

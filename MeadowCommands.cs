@@ -320,11 +320,11 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR, "File List (CLIv2)",
                 "Returns a list of files and directories in the file system",
-                Send.Text, Uses(text: "Meadow directory (empty = /meadow0)")),
+                Send.Text, Uses(text: "directory, e.g. /meadow0/dir1x/ (must end with '/'; empty = /meadow0/)")),
 
             Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR_CRC, "File List with CRC (CLIv2)",
                 "Returns a list of files and directories with file CRC checksums",
-                Send.Text, Uses(text: "Meadow directory (empty = /meadow0)")),
+                Send.Text, Uses(text: "directory, e.g. /meadow0/dir1x/ (must end with '/'; empty = /meadow0/)")),
 
             Cmd(HCOM_MDOW_REQUEST_MONO_DISABLE, "mono disable",
                 "Prevents mono from running",

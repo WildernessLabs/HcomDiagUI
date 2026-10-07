@@ -12,6 +12,11 @@
          default set in Program.cs, otherwise the Designer re-scales the
          whole form on save and its layout differs from the running app -->
     <ApplicationDefaultFont>Microsoft Sans Serif, 8.25pt</ApplicationDefaultFont>
+    <!-- Run the WinForms Designer at 100% (DPI-unaware) whatever the display
+         scaling, so the form layout stays stored at 100% (AutoScaleDimensions
+         6x13). Without it, saving the form on a scaled main display (e.g. 250%)
+         re-scales every position and size in HcomDiagUi.Designer.cs -->
+    <ForceDesignerDPIUnaware>true</ForceDesignerDPIUnaware>
     <RootNamespace>HcomDiagUi</RootNamespace>
     <AssemblyName>HcomDiagUi</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

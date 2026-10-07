@@ -36,7 +36,7 @@ namespace HcomDiagUi
             if (!File.Exists(sourceFileName))
             {
                 string msgFail = string.Format($"Please enter a valid file name {sourceFileName} doesn't exist.");
-                uiSupport.WriteStatus(msgFail);
+                uiSupport.WriteStatusLine(msgFail);
                 return false;
             }
 
