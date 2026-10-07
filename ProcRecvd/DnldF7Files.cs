@@ -149,6 +149,11 @@ namespace HcomDiagUi
                 // Send the End message
                 sendSerialComms.BuildAndSendHdrMessage(MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER, 0, 0);
             }
+            catch (NotConnectedException)
+            {
+                // Port dropped (e.g. Meadow reset) part way through the download
+                uiSupport.WriteStatusLine($"File download stopped after {seqNumb} packets: Com Port not connected");
+            }
             finally
             {
                 _isFileDnldActive = false;

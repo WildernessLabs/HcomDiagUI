@@ -45,6 +45,9 @@ namespace HcomDiagUi
         readonly object _portLock = new object();
         int _connectionGeneration;
 
+        // True while ReOpenSerialPort is retrying after a dropped connection
+        volatile bool _reconnecting;
+
         RecvSerialComms _recvSerialComms;
         SendSerialComms _sendSerialComms;
         NormalRcvdProc _recvNormalMsgs;
@@ -69,6 +72,7 @@ namespace HcomDiagUi
         //-------------------------------------------------------------------------------
         public string PortName => _serialPortName;
         public bool IsConnected => _serialPort != null && _serialPort.IsOpen;
+        public bool IsReconnecting => _reconnecting;
 
         //-------------------------------------------------------------------------------
         // Open the named port and start the receive/process handlers. Any
@@ -101,15 +105,18 @@ namespace HcomDiagUi
         }
 
         //-------------------------------------------------------------------------------
-        // Called on the UI thread
+        // Called on the UI thread. Also stops an automatic reconnect.
         public void Disconnect()
         {
             bool wasConnected;
+            bool wasReconnecting;
 
             lock (_portLock)
             {
                 _connectionGeneration++;
                 wasConnected = IsConnected;
+                wasReconnecting = _reconnecting;
+                _reconnecting = false;
                 CloseConnection();
             }
 
@@ -120,6 +127,8 @@ namespace HcomDiagUi
 
             if (wasConnected)
                 _uiSupport.WriteStatusLine($"Com Port '{_serialPortName}' closed");
+            else if (wasReconnecting)
+                _uiSupport.WriteStatusLine($"Reconnect to {_serialPortName} stopped");
 
             _hcomUiForm.ShowConnectionStateSafe();
         }
@@ -140,9 +149,18 @@ namespace HcomDiagUi
         // Stop the receive handlers and close the port. Caller must hold _portLock
         void CloseConnection()
         {
+            // Closing a port whose device is already gone (e.g. Meadow reset)
+            // can throw; nothing useful can be done about it here and it must
+            // not stop a reconnect.
             if (_recvSerialComms != null)
             {
-                _recvSerialComms.Shutdown();
+                try
+                {
+                    _recvSerialComms.Shutdown();
+                }
+                catch (Exception)
+                {
+                }
                 _recvSerialComms = null;
             }
 
@@ -152,9 +170,8 @@ namespace HcomDiagUi
                 {
                     _serialPort.Close();
                 }
-                catch (IOException)
+                catch (Exception)
                 {
-                    // The device may already be gone (e.g. Meadow reset)
                 }
             }
         }
@@ -303,6 +320,11 @@ namespace HcomDiagUi
 
             } while (iterations > 0);
             }
+            catch (NotConnectedException)
+            {
+                // Port dropped (e.g. Meadow reset) before or during the send
+                _uiSupport.WriteStatusLine("Send failed: Com Port not connected");
+            }
             finally
             {
                 _uiSupport.Stopwatch.Stop();
@@ -319,6 +341,22 @@ namespace HcomDiagUi
             HostRqstData hostRqstData = ProtocolHelper.GetHostRqstTypeData(hostRqstType);
             _uiSupport.WriteDebugLine($"Received '{hostRqstData.msgComplex}' message");
 
+            try
+            {
+                ForwardToProcessMsgsHelper(hdrMsg, hostRqstData, hostRqstType, messageBuffer,
+                    messageLength, payloadLength);
+            }
+            catch (NotConnectedException)
+            {
+                // A reply (e.g. upload acknowledgement) could not be sent because the
+                // port dropped. Don't let it kill the receive processing thread.
+                _uiSupport.WriteStatusLine($"Reply to '{hostRqstType}' not sent: Com Port not connected");
+            }
+        }
+
+        void ForwardToProcessMsgsHelper(HcomProtoHdrMessage hdrMsg, HostRqstData hostRqstData,
+            HostRqstType hostRqstType, byte[] messageBuffer, int messageLength, uint payloadLength)
+        {
             // Only a few messages are currently complex (i.e. needed 2 or more messages
             // to complete their purpose)
             switch (hostRqstData.msgComplex)
@@ -391,39 +429,60 @@ namespace HcomDiagUi
             lock (_portLock)
             {
                 generation = _connectionGeneration;
+                _reconnecting = true;
                 CloseConnection();
             }
+            _uiSupport.WriteStatusLine($"Reconnecting to {_serialPortName} (up to {reSeconds} s)...");
             _hcomUiForm.ShowConnectionStateSafe();
 
-            for(int i = 0; i < totalTryCount; i++)
-            {
-                bool successOpen;
+            // Release a send that is blocked waiting for a 'Concluded' message
+            // that can no longer arrive.
+            SetCancelSending();
+            CommandHasConcluded();
 
+            try
+            {
+                for(int i = 0; i < totalTryCount; i++)
+                {
+                    bool successOpen;
+
+                    lock (_portLock)
+                    {
+                        // The user pressed Stop (Disconnect) or connected manually
+                        if (generation != _connectionGeneration)
+                            return false;
+
+                        successOpen = OpenSerialPort(_serialPortName, true);
+                        if(successOpen)
+                        {
+                            // Port opened so we can proceed
+                            CreateHandlers();
+                        }
+                    }
+
+                    if (successOpen)
+                    {
+                        string msg = string.Format($"Serial Port:{_serialPortName} reopened\n");
+                        _uiSupport.WriteStatusLine(msg);
+                        return true;
+                    }
+                    Thread.Sleep(sleepTimeMs);
+                }
+
+                _uiSupport.WriteStatusLine($"Serial Port:{_serialPortName} could not be reopened after {reSeconds} seconds");
+                return false;
+            }
+            finally
+            {
+                // Only clear the flag if no newer Connect/Disconnect has taken
+                // over (that may already have started a reconnect of its own).
                 lock (_portLock)
                 {
-                    if (generation != _connectionGeneration)
-                        return false;
-
-                    successOpen = OpenSerialPort(_serialPortName, true);
-                    if(successOpen)
-                    {
-                        // Port opened so we can proceed
-                        CreateHandlers();
-                    }
+                    if (generation == _connectionGeneration)
+                        _reconnecting = false;
                 }
-
-                if (successOpen)
-                {
-                    string msg = string.Format($"Serial Port:{_serialPortName} reopened\n");
-                    _uiSupport.WriteStatusLine(msg);
-                    _hcomUiForm.ShowConnectionStateSafe();
-                    return true;
-                }
-                Thread.Sleep(sleepTimeMs);
+                _hcomUiForm.ShowConnectionStateSafe();
             }
-
-            _uiSupport.WriteStatusLine($"Serial Port:{_serialPortName} could not be reopened after {reSeconds} seconds");
-            return false;
         }
 
         //-------------------------------------------------------------------------------
@@ -450,6 +509,16 @@ namespace HcomDiagUi
                 _serialPort.Open();
 
                 return true;
+            }
+            catch (FileNotFoundException)
+            {
+                // .NET reports a COM port that doesn't exist as "Could not find file"
+                _serialPort = null;
+                if (retrying)
+                    return false;
+
+                _uiSupport.WriteStatusLine($"Com Port '{portName}' not found. Is the Meadow plugged in?");
+                return false;
             }
             catch (IOException ioe)
             {

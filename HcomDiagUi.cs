@@ -29,6 +29,7 @@ namespace HcomDiagUi
 
         // Send is only allowed while connected and no send is in progress
         bool _connected;
+        bool _reconnecting;
         bool _sendBusy;
 
         public HcomDiagUiForm()
@@ -101,7 +102,8 @@ namespace HcomDiagUi
 
         private void connectButton_Click(object sender, EventArgs e)
         {
-            if (_connected)
+            // While reconnecting the button reads "Stop"; Disconnect stops it
+            if (_connected || _reconnecting)
                 _commsManager.Disconnect();
             else
                 ConnectToSelectedPort();
@@ -144,11 +146,13 @@ namespace HcomDiagUi
         private void ShowConnectionState()
         {
             bool connected = _commsManager.IsConnected;
+            bool reconnecting = !connected && _commsManager.IsReconnecting;
 
             _connected = connected;
-            connectButton.Text = connected ? "Disconnect" : "Connect";
-            comPortComboBox.Enabled = !connected;
-            refreshPortsButton.Enabled = !connected;
+            _reconnecting = reconnecting;
+            connectButton.Text = connected ? "Disconnect" : reconnecting ? "Stop" : "Connect";
+            comPortComboBox.Enabled = !connected && !reconnecting;
+            refreshPortsButton.Enabled = !connected && !reconnecting;
             UpdateSendButton();
         }
 
