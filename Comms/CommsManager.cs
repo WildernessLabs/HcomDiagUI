@@ -244,6 +244,13 @@ namespace HcomDiagUi
                     _uiSupport, _sendSerialComms, _recvF7DownloadMsgs);
                 rqstInfo.sender.Send(sendContext);
 
+                // Nothing went to Meadow, so no 'Concluded' will come back
+                if (sendContext.NothingSent)
+                {
+                    _uiSupport.WriteStatusLine($"'{rqstInfo.rqstName}' not sent");
+                    break;
+                }
+
                 // Must consider that some commands return before the command is actually
                 // finished. However, all are expected to send a 'Completed' message.
                 //

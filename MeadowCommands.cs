@@ -18,6 +18,16 @@ namespace HcomDiagUi
         public UInt32 UserData { get; }
         public UInt16 ExtraData { get; }
 
+        // Set by a sender that decided not to send anything (e.g. the host file to
+        // download doesn't exist). Meadow won't reply, so CommsManager must not
+        // wait for a 'Concluded' message.
+        public bool NothingSent { get; private set; }
+
+        public void MarkNothingSent()
+        {
+            NothingSent = true;
+        }
+
         // The 'Meadow: Text, Data, Path Name or CMD Line' field
         public string Text => _uiSupport.TextForMsg();
 
@@ -51,14 +61,41 @@ namespace HcomDiagUi
             _sendSerialComms.BuildAndSendDiagCmdMsg(RqstType, UserData, ExtraData, text);
         }
 
+        // File-info message with only the Meadow file name: size, CRC, ESP32
+        // address and MD5 hash are all zero. Same as Meadow.CLI's FileDeleteRequest.
+        public void SendFileInfoNameOnly(string meadowFileName)
+        {
+            _sendSerialComms.BuildAndSendFileRelatedCommand(RqstType, UserData, ExtraData,
+                0, 0, 0, new string('\0', 32), meadowFileName);
+        }
+
         // Sends the file start message. userData is still sent in the partition
         // field, which Meadow.OS no longer uses (partitioning was dropped; the
         // field is kept so the HCOM protocol doesn't change). Only returns
         // after Meadow has accepted or rejected it; the file data and end message
         // are then sent by a thread pool thread (see DnldF7Files).
+        // With no Meadow file name the host file's name is used, as Meadow.CLI's
+        // 'file write' does.
         public void StartF7FileDownload()
         {
-            _f7Download.FindDownloadFileInformation(RqstType, UserData, Text, HostFile);
+            string hostFile = HostFile;
+            string meadowFileName = Text;
+            if (string.IsNullOrWhiteSpace(meadowFileName))
+            {
+                meadowFileName = HostFileName(hostFile);
+                _uiSupport.WriteStatusLine($"Meadow file name not given, using host file name '{meadowFileName}'");
+            }
+
+            if (!_f7Download.FindDownloadFileInformation(RqstType, UserData, meadowFileName, hostFile))
+                MarkNothingSent();
+        }
+
+        // File name without its folder. Accepts either path separator, so it
+        // doesn't depend on the host OS.
+        static string HostFileName(string hostPath)
+        {
+            int lastSeparator = hostPath.LastIndexOfAny(new[] { '\\', '/' });
+            return hostPath.Substring(lastSeparator + 1).Trim();
         }
     }
 
@@ -151,7 +188,7 @@ namespace HcomDiagUi
     {
         // Sends nothing
         public static readonly CommandSender Nothing =
-            new CommandSender("Nothing", MessageClasses.None, ctx => { });
+            new CommandSender("Nothing", MessageClasses.None, ctx => ctx.MarkNothingSent());
 
         // Header only
         public static readonly CommandSender Header =
@@ -164,6 +201,10 @@ namespace HcomDiagUi
         // Like Text but with the argument list length (diagnostic command line)
         public static readonly CommandSender DiagCmd =
             new CommandSender("DiagCmd", MessageClasses.Text, ctx => ctx.SendDiagCmd(ctx.Text));
+
+        // File-info message carrying only the 'Meadow: Text...' file name
+        public static readonly CommandSender FileInfoNameOnly =
+            new CommandSender("FileInfoNameOnly", MessageClasses.FileInfo, ctx => ctx.SendFileInfoNameOnly(ctx.Text));
 
         // Downloads the 'Host File' to Meadow as the 'Meadow: Text...' file name
         public static readonly CommandSender F7FileDownload =
@@ -203,7 +244,7 @@ namespace HcomDiagUi
 
         static FieldUse Req(string label) => FieldUse.Mandatory(label);
 
-        // Sends the PC's current time instead of the text field
+        // Sends the host's current time instead of the text field
         static readonly CommandSender SendRtcSetTime =
             new CommandSender("RtcSetTime", MessageClasses.Text, ctx =>
             {
@@ -383,11 +424,11 @@ namespace HcomDiagUi
             Cmd(HCOM_MDOW_REQUEST_START_FILE_TRANSFER, "file write",
                 "Downloads a file to the Meadow file system",
                 Send.F7FileDownload,
-                Uses(hostFile: Req("PC file to send"), text: Req("Meadow file name"))),
+                Uses(hostFile: Req("file to send"), text: "Meadow file name (empty = host's file name)")),
 
             Cmd(HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME, "file delete",
                 "Deletes a file by name from the F7 file system",
-                Send.F7FileDownload),    // VERIFY
+                Send.FileInfoNameOnly, Uses(text: Req("Meadow file name"))),
 
             Cmd(HCOM_MDOW_REQUEST_START_ESP_FILE_TRANSFER, "esp file write",
                 "start esp file transfer",
@@ -397,7 +438,7 @@ namespace HcomDiagUi
                 "Initiates reading a file from Meadow. Put host's destination pathname " +
                 "in 'Host File' field and the Meadow path name in the 'File Name' field",
                 Send.Text,
-                Uses(hostFile: Req("PC file to save to"), text: Req("Meadow file name"))),
+                Uses(hostFile: Req("file to save to"), text: Req("Meadow file name"))),
 
             Cmd(HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD, "(new) Send command-line",
                 "Only for Ethernet. Sends command (e.g. ping to web site via IP or name. " +
@@ -406,7 +447,7 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD, "(new) Set RTC clock",
                 "Needs UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25-07:00)",
-                SendRtcSetTime, Uses()),     // Sends the PC's time
+                SendRtcSetTime, Uses()),     // Sends the host's time
 
             Cmd(HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD, "(new) Read RTC clock",
                 "Reads UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25-07:00)",
