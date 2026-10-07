@@ -234,78 +234,11 @@ namespace HcomDiagUi
                 _uiSupport.WriteSendCount(dispCount);
                 iterations--;
 
-                // Pull together the needed information
-                // The message classification determines what needs to be sent
-                switch (rqstInfo.msgClass)
-                {
-                    case MessageClasses.Header:
-                        _sendSerialComms.BuildAndSendHdrMessage(rqstInfo.rqstType, userData, extraData);
-                        break;
-
-                    case MessageClasses.Text:
-                        // Pick up the Text data that is in the UI
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.Text");
-                        if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD)
-                        {
-                            _uiSupport.WriteDebugLine("--> This is the text diagnostic message");
-                            // Special case for of text message that includes a field for the number
-                            // of arguments in the text.
-                            _sendSerialComms.BuildAndSendDiagCmdMsg(rqstInfo.rqstType, userData, extraData,
-                                _uiSupport.TextForMsg());
-                        }
-                        else if (rqstInfo.rqstType == MeadowRqstType.HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD)
-                        {
-                            _uiSupport.WriteDebugLine("--> This is Set Time text msg");
-                            // For setting the time we'll read the time and send it immediately
-                            // Special text - build and format current time as UTC
-                            // Since NTP provides time in UTC we'll do the same
-                            // Using UtcNow, the formats are:
-                            // 's' = 2022-04-01T21:34:05
-                            // 'o' = 2022-04-01T21:35:03.9174375+00:00
-                            // 'u' = 2022-04-01 21:35:31Z - Notice no 'T' but a space
-                            // Using Now (local time in Pacific timezone with DST true), the formats are:
-                            // 's' = 2022-04-01T14:37:34
-                            // 'o' = 2022-04-01T14:38:25.1838288-07:00
-                            // 'u' = 2022-04-01 21:38:59Z - Notice UTC time & no 'T'
-                            //
-                            var timeStringUtc = DateTimeOffset.UtcNow.ToString("o");
-                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
-                                      timeStringUtc);
-
-                            // Send local time (both UTC and local can be sent at the same time)
-                            //var timeString = DateTimeOffset.Now.ToString("o");
-                            //_sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData,
-                            //          timeString);
-                        }
-                        else
-                        {
-                            // Normal case UserTextBox string is sent
-                            _sendSerialComms.BuildAndSendTextMsg(rqstInfo.rqstType, userData, extraData,
-                                _uiSupport.TextForMsg());
-                        }
-                        break;
-
-                    case MessageClasses.Binary:
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.Binary");
-                        break;
-
-                    case MessageClasses.FileInfo:
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.FileInfo");
-                        // Need to initiate a file download (userData is partition). Note: This returns
-                        // after only sending the start download message and receiving a response.
-                        // After this a thread pool thread is used for the execution of actual data
-                        // and end message download.
-                        _recvF7DownloadMsgs.FindDownloadFileInformation(rqstInfo.rqstType, userData,
-                                        _uiSupport.TextForMsg(), _hcomUiForm.ReadHostFileInfo());
-                        break;
-
-                    case MessageClasses.NoHdrBin: // Needs to be Deprecate
-                        _uiSupport.WriteDebugLine("--> This is MessageClass.NoHdrBin");
-                        break;
-
-                    default:
-                        break;
-                }
+                // Each command's table entry (MeadowCommands) knows how it's sent
+                _uiSupport.WriteDebugLine($"--> Sending '{rqstInfo.rqstName}' ({rqstInfo.sender.Name})");
+                var sendContext = new SendContext(rqstInfo.rqstType, userData, extraData,
+                    _uiSupport, _sendSerialComms, _recvF7DownloadMsgs);
+                rqstInfo.sender.Send(sendContext);
 
                 // Must consider that some commands return before the command is actually
                 // finished. However, all are expected to send a 'Completed' message.
@@ -338,7 +271,7 @@ namespace HcomDiagUi
         public void ForwardToProcessMsgs(HcomProtoHdrMessage hdrMsg, HostRqstType hostRqstType,
             byte[] messageBuffer, int messageLength, uint payloadLength)
         {
-            HostRqstData hostRqstData = ProtocolHelper.GetHostRqstTypeData(hostRqstType);
+            HostRqstData hostRqstData = HostMessages.Find(hostRqstType);
             _uiSupport.WriteDebugLine($"Received '{hostRqstData.msgComplex}' message");
 
             try
