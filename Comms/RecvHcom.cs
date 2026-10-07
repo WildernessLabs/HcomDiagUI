@@ -119,28 +119,15 @@ namespace HcomDiagUi
             {
                 // Port closed by Shutdown(); not a dropped connection
             }
-            catch (ThreadAbortException tae)
-            {
-                string msg = string.Format($"ThreadAbortException: {tae}");
-                _uiSupport.WriteStatusLine(msg);
-            }
-            catch (InvalidOperationException ioe)
-            {
-                string msg = string.Format($"InvalidOperationException: {ioe}");
-                _uiSupport.WriteStatusLine(msg);
-            }
-            catch (IOException ioException)
-            {
-                // Is it possible to retry the connection from here?
-                string msg = string.Format($"IOException: {ioException}");
-                _uiSupport.WriteStatusLine(msg);
-
-                _commsMgr.ReOpenSerialPort(60);
-            }
             catch (Exception ex)
             {
-                string msg = string.Format($"Exception: {ex} may mean the target connection dropped");
-                _uiSupport.WriteStatusLine(msg);
+                // The port went away, e.g. Meadow was reset or unplugged. Windows
+                // reports this in several ways (OperationCanceledException when the
+                // pending read is aborted, IOException, InvalidOperationException),
+                // so treat any read failure as a dropped connection and reconnect.
+                _uiSupport.WriteStatusLine($"Com Port '{_serialPort.PortName}' dropped ({ex.GetType().Name}: {ex.Message})");
+
+                _commsMgr.ReOpenSerialPort(60);
             }
         }
 

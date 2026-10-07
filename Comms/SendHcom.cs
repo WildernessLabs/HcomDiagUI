@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
 using System.Threading.Tasks;
@@ -130,6 +131,10 @@ namespace HcomDiagUi
 
                 EncodeAndSendPacket(msgBuffer, totalSize);
             }
+            catch (NotConnectedException)
+            {
+                throw;      // Port went away; the caller reports it
+            }
             catch (Exception except)
             {
                 Console.WriteLine($"An exception was caught: {except}");
@@ -249,6 +254,10 @@ namespace HcomDiagUi
                 int encodedToSend;
                 byte[] encodedBytes;
 
+                // Read once: a reconnect can set CommsManager.SerialPort to null
+                // between the check below and the write.
+                SerialPort serialPort = _commsMgr.SerialPort;
+
                 // For file download this is a LOT of messages
                 // _uiSupport.WriteDebugLine($"Sending packet with {messageSize} bytes");
 
@@ -273,12 +282,16 @@ namespace HcomDiagUi
                         return;
                     }
 
-                    if (_commsMgr.SerialPort == null)
+                    if (serialPort == null)
                     {
                         _uiSupport.WriteDebugLine($"Error - SerialPort == null");
                         Thread.Sleep(500);    // Place for break point
                         throw new NotConnectedException();
                     }
+                }
+                catch (NotConnectedException)
+                {
+                    throw;      // The caller reports it
                 }
                 catch (Exception except)
                 {
@@ -311,14 +324,19 @@ namespace HcomDiagUi
                 try
                 {
                     // Send the data to Meadow
-                    _commsMgr.SerialPort.Write(encodedBytes, 0, encodedToSend);
+                    serialPort.Write(encodedBytes, 0, encodedToSend);
                 }
-                catch (InvalidOperationException ioe)  // Port not opened
+                catch (InvalidOperationException)  // Port closed (e.g. Meadow reset)
                 {
-                    string msg = string.Format("Write but port not opened. Exception: {0}", ioe);
-                    _uiSupport.WriteStatus(msg);
-                    Thread.Sleep(500);    // Place for break point
-                    throw;
+                    throw new NotConnectedException();
+                }
+                catch (IOException)  // Device went away during the write
+                {
+                    throw new NotConnectedException();
+                }
+                catch (OperationCanceledException)  // Write aborted by device removal
+                {
+                    throw new NotConnectedException();
                 }
                 catch (ArgumentOutOfRangeException aore)  // offset or count don't match buffer
                 {
@@ -349,6 +367,10 @@ namespace HcomDiagUi
                     throw;
                 }
             }
+            catch (NotConnectedException)
+            {
+                throw;      // The caller reports it
+            }
             catch (Exception except)
             {
                 // DID YOU RESTART MEADOW?
@@ -360,5 +382,11 @@ namespace HcomDiagUi
         }
     }
 
-    public class NotConnectedException : Exception { }
+    // Thrown when sending fails because the serial port is closed or the
+    // device has gone away (e.g. Meadow was reset). Callers report it as a
+    // status line instead of letting it crash the app.
+    public class NotConnectedException : Exception
+    {
+        public NotConnectedException() : base("Com Port not connected") { }
+    }
 }
