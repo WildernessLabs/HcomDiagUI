@@ -222,6 +222,7 @@ namespace HcomDiagUi
             _uiSupport.Stopwatch.Restart();
 
             _concludedRecvdEvent.Reset();       // Reset to nonsignaled
+            ClearCancelSending();               // A previous Cancel must not stop this command
 
             // Read UI iteration field. Always at least 1
             iterations = _uiSupport.SendIterations() > 1 ? _uiSupport.SendIterations() : 1;
@@ -243,6 +244,13 @@ namespace HcomDiagUi
                 var sendContext = new SendContext(rqstInfo.rqstType, userData, extraData,
                     _uiSupport, _sendSerialComms, _recvF7DownloadMsgs);
                 rqstInfo.sender.Send(sendContext);
+
+                // Nothing went to Meadow, so no 'Concluded' will come back
+                if (sendContext.NothingSent)
+                {
+                    _uiSupport.WriteStatusLine($"'{rqstInfo.rqstName}' not sent");
+                    break;
+                }
 
                 // Must consider that some commands return before the command is actually
                 // finished. However, all are expected to send a 'Completed' message.
@@ -361,6 +369,16 @@ namespace HcomDiagUi
         public void SetCancelSending()
         {
             _cancelSending = true;
+        }
+
+        // Cancel button: stop the remaining iterations and stop waiting for a
+        // 'Concluded' message. Meadow doesn't always send one (e.g. after
+        // rejecting an invalid path), which used to leave Send disabled until
+        // Disconnect.
+        public void CancelCommand()
+        {
+            SetCancelSending();
+            CommandHasConcluded();
         }
         public void ClearCancelSending()
         {

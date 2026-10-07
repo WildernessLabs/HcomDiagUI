@@ -26,17 +26,18 @@ namespace HcomDiagUi
             _isFileDnldActive = false;
         }
 
-        // This is start of file download
-        public void FindDownloadFileInformation(MeadowRqstType requestType,
+        // This is start of file download. Returns false if nothing was sent
+        // because the host file doesn't exist.
+        public bool FindDownloadFileInformation(MeadowRqstType requestType,
                 UInt32 partition, string meadowFileName,
                 string sourceFileName)
         {
-            // Make sure file exists on this PC
+            // Make sure file exists on this host
             if (!File.Exists(sourceFileName))
             {
                 string msgFail = string.Format($"Please enter a valid file name {sourceFileName} doesn't exist.");
-                uiSupport.WriteStatus(msgFail);
-                return;
+                uiSupport.WriteStatusLine(msgFail);
+                return false;
             }
 
             commsManager.ClearCancelSending();
@@ -54,6 +55,7 @@ namespace HcomDiagUi
             // This is the start download message. Meadow will respond with a go/no go reply
             sendSerialComms.BuildAndSendFileRelatedCommand(requestType, partition,
                 0, fileSize, _packetCrc32, espAddress, md5Hash, meadowFileName);
+            return true;
         }
 
         // Wait for HCOM to respond with HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY or
