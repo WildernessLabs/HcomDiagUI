@@ -22,18 +22,31 @@ namespace HcomDiagUi
             Stopwatch = new Stopwatch();
         }
 
-        internal void PopulateCommandListBox()
+        // Report table mistakes, e.g. a new MeadowRqstType without an entry
+        internal void ReportCommandTableProblems()
         {
-            // Report table mistakes, e.g. a new MeadowRqstType without an entry
             foreach (string problem in MeadowCommands.Validate().Concat(HostMessages.Validate()))
                 WriteStatusLine($"Command table error - {problem}");
+        }
 
-            _hcomUiForm.CommandListBox.BeginUpdate();
+        // Internal and Unsupported commands are only listed when showHidden is
+        // true. The selected command stays selected if it is still listed.
+        internal void PopulateCommandListBox(bool showHidden)
+        {
+            var listBox = _hcomUiForm.CommandListBox;
+            object selected = listBox.SelectedItem;
+
+            listBox.BeginUpdate();
+            listBox.Items.Clear();
             foreach (MeadowRqstData command in MeadowCommands.All)
             {
-                _hcomUiForm.CommandListBox.Items.Add(command);
+                if (showHidden || command.category == CommandCategory.Normal)
+                    listBox.Items.Add(command);
             }
-            _hcomUiForm.CommandListBox.EndUpdate();
+
+            if (selected != null && listBox.Items.Contains(selected))
+                listBox.SelectedItem = selected;
+            listBox.EndUpdate();
         }
 
         public string TextForMsg()

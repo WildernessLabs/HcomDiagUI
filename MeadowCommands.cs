@@ -115,6 +115,16 @@ namespace HcomDiagUi
     }
 
     //==========================================================================
+    // Internal and Unsupported commands are only listed when 'Show internal/
+    // unsupported' is ticked
+    public enum CommandCategory
+    {
+        Normal,
+        Internal,       // Normally sent automatically as one step of a longer exchange
+        Unsupported,    // No longer supported by Meadow, or not implemented here
+    }
+
+    //==========================================================================
     // How a command is sent. MsgClass is shown in the UI's 'Cmd Type' box.
     public sealed class CommandSender
     {
@@ -173,11 +183,15 @@ namespace HcomDiagUi
     public static class MeadowCommands
     {
         static MeadowRqstData Cmd(MeadowRqstType rqstType, string name, string info,
-            CommandSender sender, CommandFields fields = null)
+            CommandSender sender, CommandFields fields = null,
+            CommandCategory category = CommandCategory.Normal)
         {
             return new MeadowRqstData(name, info, rqstType, sender,
-                fields ?? CommandFields.Unspecified);
+                fields ?? CommandFields.Unspecified, category);
         }
+
+        const CommandCategory Internal = CommandCategory.Internal;
+        const CommandCategory Unsupported = CommandCategory.Unsupported;
 
         static CommandFields Uses(FieldUse userData = null, FieldUse extraData = null,
             FieldUse hostFile = null, FieldUse text = null)
@@ -215,7 +229,7 @@ namespace HcomDiagUi
         {
             Cmd(HCOM_MDOW_REQUEST_UNDEFINED_REQUEST, "Undefined Command",
                 "...",
-                Send.Nothing),
+                Send.Nothing, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_CHANGE_TRACE_LEVEL, "trace level",
                 "UserData field holds the new level.\r\nThe value " +
@@ -224,11 +238,11 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_FORMAT_FLASH_FILE_SYS, "** not supported fs format",
                 "Was used to format file system, but no longer supported",
-                Send.Header),
+                Send.Header, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_END_FILE_TRANSFER, "(internal) indicates EOF for F/S",
                 "When the CLI has sent all the F/S data for download, this is sent",
-                Send.Header),
+                Send.Header, category: Internal),
 
             Cmd(HCOM_MDOW_REQUEST_RESTART_PRIMARY_MCU, "device restart",
                 "Restarts the STM32F777 but not the ESP32",
@@ -301,7 +315,7 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_END_ESP_FILE_TRANSFER, "(internal) indicates EOF for ESP32",
                 "When the CLI has sent all the ESP32 data for download, it sends this",
-                Send.Header),
+                Send.Header, category: Internal),
 
             Cmd(HCOM_MDOW_REQUEST_READ_ESP_MAC_ADDRESS, "device mac (esp32)",
                 "read esp mac address",
@@ -327,11 +341,11 @@ namespace HcomDiagUi
             Cmd(HCOM_MDOW_REQUEST_MONO_UPDATE_RUNTIME, "mono update rt",
                 "Downloads and flashes mono runtime image to Meadow " +
                 "This command is not implemented in HcomDiagUi",
-                Send.F7FileDownload),
+                Send.F7FileDownload, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_MONO_UPDATE_FILE_END, "(internal) indicates mono RT downloaded",
                 "CLI sends this when mono RT has been downloaded",
-                Send.Header),
+                Send.Header, category: Internal),
 
             Cmd(HCOM_MDOW_REQUEST_MONO_START_DBG_SESSION, "debug",
                 "Start mono dbg session",
@@ -348,7 +362,7 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND, "(internal) file read start",
                 "Internal used by Meadow to tell CLI it's ready for data to be sent",
-                Send.Header),
+                Send.Header, category: Internal),
 
             Cmd(HCOM_MDOW_REQUEST_UPLOAD_ABORT_DATA_SEND, "(new) file read abort",
                 "Cancel the current file being uploaded",
@@ -392,7 +406,7 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA, "(internal) debugging data",
                 "Identifies to F7 debugging information",
-                Send.Header),
+                Send.Header, category: Internal),
 
             // This replaces the 4 developer items above
             Cmd(HCOM_MDOW_REQUEST_DEVELOPER, "Developer",
@@ -429,7 +443,7 @@ namespace HcomDiagUi
                 return command;
 
             return new MeadowRqstData("Meadow Request Type not found", "For testing only",
-                rqstType, Send.Nothing, CommandFields.Unspecified);
+                rqstType, Send.Nothing, CommandFields.Unspecified, CommandCategory.Unsupported);
         }
 
         // Problems with the table, e.g. a MeadowRqstType value without an entry.

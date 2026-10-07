@@ -8,6 +8,10 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <!-- Font the WinForms Designer lays out with. Must match the runtime
+         default set in Program.cs, otherwise the Designer re-scales the
+         whole form on save and its layout differs from the running app -->
+    <ApplicationDefaultFont>Microsoft Sans Serif, 8.25pt</ApplicationDefaultFont>
     <RootNamespace>HcomDiagUi</RootNamespace>
     <AssemblyName>HcomDiagUi</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

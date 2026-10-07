@@ -40,5 +40,20 @@ namespace HcomDiagUi.Properties
                 this["LastComPort"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowHiddenCommands
+        {
+            get
+            {
+                return ((bool)(this["ShowHiddenCommands"]));
+            }
+            set
+            {
+                this["ShowHiddenCommands"] = value;
+            }
+        }
     }
 }
