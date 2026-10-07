@@ -2,7 +2,12 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- Allows dotnet build from WSL/Linux as a compile check -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
     <RootNamespace>HcomDiagUi</RootNamespace>
     <AssemblyName>HcomDiagUi</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -12,15 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Lets the project build without the .NET Framework 4.7.2 targeting
-         pack installed (e.g. dotnet build from WSL); not shipped -->
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
+    <!-- SerialPort is a NuGet package on .NET (it was part of .NET Framework) -->
+    <PackageReference Include="System.IO.Ports" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
