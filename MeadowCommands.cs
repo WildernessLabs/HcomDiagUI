@@ -270,12 +270,12 @@ namespace HcomDiagUi
                 Send.Header, Uses(userData: "1 = enable")),
 
             Cmd(HCOM_MDOW_REQUEST_LIST_PARTITION_FILES, "file list (CLIv1)",
-                "Returns a list of files in the file system",
-                Send.Header),
+                "Returns a list of files in the file system (removed from Meadow.OS)",
+                Send.Header, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_LIST_PART_FILES_AND_CRC, "file list with CRC (CLIv1)",
-                "Returns a list of files in the file system with CRC checksum",
-                Send.Header),
+                "Returns a list of files in the file system with CRC checksum (removed from Meadow.OS)",
+                Send.Header, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR, "File List (CLIv2)",
                 "Returns a list of files and directories in the file system",
@@ -337,6 +337,18 @@ namespace HcomDiagUi
             Cmd(HCOM_MDOW_REQUEST_NO_TRACE_TO_UART, "uart trace",
                 "Stops trace output from going to uart1",
                 Send.Header),
+
+            // Meadow.CLI 'uart profiler enable/disable'. The profiler data itself
+            // comes from the Mono runtime's log profiler (.mlpd) and is captured
+            // from UART1 with a separate serial adapter, not by HcomDiagUi.
+            Cmd(HCOM_MDOW_REQUEST_SEND_PROFILER_TO_UART, "uart profiler enable",
+                "Makes UART1 exclusive for Mono profiler data; trace output stops going " +
+                "to UART1. Survives a restart. Same as Meadow.CLI 'uart profiler enable'",
+                Send.Header, Uses()),
+
+            Cmd(HCOM_MDOW_REQUEST_NO_PROFILER_TO_UART, "uart profiler disable",
+                "Returns UART1 to normal use. Same as Meadow.CLI 'uart profiler disable'",
+                Send.Header, Uses()),
 
             Cmd(HCOM_MDOW_REQUEST_MONO_UPDATE_RUNTIME, "mono update rt",
                 "Downloads and flashes mono runtime image to Meadow " +
@@ -418,16 +430,16 @@ namespace HcomDiagUi
                 Send.Header),
 
             Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_INIT, "qspi init",
-                "...",
-                Send.Header),
+                "For testing only (removed from Meadow.OS)",
+                Send.Header, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_WRITE, "qspi write",
-                "For testing only",
-                Send.Header),
+                "For testing only (removed from Meadow.OS)",
+                Send.Header, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_READ, "qspi read",
-                "For testing only",
-                Send.Header),
+                "For testing only (removed from Meadow.OS)",
+                Send.Header, category: Unsupported),
 
             Cmd(HCOM_MDOW_REQUEST_OTA_REGISTER_DEVICE, "OTA - Register device",
                 "For testing only",

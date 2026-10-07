@@ -66,6 +66,12 @@ namespace HcomDiagUi
                 MessageClasses.Binary, MessageComplex.F7FileUpload),
             Msg(HCOM_HOST_REQUEST_DNLD_FAIL_RESEND, "Download failed and timer", "...",
                 MessageClasses.FileInfo, MessageComplex.F7FileDnld),
+            // Reply to 'OTA - Register device' (hcom_ota.c). Meadow.CLI decodes it as text
+            Msg(HCOM_HOST_REQUEST_DEVICE_PUBLIC_KEY, "Device Public Key", "...",
+                MessageClasses.Text, MessageComplex.Normal),
+            // 'Entering low-power mode', sent just before Stop mode (pwrmgmt_control.c)
+            Msg(HCOM_HOST_REQUEST_TEXT_NEXT_LOW_PWR, "Entering Low Power", "...",
+                MessageClasses.Text, MessageComplex.Normal),
         };
 
         static readonly Dictionary<HostRqstType, HostRqstData> _byType =
