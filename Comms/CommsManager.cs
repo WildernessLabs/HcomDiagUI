@@ -45,6 +45,9 @@ namespace HcomDiagUi
         readonly object _portLock = new object();
         int _connectionGeneration;
 
+        // Most recently sent command, named in Meadow error messages
+        volatile string _lastCommandName;
+
         // True while ReOpenSerialPort is retrying after a dropped connection
         volatile bool _reconnecting;
 
@@ -188,8 +191,8 @@ namespace HcomDiagUi
         {
             // Necessary because only the UI thread can access UI elements
             MeadowRqstData rqstInfo = (MeadowRqstData)_hcomUiForm.commandListBox.SelectedItem;
-            UInt32 userData = UInt32.Parse(_hcomUiForm.userDataTextBox.Text);
-            UInt16 extraData = UInt16.Parse(_hcomUiForm.extraDataTextBox.Text);
+            UInt32 userData = UInt32.Parse(_hcomUiForm.userDataTextBox.Text.Trim());
+            UInt16 extraData = UInt16.Parse(_hcomUiForm.extraDataTextBox.Text.Trim());
             var UIData = new NeededUiData(rqstInfo, userData, extraData);
 
             // Some commands can take a minute or more. Therefore, we need to free this
@@ -235,6 +238,7 @@ namespace HcomDiagUi
                 iterations--;
 
                 // Each command's table entry (MeadowCommands) knows how it's sent
+                _lastCommandName = rqstInfo.rqstName;
                 _uiSupport.WriteDebugLine($"--> Sending '{rqstInfo.rqstName}' ({rqstInfo.sender.Name})");
                 var sendContext = new SendContext(rqstInfo.rqstType, userData, extraData,
                     _uiSupport, _sendSerialComms, _recvF7DownloadMsgs);
@@ -274,6 +278,12 @@ namespace HcomDiagUi
             HostRqstData hostRqstData = HostMessages.Find(hostRqstType);
             _uiSupport.WriteDebugLine($"Received '{hostRqstData.msgComplex}' message");
 
+            // Meadow explains a refused or failed request with an error text
+            // (e.g. 'Mono must be disabled for file download'). It is also shown
+            // in Send/Received, but there it's easy to miss.
+            if (hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_ERROR)
+                ReportMeadowError(messageBuffer, messageLength);
+
             try
             {
                 ForwardToProcessMsgsHelper(hdrMsg, hostRqstData, hostRqstType, messageBuffer,
@@ -285,6 +295,19 @@ namespace HcomDiagUi
                 // port dropped. Don't let it kill the receive processing thread.
                 _uiSupport.WriteStatusLine($"Reply to '{hostRqstType}' not sent: Com Port not connected");
             }
+        }
+
+        void ReportMeadowError(byte[] messageBuffer, int messageLength)
+        {
+            int hdrLen = Protocol.HcomProtoHdrMessageSize();
+            string text = messageLength > hdrLen
+                ? Encoding.ASCII.GetString(messageBuffer, hdrLen, messageLength - hdrLen).TrimEnd('\0', ' ', '\r', '\n')
+                : "(no text)";
+
+            string command = _lastCommandName;
+            _uiSupport.WriteStatusLine(command == null
+                ? $"Meadow error: {text}"
+                : $"Meadow error ('{command}'): {text}");
         }
 
         void ForwardToProcessMsgsHelper(HcomProtoHdrMessage hdrMsg, HostRqstData hostRqstData,
