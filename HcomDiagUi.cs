@@ -48,8 +48,12 @@ namespace HcomDiagUi
             _hostFileLabel = label7.Text;
             _textLabel = label2.Text;
 
+            // Set before _uiSupport exists, so CheckedChanged doesn't fill the list
+            showHiddenCommandsCheckBox.Checked = Properties.Settings.Default.ShowHiddenCommands;
+
             _uiSupport = new UiSupport(this);
-            _uiSupport.PopulateCommandListBox();
+            _uiSupport.ReportCommandTableProblems();
+            _uiSupport.PopulateCommandListBox(showHiddenCommandsCheckBox.Checked);
             _commsManager = new CommsManager(this);
 
             RefreshPortList(Properties.Settings.Default.LastComPort);
@@ -338,8 +342,22 @@ namespace HcomDiagUi
             // _uiSupport.WriteDebugLine("==> UI Thread back home.");
         }
 
+        private void showHiddenCommandsCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_uiSupport == null)
+                return;     // Still in the constructor
+
+            _uiSupport.PopulateCommandListBox(showHiddenCommandsCheckBox.Checked);
+            Properties.Settings.Default.ShowHiddenCommands = showHiddenCommandsCheckBox.Checked;
+            Properties.Settings.Default.Save();
+        }
+
         private void commandListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // Refilling the list (Show internal/unsupported) can clear the selection
+            if (commandListBox.SelectedItem == null)
+                return;
+
             MeadowRqstData rqstInfo = (MeadowRqstData)commandListBox.SelectedItem;
             _uiSupport.WriteCmdSel(rqstInfo.rqstName);
             _uiSupport.WriteCmdValue(rqstInfo.GetHexValue());

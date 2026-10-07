@@ -29,390 +29,382 @@ namespace HcomDiagUi
         /// </summary>
         private void InitializeComponent()
         {
-            this.sendButton = new System.Windows.Forms.Button();
-            this.comPortComboBox = new System.Windows.Forms.ComboBox();
-            this.refreshPortsButton = new System.Windows.Forms.Button();
-            this.connectButton = new System.Windows.Forms.Button();
-            this.commandListBox = new System.Windows.Forms.ListBox();
-            this.sendRecvTextBox = new System.Windows.Forms.TextBox();
-            this.userDataTextBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.statusTextBox = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.cmdSelTextBox = new System.Windows.Forms.TextBox();
-            this.cmdInfoTextBox = new System.Windows.Forms.TextBox();
-            this.cmdValueTextBox = new System.Windows.Forms.TextBox();
-            this.textForMsgTextBox = new System.Windows.Forms.TextBox();
-            this.showRecvHexCheckBox = new System.Windows.Forms.CheckBox();
-            this.msgClassTextBox = new System.Windows.Forms.TextBox();
-            this.HostFileTextBox = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.execTimeTextBox = new System.Windows.Forms.TextBox();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.sendIterationsTextBox = new System.Windows.Forms.TextBox();
-            this.sendCountTextBox = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.extraDataTextBox = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.groupBox1.SuspendLayout();
-            this.SuspendLayout();
+            sendButton = new System.Windows.Forms.Button();
+            comPortComboBox = new System.Windows.Forms.ComboBox();
+            refreshPortsButton = new System.Windows.Forms.Button();
+            connectButton = new System.Windows.Forms.Button();
+            commandListBox = new System.Windows.Forms.ListBox();
+            showHiddenCommandsCheckBox = new System.Windows.Forms.CheckBox();
+            sendRecvTextBox = new System.Windows.Forms.TextBox();
+            userDataTextBox = new System.Windows.Forms.TextBox();
+            label3 = new System.Windows.Forms.Label();
+            statusTextBox = new System.Windows.Forms.TextBox();
+            label4 = new System.Windows.Forms.Label();
+            label5 = new System.Windows.Forms.Label();
+            cmdSelTextBox = new System.Windows.Forms.TextBox();
+            cmdInfoTextBox = new System.Windows.Forms.TextBox();
+            cmdValueTextBox = new System.Windows.Forms.TextBox();
+            textForMsgTextBox = new System.Windows.Forms.TextBox();
+            showRecvHexCheckBox = new System.Windows.Forms.CheckBox();
+            msgClassTextBox = new System.Windows.Forms.TextBox();
+            HostFileTextBox = new System.Windows.Forms.TextBox();
+            label7 = new System.Windows.Forms.Label();
+            execTimeTextBox = new System.Windows.Forms.TextBox();
+            cancelButton = new System.Windows.Forms.Button();
+            sendIterationsTextBox = new System.Windows.Forms.TextBox();
+            sendCountTextBox = new System.Windows.Forms.TextBox();
+            label8 = new System.Windows.Forms.Label();
+            extraDataTextBox = new System.Windows.Forms.TextBox();
+            label2 = new System.Windows.Forms.Label();
+            groupBox1 = new System.Windows.Forms.GroupBox();
+            label6 = new System.Windows.Forms.Label();
+            groupBox1.SuspendLayout();
+            SuspendLayout();
             // 
             // sendButton
             // 
-            this.sendButton.Location = new System.Drawing.Point(918, 356);
-            this.sendButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.sendButton.Name = "sendButton";
-            this.sendButton.Size = new System.Drawing.Size(149, 64);
-            this.sendButton.TabIndex = 0;
-            this.sendButton.Text = "Send";
-            this.sendButton.UseVisualStyleBackColor = true;
-            this.sendButton.Click += new System.EventHandler(this.sendButton_Click);
+            sendButton.Location = new System.Drawing.Point(975, 471);
+            sendButton.Name = "sendButton";
+            sendButton.Size = new System.Drawing.Size(158, 85);
+            sendButton.TabIndex = 0;
+            sendButton.Text = "Send";
+            sendButton.UseVisualStyleBackColor = true;
+            sendButton.Click += sendButton_Click;
             // 
             // comPortComboBox
             // 
-            this.comPortComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.comPortComboBox.FormattingEnabled = true;
-            this.comPortComboBox.Location = new System.Drawing.Point(12, 36);
-            this.comPortComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.comPortComboBox.Name = "comPortComboBox";
-            this.comPortComboBox.Size = new System.Drawing.Size(226, 44);
-            this.comPortComboBox.TabIndex = 1;
+            comPortComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            comPortComboBox.FormattingEnabled = true;
+            comPortComboBox.Location = new System.Drawing.Point(13, 48);
+            comPortComboBox.Name = "comPortComboBox";
+            comPortComboBox.Size = new System.Drawing.Size(240, 44);
+            comPortComboBox.TabIndex = 1;
             // 
             // refreshPortsButton
             // 
-            this.refreshPortsButton.Location = new System.Drawing.Point(12, 170);
-            this.refreshPortsButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.refreshPortsButton.Name = "refreshPortsButton";
-            this.refreshPortsButton.Size = new System.Drawing.Size(226, 50);
-            this.refreshPortsButton.TabIndex = 26;
-            this.refreshPortsButton.Text = "Scan";
-            this.refreshPortsButton.UseVisualStyleBackColor = true;
-            this.refreshPortsButton.Click += new System.EventHandler(this.refreshPortsButton_Click);
+            refreshPortsButton.Location = new System.Drawing.Point(13, 225);
+            refreshPortsButton.Name = "refreshPortsButton";
+            refreshPortsButton.Size = new System.Drawing.Size(240, 66);
+            refreshPortsButton.TabIndex = 26;
+            refreshPortsButton.Text = "Scan";
+            refreshPortsButton.UseVisualStyleBackColor = true;
+            refreshPortsButton.Click += refreshPortsButton_Click;
             // 
             // connectButton
             // 
-            this.connectButton.Location = new System.Drawing.Point(11, 102);
-            this.connectButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.connectButton.Name = "connectButton";
-            this.connectButton.Size = new System.Drawing.Size(227, 50);
-            this.connectButton.TabIndex = 27;
-            this.connectButton.Text = "Connect";
-            this.connectButton.UseVisualStyleBackColor = true;
-            this.connectButton.Click += new System.EventHandler(this.connectButton_Click);
+            connectButton.Location = new System.Drawing.Point(12, 135);
+            connectButton.Name = "connectButton";
+            connectButton.Size = new System.Drawing.Size(241, 66);
+            connectButton.TabIndex = 27;
+            connectButton.Text = "Connect";
+            connectButton.UseVisualStyleBackColor = true;
+            connectButton.Click += connectButton_Click;
             // 
             // commandListBox
             // 
-            this.commandListBox.AllowDrop = true;
-            this.commandListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.commandListBox.FormattingEnabled = true;
-            this.commandListBox.ItemHeight = 36;
-            this.commandListBox.Location = new System.Drawing.Point(264, 24);
-            this.commandListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.commandListBox.Name = "commandListBox";
-            this.commandListBox.ScrollAlwaysVisible = true;
-            this.commandListBox.Size = new System.Drawing.Size(608, 436);
-            this.commandListBox.Sorted = true;
-            this.commandListBox.TabIndex = 2;
-            this.commandListBox.SelectedIndexChanged += new System.EventHandler(this.commandListBox_SelectedIndexChanged);
+            commandListBox.AllowDrop = true;
+            commandListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            commandListBox.FormattingEnabled = true;
+            commandListBox.Location = new System.Drawing.Point(280, 32);
+            commandListBox.Name = "commandListBox";
+            commandListBox.ScrollAlwaysVisible = true;
+            commandListBox.Size = new System.Drawing.Size(646, 508);
+            commandListBox.Sorted = true;
+            commandListBox.TabIndex = 2;
+            commandListBox.SelectedIndexChanged += commandListBox_SelectedIndexChanged;
+            // 
+            // showHiddenCommandsCheckBox
+            // 
+            showHiddenCommandsCheckBox.AutoSize = true;
+            showHiddenCommandsCheckBox.Location = new System.Drawing.Point(309, 571);
+            showHiddenCommandsCheckBox.Name = "showHiddenCommandsCheckBox";
+            showHiddenCommandsCheckBox.Size = new System.Drawing.Size(575, 45);
+            showHiddenCommandsCheckBox.TabIndex = 29;
+            showHiddenCommandsCheckBox.Text = "Show internal/unsupported commands";
+            showHiddenCommandsCheckBox.UseVisualStyleBackColor = true;
+            showHiddenCommandsCheckBox.CheckedChanged += showHiddenCommandsCheckBox_CheckedChanged;
             // 
             // sendRecvTextBox
             // 
-            this.sendRecvTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.sendRecvTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.sendRecvTextBox.Location = new System.Drawing.Point(30, 1199);
-            this.sendRecvTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.sendRecvTextBox.Multiline = true;
-            this.sendRecvTextBox.Name = "sendRecvTextBox";
-            this.sendRecvTextBox.ReadOnly = true;
-            this.sendRecvTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.sendRecvTextBox.Size = new System.Drawing.Size(1963, 373);
-            this.sendRecvTextBox.TabIndex = 3;
+            sendRecvTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            sendRecvTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            sendRecvTextBox.Location = new System.Drawing.Point(32, 1586);
+            sendRecvTextBox.Multiline = true;
+            sendRecvTextBox.Name = "sendRecvTextBox";
+            sendRecvTextBox.ReadOnly = true;
+            sendRecvTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            sendRecvTextBox.Size = new System.Drawing.Size(2085, 492);
+            sendRecvTextBox.TabIndex = 3;
             // 
             // userDataTextBox
             // 
-            this.userDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.userDataTextBox.Location = new System.Drawing.Point(16, 397);
-            this.userDataTextBox.Margin = new System.Windows.Forms.Padding(1);
-            this.userDataTextBox.Name = "userDataTextBox";
-            this.userDataTextBox.Size = new System.Drawing.Size(227, 41);
-            this.userDataTextBox.TabIndex = 7;
-            this.userDataTextBox.Text = "0";
-            this.userDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            userDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            userDataTextBox.Location = new System.Drawing.Point(17, 525);
+            userDataTextBox.Margin = new System.Windows.Forms.Padding(1);
+            userDataTextBox.Name = "userDataTextBox";
+            userDataTextBox.Size = new System.Drawing.Size(241, 41);
+            userDataTextBox.TabIndex = 7;
+            userDataTextBox.Text = "0";
+            userDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(1, 364);
-            this.label3.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(140, 32);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "User Data";
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(1, 481);
+            label3.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(147, 41);
+            label3.TabIndex = 5;
+            label3.Text = "User Data";
             // 
             // statusTextBox
             // 
-            this.statusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.statusTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusTextBox.Location = new System.Drawing.Point(10, 685);
-            this.statusTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.statusTextBox.Multiline = true;
-            this.statusTextBox.Name = "statusTextBox";
-            this.statusTextBox.ReadOnly = true;
-            this.statusTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.statusTextBox.Size = new System.Drawing.Size(1973, 407);
-            this.statusTextBox.TabIndex = 8;
+            statusTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            statusTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            statusTextBox.Location = new System.Drawing.Point(11, 906);
+            statusTextBox.Multiline = true;
+            statusTextBox.Name = "statusTextBox";
+            statusTextBox.ReadOnly = true;
+            statusTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            statusTextBox.Size = new System.Drawing.Size(2096, 537);
+            statusTextBox.TabIndex = 8;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(21, 651);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(95, 32);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "Status";
+            label4.AutoSize = true;
+            label4.Location = new System.Drawing.Point(22, 861);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(98, 41);
+            label4.TabIndex = 5;
+            label4.Text = "Status";
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(29, 1142);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(208, 32);
-            this.label5.TabIndex = 5;
-            this.label5.Text = "Send/Received";
+            label5.AutoSize = true;
+            label5.Location = new System.Drawing.Point(31, 1510);
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size(215, 41);
+            label5.TabIndex = 5;
+            label5.Text = "Send/Received";
             // 
             // cmdSelTextBox
             // 
-            this.cmdSelTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmdSelTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmdSelTextBox.Location = new System.Drawing.Point(1115, 24);
-            this.cmdSelTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.cmdSelTextBox.Name = "cmdSelTextBox";
-            this.cmdSelTextBox.ReadOnly = true;
-            this.cmdSelTextBox.Size = new System.Drawing.Size(1903, 41);
-            this.cmdSelTextBox.TabIndex = 9;
-            this.cmdSelTextBox.Text = "Cmd Description";
+            cmdSelTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            cmdSelTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            cmdSelTextBox.Location = new System.Drawing.Point(1185, 32);
+            cmdSelTextBox.Name = "cmdSelTextBox";
+            cmdSelTextBox.ReadOnly = true;
+            cmdSelTextBox.Size = new System.Drawing.Size(2022, 41);
+            cmdSelTextBox.TabIndex = 9;
+            cmdSelTextBox.Text = "Cmd Description";
             // 
             // cmdInfoTextBox
             // 
-            this.cmdInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmdInfoTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmdInfoTextBox.Location = new System.Drawing.Point(1115, 81);
-            this.cmdInfoTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.cmdInfoTextBox.Multiline = true;
-            this.cmdInfoTextBox.Name = "cmdInfoTextBox";
-            this.cmdInfoTextBox.ReadOnly = true;
-            this.cmdInfoTextBox.Size = new System.Drawing.Size(878, 245);
-            this.cmdInfoTextBox.TabIndex = 10;
+            cmdInfoTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            cmdInfoTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            cmdInfoTextBox.Location = new System.Drawing.Point(1185, 107);
+            cmdInfoTextBox.Multiline = true;
+            cmdInfoTextBox.Name = "cmdInfoTextBox";
+            cmdInfoTextBox.ReadOnly = true;
+            cmdInfoTextBox.Size = new System.Drawing.Size(933, 323);
+            cmdInfoTextBox.TabIndex = 10;
             // 
             // cmdValueTextBox
             // 
-            this.cmdValueTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmdValueTextBox.Location = new System.Drawing.Point(878, 24);
-            this.cmdValueTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.cmdValueTextBox.Name = "cmdValueTextBox";
-            this.cmdValueTextBox.ReadOnly = true;
-            this.cmdValueTextBox.Size = new System.Drawing.Size(201, 41);
-            this.cmdValueTextBox.TabIndex = 11;
-            this.cmdValueTextBox.Text = "Cmd Value";
-            this.cmdValueTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            cmdValueTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            cmdValueTextBox.Location = new System.Drawing.Point(946, 32);
+            cmdValueTextBox.Name = "cmdValueTextBox";
+            cmdValueTextBox.ReadOnly = true;
+            cmdValueTextBox.Size = new System.Drawing.Size(213, 41);
+            cmdValueTextBox.TabIndex = 11;
+            cmdValueTextBox.Text = "Cmd Value";
+            cmdValueTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textForMsgTextBox
             // 
-            this.textForMsgTextBox.AllowDrop = true;
-            this.textForMsgTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textForMsgTextBox.Location = new System.Drawing.Point(32, 601);
-            this.textForMsgTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.textForMsgTextBox.MaxLength = 512;
-            this.textForMsgTextBox.Name = "textForMsgTextBox";
-            this.textForMsgTextBox.Size = new System.Drawing.Size(1596, 41);
-            this.textForMsgTextBox.TabIndex = 12;
+            textForMsgTextBox.AllowDrop = true;
+            textForMsgTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            textForMsgTextBox.Location = new System.Drawing.Point(34, 795);
+            textForMsgTextBox.MaxLength = 512;
+            textForMsgTextBox.Name = "textForMsgTextBox";
+            textForMsgTextBox.Size = new System.Drawing.Size(1696, 41);
+            textForMsgTextBox.TabIndex = 12;
             // 
             // showRecvHexCheckBox
             // 
-            this.showRecvHexCheckBox.AutoSize = true;
-            this.showRecvHexCheckBox.Location = new System.Drawing.Point(304, 1140);
-            this.showRecvHexCheckBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.showRecvHexCheckBox.Name = "showRecvHexCheckBox";
-            this.showRecvHexCheckBox.Size = new System.Drawing.Size(102, 36);
-            this.showRecvHexCheckBox.TabIndex = 13;
-            this.showRecvHexCheckBox.Text = "Hex";
-            this.showRecvHexCheckBox.UseVisualStyleBackColor = true;
-            this.showRecvHexCheckBox.CheckedChanged += new System.EventHandler(this.showRecvHexCheckBox_CheckedChanged);
+            showRecvHexCheckBox.AutoSize = true;
+            showRecvHexCheckBox.Location = new System.Drawing.Point(323, 1508);
+            showRecvHexCheckBox.Name = "showRecvHexCheckBox";
+            showRecvHexCheckBox.Size = new System.Drawing.Size(107, 45);
+            showRecvHexCheckBox.TabIndex = 13;
+            showRecvHexCheckBox.Text = "Hex";
+            showRecvHexCheckBox.UseVisualStyleBackColor = true;
+            showRecvHexCheckBox.CheckedChanged += showRecvHexCheckBox_CheckedChanged;
             // 
             // msgClassTextBox
             // 
-            this.msgClassTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.msgClassTextBox.Location = new System.Drawing.Point(878, 114);
-            this.msgClassTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.msgClassTextBox.Name = "msgClassTextBox";
-            this.msgClassTextBox.ReadOnly = true;
-            this.msgClassTextBox.Size = new System.Drawing.Size(201, 41);
-            this.msgClassTextBox.TabIndex = 11;
-            this.msgClassTextBox.Text = "Cmd Type";
-            this.msgClassTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            msgClassTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            msgClassTextBox.Location = new System.Drawing.Point(946, 147);
+            msgClassTextBox.Name = "msgClassTextBox";
+            msgClassTextBox.ReadOnly = true;
+            msgClassTextBox.Size = new System.Drawing.Size(213, 41);
+            msgClassTextBox.TabIndex = 11;
+            msgClassTextBox.Text = "Cmd Type";
+            msgClassTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // HostFileTextBox
             // 
-            this.HostFileTextBox.AllowDrop = true;
-            this.HostFileTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.HostFileTextBox.Location = new System.Drawing.Point(37, 491);
-            this.HostFileTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.HostFileTextBox.MaxLength = 512;
-            this.HostFileTextBox.Name = "HostFileTextBox";
-            this.HostFileTextBox.Size = new System.Drawing.Size(1593, 41);
-            this.HostFileTextBox.TabIndex = 12;
-            this.HostFileTextBox.Text = "C:\\HcomFiles\\Write\\Text\\TestFileGen1-26.txt";
+            HostFileTextBox.AllowDrop = true;
+            HostFileTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            HostFileTextBox.Location = new System.Drawing.Point(39, 649);
+            HostFileTextBox.MaxLength = 512;
+            HostFileTextBox.Name = "HostFileTextBox";
+            HostFileTextBox.Size = new System.Drawing.Size(1692, 41);
+            HostFileTextBox.TabIndex = 12;
+            HostFileTextBox.Text = "C:\\HcomFiles\\Write\\Text\\TestFileGen1-26.txt";
             // 
             // label7
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(24, 451);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(126, 32);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "Host File";
+            label7.AutoSize = true;
+            label7.Location = new System.Drawing.Point(26, 596);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(133, 41);
+            label7.TabIndex = 5;
+            label7.Text = "Host File";
             // 
             // execTimeTextBox
             // 
-            this.execTimeTextBox.Location = new System.Drawing.Point(1115, 370);
-            this.execTimeTextBox.Margin = new System.Windows.Forms.Padding(1);
-            this.execTimeTextBox.Name = "execTimeTextBox";
-            this.execTimeTextBox.ReadOnly = true;
-            this.execTimeTextBox.Size = new System.Drawing.Size(264, 38);
-            this.execTimeTextBox.TabIndex = 14;
-            this.execTimeTextBox.Text = "Execution Time";
-            this.execTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            execTimeTextBox.Location = new System.Drawing.Point(1185, 489);
+            execTimeTextBox.Margin = new System.Windows.Forms.Padding(1);
+            execTimeTextBox.Name = "execTimeTextBox";
+            execTimeTextBox.ReadOnly = true;
+            execTimeTextBox.Size = new System.Drawing.Size(280, 47);
+            execTimeTextBox.TabIndex = 14;
+            execTimeTextBox.Text = "Execution Time";
+            execTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(1640, 356);
-            this.cancelButton.Margin = new System.Windows.Forms.Padding(1);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(133, 69);
-            this.cancelButton.TabIndex = 15;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
+            cancelButton.Location = new System.Drawing.Point(1742, 471);
+            cancelButton.Margin = new System.Windows.Forms.Padding(1);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new System.Drawing.Size(141, 91);
+            cancelButton.TabIndex = 15;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Click += cancelButton_Click;
             // 
             // sendIterationsTextBox
             // 
-            this.sendIterationsTextBox.Location = new System.Drawing.Point(918, 238);
-            this.sendIterationsTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.sendIterationsTextBox.Name = "sendIterationsTextBox";
-            this.sendIterationsTextBox.Size = new System.Drawing.Size(125, 38);
-            this.sendIterationsTextBox.TabIndex = 16;
-            this.sendIterationsTextBox.Text = "1";
-            this.sendIterationsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            sendIterationsTextBox.Location = new System.Drawing.Point(975, 301);
+            sendIterationsTextBox.Name = "sendIterationsTextBox";
+            sendIterationsTextBox.Size = new System.Drawing.Size(158, 47);
+            sendIterationsTextBox.TabIndex = 16;
+            sendIterationsTextBox.Text = "1";
+            sendIterationsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // sendCountTextBox
             // 
-            this.sendCountTextBox.Location = new System.Drawing.Point(918, 288);
-            this.sendCountTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.sendCountTextBox.Name = "sendCountTextBox";
-            this.sendCountTextBox.ReadOnly = true;
-            this.sendCountTextBox.Size = new System.Drawing.Size(125, 38);
-            this.sendCountTextBox.TabIndex = 18;
-            this.sendCountTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            sendCountTextBox.Location = new System.Drawing.Point(970, 383);
+            sendCountTextBox.Name = "sendCountTextBox";
+            sendCountTextBox.ReadOnly = true;
+            sendCountTextBox.Size = new System.Drawing.Size(163, 47);
+            sendCountTextBox.TabIndex = 18;
+            sendCountTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label8
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 266);
-            this.label8.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(147, 32);
-            this.label8.TabIndex = 19;
-            this.label8.Text = "Extra Data";
+            label8.AutoSize = true;
+            label8.Location = new System.Drawing.Point(3, 352);
+            label8.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(151, 41);
+            label8.TabIndex = 19;
+            label8.Text = "Extra Data";
             // 
             // extraDataTextBox
             // 
-            this.extraDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.extraDataTextBox.Location = new System.Drawing.Point(16, 309);
-            this.extraDataTextBox.Margin = new System.Windows.Forms.Padding(1);
-            this.extraDataTextBox.Name = "extraDataTextBox";
-            this.extraDataTextBox.Size = new System.Drawing.Size(227, 41);
-            this.extraDataTextBox.TabIndex = 20;
-            this.extraDataTextBox.Text = "0";
-            this.extraDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            extraDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            extraDataTextBox.Location = new System.Drawing.Point(17, 409);
+            extraDataTextBox.Margin = new System.Windows.Forms.Padding(1);
+            extraDataTextBox.Name = "extraDataTextBox";
+            extraDataTextBox.Size = new System.Drawing.Size(241, 41);
+            extraDataTextBox.TabIndex = 20;
+            extraDataTextBox.Text = "0";
+            extraDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(45, 551);
-            this.label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(886, 32);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Meadow:Text, Data, Path Name or CMD Line (e.g. \'ping google.com\') ";
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(48, 729);
+            label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(935, 41);
+            label2.TabIndex = 5;
+            label2.Text = "Meadow:Text, Data, Path Name or CMD Line (e.g. 'ping google.com') ";
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.connectButton);
-            this.groupBox1.Controls.Add(this.comPortComboBox);
-            this.groupBox1.Controls.Add(this.refreshPortsButton);
-            this.groupBox1.Location = new System.Drawing.Point(7, 24);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(251, 239);
-            this.groupBox1.TabIndex = 28;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Comm Port";
+            groupBox1.Controls.Add(connectButton);
+            groupBox1.Controls.Add(comPortComboBox);
+            groupBox1.Controls.Add(refreshPortsButton);
+            groupBox1.Location = new System.Drawing.Point(7, 32);
+            groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            groupBox1.Size = new System.Drawing.Size(267, 316);
+            groupBox1.TabIndex = 28;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Comm Port";
             // 
             // label6
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(883, 194);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(200, 32);
-            this.label6.TabIndex = 17;
-            this.label6.Text = "Iteration Count";
+            label6.AutoSize = true;
+            label6.Location = new System.Drawing.Point(946, 257);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(218, 41);
+            label6.TabIndex = 17;
+            label6.Text = "Iteration Count";
             // 
             // HcomDiagUiForm
             // 
-            this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(2022, 1624);
-            this.Controls.Add(this.extraDataTextBox);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.sendCountTextBox);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.sendIterationsTextBox);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.execTimeTextBox);
-            this.Controls.Add(this.showRecvHexCheckBox);
-            this.Controls.Add(this.HostFileTextBox);
-            this.Controls.Add(this.textForMsgTextBox);
-            this.Controls.Add(this.msgClassTextBox);
-            this.Controls.Add(this.cmdValueTextBox);
-            this.Controls.Add(this.cmdInfoTextBox);
-            this.Controls.Add(this.cmdSelTextBox);
-            this.Controls.Add(this.statusTextBox);
-            this.Controls.Add(this.userDataTextBox);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.sendRecvTextBox);
-            this.Controls.Add(this.commandListBox);
-            this.Controls.Add(this.sendButton);
-            this.Controls.Add(this.groupBox1);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "HcomDiagUiForm";
-            this.Text = "HcomDiagUi";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.HcomDiagUiForm_FormClosing);
-            this.Shown += new System.EventHandler(this.HcomDiagUiForm_Shown);
-            this.groupBox1.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AllowDrop = true;
+            AutoScaleDimensions = new System.Drawing.SizeF(17F, 41F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(2148, 2148);
+            Controls.Add(extraDataTextBox);
+            Controls.Add(label8);
+            Controls.Add(sendCountTextBox);
+            Controls.Add(label6);
+            Controls.Add(sendIterationsTextBox);
+            Controls.Add(cancelButton);
+            Controls.Add(execTimeTextBox);
+            Controls.Add(showRecvHexCheckBox);
+            Controls.Add(HostFileTextBox);
+            Controls.Add(textForMsgTextBox);
+            Controls.Add(msgClassTextBox);
+            Controls.Add(cmdValueTextBox);
+            Controls.Add(cmdInfoTextBox);
+            Controls.Add(cmdSelTextBox);
+            Controls.Add(statusTextBox);
+            Controls.Add(userDataTextBox);
+            Controls.Add(label3);
+            Controls.Add(label5);
+            Controls.Add(label4);
+            Controls.Add(label7);
+            Controls.Add(label2);
+            Controls.Add(sendRecvTextBox);
+            Controls.Add(showHiddenCommandsCheckBox);
+            Controls.Add(commandListBox);
+            Controls.Add(sendButton);
+            Controls.Add(groupBox1);
+            Name = "HcomDiagUiForm";
+            Text = "HcomDiagUi";
+            FormClosing += HcomDiagUiForm_FormClosing;
+            Shown += HcomDiagUiForm_Shown;
+            groupBox1.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -423,6 +415,7 @@ namespace HcomDiagUi
         private System.Windows.Forms.Button refreshPortsButton;
         private System.Windows.Forms.Button connectButton;
         internal System.Windows.Forms.ListBox commandListBox;
+        private System.Windows.Forms.CheckBox showHiddenCommandsCheckBox;
         private System.Windows.Forms.TextBox sendRecvTextBox;
         internal System.Windows.Forms.TextBox userDataTextBox;
         private System.Windows.Forms.Label label3;

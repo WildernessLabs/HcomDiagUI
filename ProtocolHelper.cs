@@ -46,12 +46,15 @@ namespace HcomDiagUi
         public MeadowRqstType rqstType;
         public CommandSender sender;
         public CommandFields fields;
+        public CommandCategory category;
 
         public MessageClasses msgClass => sender.MsgClass;
 
         public MeadowRqstData(string rqstName, string rqstInfo,
-            MeadowRqstType rqstType, CommandSender sender, CommandFields fields)
+            MeadowRqstType rqstType, CommandSender sender, CommandFields fields,
+            CommandCategory category)
         {
+            this.category = category;
             this.rqstName = rqstName;
             this.rqstInfo = rqstInfo;
             this.rqstType = rqstType;
