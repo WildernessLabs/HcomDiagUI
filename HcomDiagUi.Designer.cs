@@ -63,9 +63,10 @@ namespace HcomDiagUi
             // 
             // sendButton
             // 
-            sendButton.Location = new System.Drawing.Point(975, 471);
+            sendButton.Location = new System.Drawing.Point(344, 149);
+            sendButton.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             sendButton.Name = "sendButton";
-            sendButton.Size = new System.Drawing.Size(158, 85);
+            sendButton.Size = new System.Drawing.Size(56, 27);
             sendButton.TabIndex = 0;
             sendButton.Text = "Send";
             sendButton.UseVisualStyleBackColor = true;
@@ -75,16 +76,18 @@ namespace HcomDiagUi
             // 
             comPortComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             comPortComboBox.FormattingEnabled = true;
-            comPortComboBox.Location = new System.Drawing.Point(13, 48);
+            comPortComboBox.Location = new System.Drawing.Point(5, 15);
+            comPortComboBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             comPortComboBox.Name = "comPortComboBox";
-            comPortComboBox.Size = new System.Drawing.Size(240, 44);
+            comPortComboBox.Size = new System.Drawing.Size(87, 23);
             comPortComboBox.TabIndex = 1;
             // 
             // refreshPortsButton
             // 
-            refreshPortsButton.Location = new System.Drawing.Point(13, 225);
+            refreshPortsButton.Location = new System.Drawing.Point(5, 71);
+            refreshPortsButton.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             refreshPortsButton.Name = "refreshPortsButton";
-            refreshPortsButton.Size = new System.Drawing.Size(240, 66);
+            refreshPortsButton.Size = new System.Drawing.Size(85, 21);
             refreshPortsButton.TabIndex = 26;
             refreshPortsButton.Text = "Scan";
             refreshPortsButton.UseVisualStyleBackColor = true;
@@ -92,9 +95,10 @@ namespace HcomDiagUi
             // 
             // connectButton
             // 
-            connectButton.Location = new System.Drawing.Point(12, 135);
+            connectButton.Location = new System.Drawing.Point(4, 43);
+            connectButton.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             connectButton.Name = "connectButton";
-            connectButton.Size = new System.Drawing.Size(241, 66);
+            connectButton.Size = new System.Drawing.Size(85, 21);
             connectButton.TabIndex = 27;
             connectButton.Text = "Connect";
             connectButton.UseVisualStyleBackColor = true;
@@ -105,10 +109,11 @@ namespace HcomDiagUi
             commandListBox.AllowDrop = true;
             commandListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             commandListBox.FormattingEnabled = true;
-            commandListBox.Location = new System.Drawing.Point(280, 32);
+            commandListBox.Location = new System.Drawing.Point(99, 10);
+            commandListBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             commandListBox.Name = "commandListBox";
             commandListBox.ScrollAlwaysVisible = true;
-            commandListBox.Size = new System.Drawing.Size(646, 508);
+            commandListBox.Size = new System.Drawing.Size(231, 154);
             commandListBox.Sorted = true;
             commandListBox.TabIndex = 2;
             commandListBox.SelectedIndexChanged += commandListBox_SelectedIndexChanged;
@@ -116,9 +121,10 @@ namespace HcomDiagUi
             // showHiddenCommandsCheckBox
             // 
             showHiddenCommandsCheckBox.AutoSize = true;
-            showHiddenCommandsCheckBox.Location = new System.Drawing.Point(309, 571);
+            showHiddenCommandsCheckBox.Location = new System.Drawing.Point(109, 181);
+            showHiddenCommandsCheckBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             showHiddenCommandsCheckBox.Name = "showHiddenCommandsCheckBox";
-            showHiddenCommandsCheckBox.Size = new System.Drawing.Size(575, 45);
+            showHiddenCommandsCheckBox.Size = new System.Drawing.Size(208, 17);
             showHiddenCommandsCheckBox.TabIndex = 29;
             showHiddenCommandsCheckBox.Text = "Show internal/unsupported commands";
             showHiddenCommandsCheckBox.UseVisualStyleBackColor = true;
@@ -128,21 +134,22 @@ namespace HcomDiagUi
             // 
             sendRecvTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             sendRecvTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            sendRecvTextBox.Location = new System.Drawing.Point(32, 1586);
+            sendRecvTextBox.Location = new System.Drawing.Point(11, 503);
+            sendRecvTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             sendRecvTextBox.Multiline = true;
             sendRecvTextBox.Name = "sendRecvTextBox";
             sendRecvTextBox.ReadOnly = true;
             sendRecvTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            sendRecvTextBox.Size = new System.Drawing.Size(2085, 492);
+            sendRecvTextBox.Size = new System.Drawing.Size(738, 171);
             sendRecvTextBox.TabIndex = 3;
             // 
             // userDataTextBox
             // 
             userDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            userDataTextBox.Location = new System.Drawing.Point(17, 525);
-            userDataTextBox.Margin = new System.Windows.Forms.Padding(1);
+            userDataTextBox.Location = new System.Drawing.Point(6, 166);
+            userDataTextBox.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             userDataTextBox.Name = "userDataTextBox";
-            userDataTextBox.Size = new System.Drawing.Size(241, 41);
+            userDataTextBox.Size = new System.Drawing.Size(88, 21);
             userDataTextBox.TabIndex = 7;
             userDataTextBox.Text = "0";
             userDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -150,10 +157,10 @@ namespace HcomDiagUi
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new System.Drawing.Point(1, 481);
-            label3.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            label3.Location = new System.Drawing.Point(0, 153);
+            label3.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(147, 41);
+            label3.Size = new System.Drawing.Size(55, 13);
             label3.TabIndex = 5;
             label3.Text = "User Data";
             // 
@@ -161,29 +168,32 @@ namespace HcomDiagUi
             // 
             statusTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             statusTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            statusTextBox.Location = new System.Drawing.Point(11, 906);
+            statusTextBox.Location = new System.Drawing.Point(4, 287);
+            statusTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             statusTextBox.Multiline = true;
             statusTextBox.Name = "statusTextBox";
             statusTextBox.ReadOnly = true;
             statusTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            statusTextBox.Size = new System.Drawing.Size(2096, 537);
+            statusTextBox.Size = new System.Drawing.Size(742, 173);
             statusTextBox.TabIndex = 8;
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new System.Drawing.Point(22, 861);
+            label4.Location = new System.Drawing.Point(8, 273);
+            label4.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(98, 41);
+            label4.Size = new System.Drawing.Size(37, 13);
             label4.TabIndex = 5;
             label4.Text = "Status";
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(31, 1510);
+            label5.Location = new System.Drawing.Point(11, 479);
+            label5.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             label5.Name = "label5";
-            label5.Size = new System.Drawing.Size(215, 41);
+            label5.Size = new System.Drawing.Size(83, 13);
             label5.TabIndex = 5;
             label5.Text = "Send/Received";
             // 
@@ -191,10 +201,11 @@ namespace HcomDiagUi
             // 
             cmdSelTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             cmdSelTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            cmdSelTextBox.Location = new System.Drawing.Point(1185, 32);
+            cmdSelTextBox.Location = new System.Drawing.Point(418, 10);
+            cmdSelTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             cmdSelTextBox.Name = "cmdSelTextBox";
             cmdSelTextBox.ReadOnly = true;
-            cmdSelTextBox.Size = new System.Drawing.Size(2022, 41);
+            cmdSelTextBox.Size = new System.Drawing.Size(332, 21);
             cmdSelTextBox.TabIndex = 9;
             cmdSelTextBox.Text = "Cmd Description";
             // 
@@ -202,20 +213,22 @@ namespace HcomDiagUi
             // 
             cmdInfoTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             cmdInfoTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            cmdInfoTextBox.Location = new System.Drawing.Point(1185, 107);
+            cmdInfoTextBox.Location = new System.Drawing.Point(418, 34);
+            cmdInfoTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             cmdInfoTextBox.Multiline = true;
             cmdInfoTextBox.Name = "cmdInfoTextBox";
             cmdInfoTextBox.ReadOnly = true;
-            cmdInfoTextBox.Size = new System.Drawing.Size(933, 323);
+            cmdInfoTextBox.Size = new System.Drawing.Size(332, 105);
             cmdInfoTextBox.TabIndex = 10;
             // 
             // cmdValueTextBox
             // 
             cmdValueTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            cmdValueTextBox.Location = new System.Drawing.Point(946, 32);
+            cmdValueTextBox.Location = new System.Drawing.Point(334, 10);
+            cmdValueTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             cmdValueTextBox.Name = "cmdValueTextBox";
             cmdValueTextBox.ReadOnly = true;
-            cmdValueTextBox.Size = new System.Drawing.Size(213, 41);
+            cmdValueTextBox.Size = new System.Drawing.Size(78, 21);
             cmdValueTextBox.TabIndex = 11;
             cmdValueTextBox.Text = "Cmd Value";
             cmdValueTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -224,18 +237,20 @@ namespace HcomDiagUi
             // 
             textForMsgTextBox.AllowDrop = true;
             textForMsgTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            textForMsgTextBox.Location = new System.Drawing.Point(34, 795);
+            textForMsgTextBox.Location = new System.Drawing.Point(12, 252);
+            textForMsgTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             textForMsgTextBox.MaxLength = 512;
             textForMsgTextBox.Name = "textForMsgTextBox";
-            textForMsgTextBox.Size = new System.Drawing.Size(1696, 41);
+            textForMsgTextBox.Size = new System.Drawing.Size(601, 21);
             textForMsgTextBox.TabIndex = 12;
             // 
             // showRecvHexCheckBox
             // 
             showRecvHexCheckBox.AutoSize = true;
-            showRecvHexCheckBox.Location = new System.Drawing.Point(323, 1508);
+            showRecvHexCheckBox.Location = new System.Drawing.Point(114, 478);
+            showRecvHexCheckBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             showRecvHexCheckBox.Name = "showRecvHexCheckBox";
-            showRecvHexCheckBox.Size = new System.Drawing.Size(107, 45);
+            showRecvHexCheckBox.Size = new System.Drawing.Size(45, 17);
             showRecvHexCheckBox.TabIndex = 13;
             showRecvHexCheckBox.Text = "Hex";
             showRecvHexCheckBox.UseVisualStyleBackColor = true;
@@ -244,10 +259,11 @@ namespace HcomDiagUi
             // msgClassTextBox
             // 
             msgClassTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            msgClassTextBox.Location = new System.Drawing.Point(946, 147);
+            msgClassTextBox.Location = new System.Drawing.Point(334, 47);
+            msgClassTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             msgClassTextBox.Name = "msgClassTextBox";
             msgClassTextBox.ReadOnly = true;
-            msgClassTextBox.Size = new System.Drawing.Size(213, 41);
+            msgClassTextBox.Size = new System.Drawing.Size(78, 21);
             msgClassTextBox.TabIndex = 11;
             msgClassTextBox.Text = "Cmd Type";
             msgClassTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -256,39 +272,41 @@ namespace HcomDiagUi
             // 
             HostFileTextBox.AllowDrop = true;
             HostFileTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            HostFileTextBox.Location = new System.Drawing.Point(39, 649);
+            HostFileTextBox.Location = new System.Drawing.Point(14, 206);
+            HostFileTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             HostFileTextBox.MaxLength = 512;
             HostFileTextBox.Name = "HostFileTextBox";
-            HostFileTextBox.Size = new System.Drawing.Size(1692, 41);
+            HostFileTextBox.Size = new System.Drawing.Size(600, 21);
             HostFileTextBox.TabIndex = 12;
             HostFileTextBox.Text = "C:\\HcomFiles\\Write\\Text\\TestFileGen1-26.txt";
             // 
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(26, 596);
+            label7.Location = new System.Drawing.Point(9, 189);
+            label7.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(133, 41);
+            label7.Size = new System.Drawing.Size(48, 13);
             label7.TabIndex = 5;
             label7.Text = "Host File";
             // 
             // execTimeTextBox
             // 
-            execTimeTextBox.Location = new System.Drawing.Point(1185, 489);
-            execTimeTextBox.Margin = new System.Windows.Forms.Padding(1);
+            execTimeTextBox.Location = new System.Drawing.Point(418, 155);
+            execTimeTextBox.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             execTimeTextBox.Name = "execTimeTextBox";
             execTimeTextBox.ReadOnly = true;
-            execTimeTextBox.Size = new System.Drawing.Size(280, 47);
+            execTimeTextBox.Size = new System.Drawing.Size(101, 20);
             execTimeTextBox.TabIndex = 14;
             execTimeTextBox.Text = "Execution Time";
             execTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // cancelButton
             // 
-            cancelButton.Location = new System.Drawing.Point(1742, 471);
-            cancelButton.Margin = new System.Windows.Forms.Padding(1);
+            cancelButton.Location = new System.Drawing.Point(615, 149);
+            cancelButton.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             cancelButton.Name = "cancelButton";
-            cancelButton.Size = new System.Drawing.Size(141, 91);
+            cancelButton.Size = new System.Drawing.Size(50, 29);
             cancelButton.TabIndex = 15;
             cancelButton.Text = "Cancel";
             cancelButton.UseVisualStyleBackColor = true;
@@ -296,39 +314,41 @@ namespace HcomDiagUi
             // 
             // sendIterationsTextBox
             // 
-            sendIterationsTextBox.Location = new System.Drawing.Point(975, 301);
+            sendIterationsTextBox.Location = new System.Drawing.Point(344, 95);
+            sendIterationsTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             sendIterationsTextBox.Name = "sendIterationsTextBox";
-            sendIterationsTextBox.Size = new System.Drawing.Size(158, 47);
+            sendIterationsTextBox.Size = new System.Drawing.Size(58, 20);
             sendIterationsTextBox.TabIndex = 16;
             sendIterationsTextBox.Text = "1";
             sendIterationsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // sendCountTextBox
             // 
-            sendCountTextBox.Location = new System.Drawing.Point(970, 383);
+            sendCountTextBox.Location = new System.Drawing.Point(342, 121);
+            sendCountTextBox.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             sendCountTextBox.Name = "sendCountTextBox";
             sendCountTextBox.ReadOnly = true;
-            sendCountTextBox.Size = new System.Drawing.Size(163, 47);
+            sendCountTextBox.Size = new System.Drawing.Size(60, 20);
             sendCountTextBox.TabIndex = 18;
             sendCountTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new System.Drawing.Point(3, 352);
-            label8.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            label8.Location = new System.Drawing.Point(1, 112);
+            label8.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(151, 41);
+            label8.Size = new System.Drawing.Size(57, 13);
             label8.TabIndex = 19;
             label8.Text = "Extra Data";
             // 
             // extraDataTextBox
             // 
             extraDataTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            extraDataTextBox.Location = new System.Drawing.Point(17, 409);
-            extraDataTextBox.Margin = new System.Windows.Forms.Padding(1);
+            extraDataTextBox.Location = new System.Drawing.Point(6, 130);
+            extraDataTextBox.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             extraDataTextBox.Name = "extraDataTextBox";
-            extraDataTextBox.Size = new System.Drawing.Size(241, 41);
+            extraDataTextBox.Size = new System.Drawing.Size(88, 21);
             extraDataTextBox.TabIndex = 20;
             extraDataTextBox.Text = "0";
             extraDataTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -336,10 +356,10 @@ namespace HcomDiagUi
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(48, 729);
-            label2.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            label2.Location = new System.Drawing.Point(17, 231);
+            label2.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
             label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(935, 41);
+            label2.Size = new System.Drawing.Size(337, 13);
             label2.TabIndex = 5;
             label2.Text = "Meadow:Text, Data, Path Name or CMD Line (e.g. 'ping google.com') ";
             // 
@@ -348,11 +368,11 @@ namespace HcomDiagUi
             groupBox1.Controls.Add(connectButton);
             groupBox1.Controls.Add(comPortComboBox);
             groupBox1.Controls.Add(refreshPortsButton);
-            groupBox1.Location = new System.Drawing.Point(7, 32);
-            groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            groupBox1.Location = new System.Drawing.Point(2, 10);
+            groupBox1.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             groupBox1.Name = "groupBox1";
-            groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBox1.Size = new System.Drawing.Size(267, 316);
+            groupBox1.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
+            groupBox1.Size = new System.Drawing.Size(94, 100);
             groupBox1.TabIndex = 28;
             groupBox1.TabStop = false;
             groupBox1.Text = "Comm Port";
@@ -360,18 +380,19 @@ namespace HcomDiagUi
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(946, 257);
+            label6.Location = new System.Drawing.Point(334, 81);
+            label6.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(218, 41);
+            label6.Size = new System.Drawing.Size(76, 13);
             label6.TabIndex = 17;
             label6.Text = "Iteration Count";
             // 
             // HcomDiagUiForm
             // 
             AllowDrop = true;
-            AutoScaleDimensions = new System.Drawing.SizeF(17F, 41F);
+            AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(2148, 2148);
+            ClientSize = new System.Drawing.Size(758, 684);
             Controls.Add(extraDataTextBox);
             Controls.Add(label8);
             Controls.Add(sendCountTextBox);
@@ -398,6 +419,7 @@ namespace HcomDiagUi
             Controls.Add(commandListBox);
             Controls.Add(sendButton);
             Controls.Add(groupBox1);
+            Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             Name = "HcomDiagUiForm";
             Text = "HcomDiagUi";
             FormClosing += HcomDiagUiForm_FormClosing;
