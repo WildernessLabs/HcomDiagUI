@@ -155,7 +155,7 @@ namespace HcomDiagUi
             hdrMsg.stdHeader.userData = userData;
 
             MeadowRqstData rqstData;
-            rqstData = ProtocolHelper.DecodeMsgToMeadow(requestType);
+            rqstData = MeadowCommands.Find(requestType);
 
             if (Verbose)
             {

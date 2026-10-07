@@ -24,14 +24,14 @@ namespace HcomDiagUi
 
         internal void PopulateCommandListBox()
         {
-            UInt16[] requestTypes = (ushort[])Enum.GetValues(typeof(MeadowRqstType));
+            // Report table mistakes, e.g. a new MeadowRqstType without an entry
+            foreach (string problem in MeadowCommands.Validate().Concat(HostMessages.Validate()))
+                WriteStatusLine($"Command table error - {problem}");
 
             _hcomUiForm.CommandListBox.BeginUpdate();
-            foreach (MeadowRqstType rqstType in requestTypes)
+            foreach (MeadowRqstData command in MeadowCommands.All)
             {
-                // Use the request type to find the command name and command information
-                MeadowRqstData meadowRqstData = ProtocolHelper.DecodeMsgToMeadow(rqstType);
-                _hcomUiForm.CommandListBox.Items.Add(meadowRqstData);
+                _hcomUiForm.CommandListBox.Items.Add(command);
             }
             _hcomUiForm.CommandListBox.EndUpdate();
         }
