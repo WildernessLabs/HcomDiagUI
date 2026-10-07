@@ -51,13 +51,67 @@ namespace HcomDiagUi
             _sendSerialComms.BuildAndSendDiagCmdMsg(RqstType, UserData, ExtraData, text);
         }
 
-        // Sends the file start message (userData is the partition). Only returns
+        // Sends the file start message. userData is still sent in the partition
+        // field, which Meadow.OS no longer uses (partitioning was dropped; the
+        // field is kept so the HCOM protocol doesn't change). Only returns
         // after Meadow has accepted or rejected it; the file data and end message
         // are then sent by a thread pool thread (see DnldF7Files).
         public void StartF7FileDownload()
         {
             _f7Download.FindDownloadFileInformation(RqstType, UserData, Text, HostFile);
         }
+    }
+
+    //==========================================================================
+    // What a command does with one of the UI's input fields
+    public sealed class FieldUse
+    {
+        // null when the field is not used
+        public string Label { get; }
+
+        // Send is refused while a required text field is empty
+        public bool Required { get; }
+
+        public bool Used => Label != null;
+
+        FieldUse(string label, bool required)
+        {
+            Label = label;
+            Required = required;
+        }
+
+        public static readonly FieldUse NotUsed = new FieldUse(null, false);
+
+        public static FieldUse Optional(string label) => new FieldUse(label, false);
+        public static FieldUse Mandatory(string label) => new FieldUse(label, true);
+
+        // Lets a table entry write userData: "Trace level"
+        public static implicit operator FieldUse(string label) => Optional(label);
+    }
+
+    // What a command does with each input field. Commands whose use of the
+    // fields hasn't been checked against Meadow.OS have Unspecified, and the
+    // UI keeps its generic field labels for them.
+    public sealed class CommandFields
+    {
+        public bool Specified { get; }
+        public FieldUse UserData { get; }
+        public FieldUse ExtraData { get; }
+        public FieldUse HostFile { get; }
+        public FieldUse Text { get; }
+
+        public CommandFields(bool specified, FieldUse userData, FieldUse extraData,
+            FieldUse hostFile, FieldUse text)
+        {
+            Specified = specified;
+            UserData = userData;
+            ExtraData = extraData;
+            HostFile = hostFile;
+            Text = text;
+        }
+
+        public static readonly CommandFields Unspecified = new CommandFields(false,
+            FieldUse.NotUsed, FieldUse.NotUsed, FieldUse.NotUsed, FieldUse.NotUsed);
     }
 
     //==========================================================================
@@ -111,13 +165,29 @@ namespace HcomDiagUi
     // MeadowRqstType value (Protocol.cs) and one entry here. A command that
     // needs more than a standard sender (see Send) gets its own CommandSender,
     // like SendRtcSetTime below.
+    //
+    // Uses(...) says what the command does with each input field, as checked
+    // against Meadow.OS (apps/system/hcom). Fields not named in Uses(...) are
+    // shown as not used; Req(...) marks a text field that must not be empty.
+    // Entries without Uses(...) keep the UI's generic field labels.
     public static class MeadowCommands
     {
         static MeadowRqstData Cmd(MeadowRqstType rqstType, string name, string info,
-            CommandSender sender)
+            CommandSender sender, CommandFields fields = null)
         {
-            return new MeadowRqstData(name, info, rqstType, sender);
+            return new MeadowRqstData(name, info, rqstType, sender,
+                fields ?? CommandFields.Unspecified);
         }
+
+        static CommandFields Uses(FieldUse userData = null, FieldUse extraData = null,
+            FieldUse hostFile = null, FieldUse text = null)
+        {
+            return new CommandFields(true, userData ?? FieldUse.NotUsed,
+                extraData ?? FieldUse.NotUsed, hostFile ?? FieldUse.NotUsed,
+                text ?? FieldUse.NotUsed);
+        }
+
+        static FieldUse Req(string label) => FieldUse.Mandatory(label);
 
         // Sends the PC's current time instead of the text field
         static readonly CommandSender SendRtcSetTime =
@@ -150,7 +220,7 @@ namespace HcomDiagUi
             Cmd(HCOM_MDOW_REQUEST_CHANGE_TRACE_LEVEL, "trace level",
                 "UserData field holds the new level.\r\nThe value " +
                 "of 2 is usually a good choice.",
-                Send.Header),
+                Send.Header, Uses(userData: "Trace level")),
 
             Cmd(HCOM_MDOW_REQUEST_FORMAT_FLASH_FILE_SYS, "** not supported fs format",
                 "Was used to format file system, but no longer supported",
@@ -183,7 +253,7 @@ namespace HcomDiagUi
                 "will report that it cannot be disabled\r\n" +
                 "This will only work if NSH support is included " +
                 "in the build.",
-                Send.Header),
+                Send.Header, Uses(userData: "1 = enable")),
 
             Cmd(HCOM_MDOW_REQUEST_LIST_PARTITION_FILES, "file list (CLIv1)",
                 "Returns a list of files in the file system",
@@ -195,11 +265,11 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR, "File List (CLIv2)",
                 "Returns a list of files and directories in the file system",
-                Send.Text),
+                Send.Text, Uses(text: "Meadow directory (empty = /meadow0)")),
 
             Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR_CRC, "File List with CRC (CLIv2)",
                 "Returns a list of files and directories with file CRC checksums",
-                Send.Text),
+                Send.Text, Uses(text: "Meadow directory (empty = /meadow0)")),
 
             Cmd(HCOM_MDOW_REQUEST_MONO_DISABLE, "mono disable",
                 "Prevents mono from running",
@@ -274,7 +344,7 @@ namespace HcomDiagUi
             Cmd(HCOM_MDOW_REQUEST_GET_INITIAL_FILE_BYTES, "file initial",
                 "Gets the initial bytes (upto 500).\r\n" +
                 "Requires the Meadow file name in 'Text Data' field",
-                Send.Text),
+                Send.Text, Uses(text: Req("Meadow file name"))),
 
             Cmd(HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND, "(internal) file read start",
                 "Internal used by Meadow to tell CLI it's ready for data to be sent",
@@ -286,7 +356,8 @@ namespace HcomDiagUi
 
             Cmd(HCOM_MDOW_REQUEST_START_FILE_TRANSFER, "file write",
                 "Downloads a file to the Meadow file system",
-                Send.F7FileDownload),
+                Send.F7FileDownload,
+                Uses(hostFile: Req("PC file to send"), text: Req("Meadow file name"))),
 
             Cmd(HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME, "file delete",
                 "Deletes a file by name from the F7 file system",
@@ -299,24 +370,25 @@ namespace HcomDiagUi
             Cmd(HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT, "(new) file read (aka upload)",
                 "Initiates reading a file from Meadow. Put host's destination pathname " +
                 "in 'Host File' field and the Meadow path name in the 'File Name' field",
-                Send.Text),
+                Send.Text,
+                Uses(hostFile: Req("PC file to save to"), text: Req("Meadow file name"))),
 
             Cmd(HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD, "(new) Send command-line",
                 "Only for Ethernet. Sends command (e.g. ping to web site via IP or name. " +
                 "All elements must be space separated (e.g. ping abc.xyz).",
-                Send.DiagCmd),
+                Send.DiagCmd, Uses(text: Req("Command line, e.g. ping abc.xyz"))),
 
             Cmd(HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD, "(new) Set RTC clock",
                 "Needs UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25-07:00)",
-                SendRtcSetTime),
+                SendRtcSetTime, Uses()),     // Sends the PC's time
 
             Cmd(HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD, "(new) Read RTC clock",
                 "Reads UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25-07:00)",
-                Send.Text),
+                Send.Text, Uses()),
 
             Cmd(HCOM_MDOW_REQUEST_RTC_WAKEUP_TIME_CMD, "(new) Set RTC Alarm (wakeup)",
                 "Sends ISO 8601 time period (e.g. 3:19 P0Y0M0DT0H3M19S)",
-                Send.Text),
+                Send.Text, Uses(text: Req("ISO 8601 period, e.g. P0Y0M0DT0H3M19S"))),
 
             Cmd(HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA, "(internal) debugging data",
                 "Identifies to F7 debugging information",
@@ -325,7 +397,7 @@ namespace HcomDiagUi
             // This replaces the 4 developer items above
             Cmd(HCOM_MDOW_REQUEST_DEVELOPER, "Developer",
                 "(new) Diagnostic\r\nExtraData is developer number, UserData contains the value",
-                Send.Header),
+                Send.Header, Uses(userData: "Value", extraData: "Developer no.")),
 
             Cmd(HCOM_MDOW_REQUEST_GET_FILES_AND_FOLDERS, "file list & dev nested",
                 "Returns a list of all devices and files",
@@ -357,7 +429,7 @@ namespace HcomDiagUi
                 return command;
 
             return new MeadowRqstData("Meadow Request Type not found", "For testing only",
-                rqstType, Send.Nothing);
+                rqstType, Send.Nothing, CommandFields.Unspecified);
         }
 
         // Problems with the table, e.g. a MeadowRqstType value without an entry.

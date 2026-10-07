@@ -32,9 +32,21 @@ namespace HcomDiagUi
         bool _reconnecting;
         bool _sendBusy;
 
+        // Designer label texts, shown for commands whose field use isn't
+        // specified in MeadowCommands
+        readonly string _userDataLabel;
+        readonly string _extraDataLabel;
+        readonly string _hostFileLabel;
+        readonly string _textLabel;
+
         public HcomDiagUiForm()
         {
             InitializeComponent();
+
+            _userDataLabel = label3.Text;
+            _extraDataLabel = label8.Text;
+            _hostFileLabel = label7.Text;
+            _textLabel = label2.Text;
 
             _uiSupport = new UiSupport(this);
             _uiSupport.PopulateCommandListBox();
@@ -315,6 +327,9 @@ namespace HcomDiagUi
                 return;
             }
 
+            if (!InputFieldsValid((MeadowRqstData)commandListBox.SelectedItem))
+                return;
+
             _uiSupport.SendButtonEnable(false);
 
             // Tell the communication manager we have work to do
@@ -330,6 +345,72 @@ namespace HcomDiagUi
             _uiSupport.WriteCmdValue(rqstInfo.GetHexValue());
             _uiSupport.WriteCmdInfo(rqstInfo.rqstInfo);
             _uiSupport.WriteCmdClass(rqstInfo.msgClass.ToString());
+            ShowFieldLabels(rqstInfo.fields);
+        }
+
+        //---------------------------------------------------------
+        // Label the input fields with what the selected command does with them.
+        // The User/Extra Data labels sit in a narrow column, so they show only
+        // the meaning; Host File and the Meadow text field have room for more.
+        private void ShowFieldLabels(CommandFields fields)
+        {
+            if (!fields.Specified)
+            {
+                label3.Text = _userDataLabel;
+                label8.Text = _extraDataLabel;
+                label7.Text = _hostFileLabel;
+                label2.Text = _textLabel;
+                return;
+            }
+
+            label3.Text = fields.UserData.Used ? fields.UserData.Label : "(not used)";
+            label8.Text = fields.ExtraData.Used ? fields.ExtraData.Label : "(not used)";
+            label7.Text = WideLabel("Host File", fields.HostFile);
+            label2.Text = WideLabel("Meadow", fields.Text);
+        }
+
+        private static string WideLabel(string fieldName, FieldUse use)
+        {
+            if (!use.Used)
+                return $"{fieldName} (not used)";
+
+            return use.Required ? $"{fieldName}: {use.Label} (required)" : $"{fieldName}: {use.Label}";
+        }
+
+        //---------------------------------------------------------
+        // Check the input fields before sending. Problems are reported in the
+        // Status box and nothing is sent.
+        private bool InputFieldsValid(MeadowRqstData command)
+        {
+            bool valid = true;
+
+            // CommsManager parses these; a non-number used to crash the app
+            if (!UInt32.TryParse(userDataTextBox.Text.Trim(), out _))
+            {
+                _uiSupport.WriteStatusLine($"User Data must be a number from 0 to {UInt32.MaxValue}");
+                valid = false;
+            }
+
+            if (!UInt16.TryParse(extraDataTextBox.Text.Trim(), out _))
+            {
+                _uiSupport.WriteStatusLine($"Extra Data must be a number from 0 to {UInt16.MaxValue}");
+                valid = false;
+            }
+
+            CommandFields fields = command.fields;
+            if (fields.Text.Required && string.IsNullOrWhiteSpace(textForMsgTextBox.Text))
+            {
+                _uiSupport.WriteStatusLine($"'{command.rqstName}' not sent: the Meadow text field is required ({fields.Text.Label})");
+                valid = false;
+            }
+
+            if (fields.HostFile.Required && string.IsNullOrWhiteSpace(HostFileTextBox.Text))
+            {
+                _uiSupport.WriteStatusLine($"'{command.rqstName}' not sent: the Host File field is required ({fields.HostFile.Label})");
+                valid = false;
+            }
+
+            return valid;
         }
 
         private void showRecvHexCheckBox_CheckedChanged(object sender, EventArgs e)
