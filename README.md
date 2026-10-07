@@ -6,6 +6,7 @@ This tool will never be finished. And it is not yet able to send/receive all
 HCOM protocol message types.
 
 ## Building
-Open `HcomDiagUi.sln` in Visual Studio 2022 or later, or run `dotnet build` from the
-repository root (this also works from WSL/Linux, as a compile check only).
-The executable is written to `bin/Debug/net472/HcomDiagUi.exe`.
+Targets .NET 10 (`net10.0-windows`). Open `HcomDiagUi.sln` in Visual Studio 2026 or
+later, or run `dotnet build` from the repository root (this also works from
+WSL/Linux, as a compile check only). The executable is written to
+`bin/Debug/net10.0-windows/HcomDiagUi.exe` and needs the .NET 10 Desktop Runtime.
