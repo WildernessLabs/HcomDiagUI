@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -6,8 +7,22 @@ using System.Xml.Linq;
 
 namespace HcomDiagUi
 {
-    public class DnldF7Files
+    public class DnldF7Files : IHostMessageProcessor
     {
+        // Meadow's replies to a file download (file write) start
+        public IEnumerable<HostRqstType> Handles => new[]
+        {
+            HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY,
+            HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_FAIL,
+            HostRqstType.HCOM_HOST_REQUEST_DNLD_FAIL_RESEND,
+        };
+
+        public void Process(ReceivedMessage msg)
+        {
+            ProcessRcvdF7Dnld(msg.Header, msg.Info, msg.Type, msg.Buffer, msg.Length,
+                msg.PayloadLength);
+        }
+
         private CommsManager commsManager;
         private UiSupport uiSupport;
         private SendSerialComms sendSerialComms;

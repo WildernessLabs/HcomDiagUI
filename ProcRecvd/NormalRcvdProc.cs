@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace HcomDiagUi
 {
-    public class NormalRcvdProc
+    // Displays every message no other processor claims (see HostMessageRouter)
+    public class NormalRcvdProc : IHostMessageProcessor
     {
         private CommsManager _commsManager;
         private UiSupport _uiSupport;
@@ -22,6 +23,15 @@ namespace HcomDiagUi
         }
 
         public bool Verbose { get; set; }
+
+        // Claims nothing; CommsManager uses it for all unclaimed messages
+        public IEnumerable<HostRqstType> Handles => Array.Empty<HostRqstType>();
+
+        public void Process(ReceivedMessage msg)
+        {
+            DisplayNormalMsgData(msg.Header, msg.Info, msg.Type, msg.Buffer, msg.Length,
+                msg.PayloadLength);
+        }
 
         //===================================================================
         internal void DisplayNormalMsgData(HcomProtoHdrMessage hdrMsg,
