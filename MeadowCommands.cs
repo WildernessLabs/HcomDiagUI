@@ -55,10 +55,10 @@ namespace HcomDiagUi
             _sendSerialComms.BuildAndSendTextMsg(RqstType, UserData, ExtraData, text);
         }
 
-        // Text message that also carries the length of the argument list
-        public void SendDiagCmd(string text)
+        // Header only, with a fixed User Data instead of the User Data field
+        public void SendHeader(UInt32 userData)
         {
-            _sendSerialComms.BuildAndSendDiagCmdMsg(RqstType, UserData, ExtraData, text);
+            _sendSerialComms.BuildAndSendHdrMessage(RqstType, userData, ExtraData);
         }
 
         // File-info message with only the Meadow file name: size, CRC, ESP32
@@ -226,11 +226,16 @@ namespace HcomDiagUi
         public string Name { get; }
         public MessageClasses MsgClass { get; }
 
-        public CommandSender(string name, MessageClasses msgClass, Action<SendContext> send)
+        // Set when the sender always sends this User Data (see Send.HeaderWithUserData)
+        public UInt32? FixedUserData { get; }
+
+        public CommandSender(string name, MessageClasses msgClass, Action<SendContext> send,
+            UInt32? fixedUserData = null)
         {
             Name = name;
             MsgClass = msgClass;
             _send = send;
+            FixedUserData = fixedUserData;
         }
 
         public void Send(SendContext ctx)
@@ -250,13 +255,15 @@ namespace HcomDiagUi
         public static readonly CommandSender Header =
             new CommandSender("Header", MessageClasses.Header, ctx => ctx.SendHeader());
 
+        // Header only, always with the given User Data. For several list entries
+        // sharing one request type (e.g. NSH Enable / NSH Disable).
+        public static CommandSender HeaderWithUserData(UInt32 userData) =>
+            new CommandSender($"Header(UserData={userData})", MessageClasses.Header,
+                ctx => ctx.SendHeader(userData), userData);
+
         // Header followed by the 'Meadow: Text...' field
         public static readonly CommandSender Text =
             new CommandSender("Text", MessageClasses.Text, ctx => ctx.SendText(ctx.Text));
-
-        // Like Text but with the argument list length (diagnostic command line)
-        public static readonly CommandSender DiagCmd =
-            new CommandSender("DiagCmd", MessageClasses.Text, ctx => ctx.SendDiagCmd(ctx.Text));
 
         // File-info message carrying only the 'Meadow: Text...' file name
         public static readonly CommandSender FileInfoNameOnly =
@@ -332,165 +339,168 @@ namespace HcomDiagUi
                 "...",
                 Send.Nothing, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_CHANGE_TRACE_LEVEL, "trace level",
+            Cmd(HCOM_MDOW_REQUEST_CHANGE_TRACE_LEVEL, "Trace Level - Set",
                 "UserData field holds the new level.\r\nThe value " +
                 "of 2 is usually a good choice.",
                 Send.Header, Uses(userData: "Trace level")),
 
-            Cmd(HCOM_MDOW_REQUEST_FORMAT_FLASH_FILE_SYS, "** not supported fs format",
+            Cmd(HCOM_MDOW_REQUEST_FORMAT_FLASH_FILE_SYS, "** Not Supported FS Format",
                 "Was used to format file system, but no longer supported",
                 Send.Header, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_END_FILE_TRANSFER, "(internal) indicates EOF for F/S",
+            Cmd(HCOM_MDOW_REQUEST_END_FILE_TRANSFER, "(Internal) Indicates EOF for F/S",
                 "When the CLI has sent all the F/S data for download, this is sent",
-                Send.Header, category: Internal),
+                Send.Header, Uses(), category: Internal),
 
-            Cmd(HCOM_MDOW_REQUEST_RESTART_PRIMARY_MCU, "device restart",
+            Cmd(HCOM_MDOW_REQUEST_RESTART_PRIMARY_MCU, "Device Restart",
                 "Restarts the STM32F777 but not the ESP32",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_VERIFY_ERASED_FLASH, "flash verify",
+            Cmd(HCOM_MDOW_REQUEST_VERIFY_ERASED_FLASH, "Flash Verify",
                 "Only useful after bulk erase of flash.\r\n " +
                 "This will take a few minutes to execute.",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_BULK_FLASH_ERASE, "flash erase",
+            Cmd(HCOM_MDOW_REQUEST_BULK_FLASH_ERASE, "Flash Erase",
                 "Format the file system (2-3 minutes)",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_ENTER_DFU_MODE, "flash os",
+            Cmd(HCOM_MDOW_REQUEST_ENTER_DFU_MODE, "Flash OS",
                 "Enter DFU Mode",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_ENABLE_DISABLE_NSH, "nsh enable/nsh disable",
-                "Enable/Disable NuttShell (NSH). " +
-                "UserData = 1 will enable. Other values " +
-                "will report that it cannot be disabled\r\n" +
-                "This will only work if NSH support is included " +
-                "in the build.",
-                Send.Header, Uses(userData: "1 = enable")),
+            // Both send ENABLE_DISABLE_NSH; the User Data is set for you
+            Cmd(HCOM_MDOW_REQUEST_ENABLE_DISABLE_NSH, "NSH Enable",
+                "Enables NuttShell (NSH) (sends User Data 1).\r\n" +
+                "This will only work if NSH support is included in the build.",
+                Send.HeaderWithUserData(1), Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_LIST_PARTITION_FILES, "file list (CLIv1)",
+            Cmd(HCOM_MDOW_REQUEST_ENABLE_DISABLE_NSH, "NSH Disable",
+                "Disables NuttShell (NSH) (sends User Data 0). Meadow currently " +
+                "replies that NSH cannot be disabled.",
+                Send.HeaderWithUserData(0), Uses()),
+
+            Cmd(HCOM_MDOW_REQUEST_LIST_PARTITION_FILES, "File List (CLIv1)",
                 "Returns a list of files in the file system (removed from Meadow.OS)",
                 Send.Header, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_LIST_PART_FILES_AND_CRC, "file list with CRC (CLIv1)",
+            Cmd(HCOM_MDOW_REQUEST_LIST_PART_FILES_AND_CRC, "File List with CRC (CLIv1)",
                 "Returns a list of files in the file system with CRC checksum (removed from Meadow.OS)",
                 Send.Header, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR, "File List (CLIv2)",
+            Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR, "File List",
                 "Returns a list of files and directories in the file system",
                 Send.Text, Uses(text: "directory, e.g. /meadow0/dir1x/ (must end with '/'; empty = /meadow0/)")),
 
-            Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR_CRC, "File List with CRC (CLIv2)",
+            Cmd(HCOM_MDOW_REQUEST_LIST_FILES_SUBDIR_CRC, "File List with CRC",
                 "Returns a list of files and directories with file CRC checksums",
                 Send.Text, Uses(text: "directory, e.g. /meadow0/dir1x/ (must end with '/'; empty = /meadow0/)")),
 
-            Cmd(HCOM_MDOW_REQUEST_MONO_DISABLE, "mono disable",
+            Cmd(HCOM_MDOW_REQUEST_MONO_DISABLE, "Mono Disable",
                 "Prevents mono from running",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_MONO_ENABLE, "mono enable",
+            Cmd(HCOM_MDOW_REQUEST_MONO_ENABLE, "Mono Enable",
                 "Enables mono to run",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_MONO_RUN_STATE, "mono state",
+            Cmd(HCOM_MDOW_REQUEST_MONO_RUN_STATE, "Mono State",
                 "Reports if mono is enabled or disabled",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_GET_DEVICE_INFORMATION, "device info",
+            Cmd(HCOM_MDOW_REQUEST_GET_DEVICE_INFORMATION, "Device Info",
                 "Displays device information",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_PART_RENEW_FILE_SYS, "fs renew",
+            Cmd(HCOM_MDOW_REQUEST_PART_RENEW_FILE_SYS, "FS Renew",
                 "Deletes all files quickly",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_NO_TRACE_TO_HOST, "trace disable",
+            Cmd(HCOM_MDOW_REQUEST_NO_TRACE_TO_HOST, "Trace Disable",
                 "Disables trace output from being displayed on CLI",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_SEND_TRACE_TO_HOST, "trace enable",
+            Cmd(HCOM_MDOW_REQUEST_SEND_TRACE_TO_HOST, "Trace Enable",
                 "Enables trace output to be displayed on CLI",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_END_ESP_FILE_TRANSFER, "(internal) indicates EOF for ESP32",
+            Cmd(HCOM_MDOW_REQUEST_END_ESP_FILE_TRANSFER, "(Internal) Indicates EOF for ESP32",
                 "When the CLI has sent all the ESP32 data for download, it sends this",
-                Send.Header, category: Internal),
+                Send.Header, Uses(userData: "1 = last file"), category: Internal),
 
-            Cmd(HCOM_MDOW_REQUEST_READ_ESP_MAC_ADDRESS, "device mac (esp32)",
+            Cmd(HCOM_MDOW_REQUEST_READ_ESP_MAC_ADDRESS, "Device MAC (ESP32)",
                 "read esp mac address",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_RESTART_ESP32, "esp32 restart",
+            Cmd(HCOM_MDOW_REQUEST_RESTART_ESP32, "ESP32 Restart",
                 "Restarts the ESP32 coprocessor",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_MONO_FLASH, "mono flash",
+            Cmd(HCOM_MDOW_REQUEST_MONO_FLASH, "Mono Flash",
                 "Flashes the mono image already download to file system. " +
-                "Not used much since 'mono upload rt' downloads and flashes",
-                Send.Header),
+                "Not used much since 'Mono Update RT' downloads and flashes",
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_SEND_TRACE_TO_UART, "uart trace -e",
+            Cmd(HCOM_MDOW_REQUEST_SEND_TRACE_TO_UART, "UART Trace Enable",
                 "Directs trace output to uart1",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_NO_TRACE_TO_UART, "uart trace",
+            Cmd(HCOM_MDOW_REQUEST_NO_TRACE_TO_UART, "UART Trace Disable",
                 "Stops trace output from going to uart1",
-                Send.Header),
+                Send.Header, Uses()),
 
             // Meadow.CLI 'uart profiler enable/disable'. The profiler data itself
             // comes from the Mono runtime's log profiler (.mlpd) and is captured
             // from UART1 with a separate serial adapter, not by HcomDiagUi.
-            Cmd(HCOM_MDOW_REQUEST_SEND_PROFILER_TO_UART, "uart profiler enable",
+            Cmd(HCOM_MDOW_REQUEST_SEND_PROFILER_TO_UART, "UART Profiler Enable",
                 "Makes UART1 exclusive for Mono profiler data; trace output stops going " +
                 "to UART1. Survives a restart. Same as Meadow.CLI 'uart profiler enable'",
                 Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_NO_PROFILER_TO_UART, "uart profiler disable",
+            Cmd(HCOM_MDOW_REQUEST_NO_PROFILER_TO_UART, "UART Profiler Disable",
                 "Returns UART1 to normal use. Same as Meadow.CLI 'uart profiler disable'",
                 Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_MONO_UPDATE_RUNTIME, "mono update rt",
+            Cmd(HCOM_MDOW_REQUEST_MONO_UPDATE_RUNTIME, "Mono Update RT",
                 "Downloads and flashes mono runtime image to Meadow " +
                 "This command is not implemented in HcomDiagUi",
                 Send.F7FileDownload, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_MONO_UPDATE_FILE_END, "(internal) indicates mono RT downloaded",
+            Cmd(HCOM_MDOW_REQUEST_MONO_UPDATE_FILE_END, "(Internal) Indicates Mono RT Downloaded",
                 "CLI sends this when mono RT has been downloaded",
-                Send.Header, category: Internal),
+                Send.Header, Uses(), category: Internal),
 
-            Cmd(HCOM_MDOW_REQUEST_MONO_START_DBG_SESSION, "debug",
+            Cmd(HCOM_MDOW_REQUEST_MONO_START_DBG_SESSION, "Debug",
                 "Start mono dbg session",
-                Send.Header),    // VERIFY
+                Send.Header, Uses()),    // VERIFY
 
-            Cmd(HCOM_MDOW_REQUEST_GET_DEVICE_NAME, "device name",
+            Cmd(HCOM_MDOW_REQUEST_GET_DEVICE_NAME, "Device Name",
                 "Gets the connected Meadow's name (MeadowF7 is default)",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_GET_INITIAL_FILE_BYTES, "file initial",
+            Cmd(HCOM_MDOW_REQUEST_GET_INITIAL_FILE_BYTES, "File Initial",
                 "Gets the initial bytes (upto 500).\r\n" +
                 "Requires the Meadow file name in 'Text Data' field",
                 Send.Text, Uses(text: Req("Meadow file name"))),
 
-            Cmd(HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND, "(internal) file read start",
+            Cmd(HCOM_MDOW_REQUEST_UPLOAD_START_DATA_SEND, "(Internal) File Read Start",
                 "Internal used by Meadow to tell CLI it's ready for data to be sent",
-                Send.Header, category: Internal),
+                Send.Header, Uses(), category: Internal),
 
-            Cmd(HCOM_MDOW_REQUEST_UPLOAD_ABORT_DATA_SEND, "(new) file read abort",
+            Cmd(HCOM_MDOW_REQUEST_UPLOAD_ABORT_DATA_SEND, "File Read Abort",
                 "Cancel the current file being uploaded",
-                Send.Header),
+                Send.Header, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_START_FILE_TRANSFER, "file write",
+            Cmd(HCOM_MDOW_REQUEST_START_FILE_TRANSFER, "File Write",
                 "Downloads a file to the Meadow file system",
                 Send.F7FileDownload,
                 Uses(hostFile: Req("file to send"), text: "Meadow file name (empty = host's file name)")),
 
-            Cmd(HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME, "file delete",
+            Cmd(HCOM_MDOW_REQUEST_DELETE_FILE_BY_NAME, "File Delete",
                 "Deletes a file by name from the F7 file system",
                 Send.FileInfoNameOnly, Uses(text: Req("Meadow file name"))),
 
-            Cmd(HCOM_MDOW_REQUEST_START_ESP_FILE_TRANSFER, "esp file write",
+            Cmd(HCOM_MDOW_REQUEST_START_ESP_FILE_TRANSFER, "ESP32 File Write",
                 "Flashes the Host File (full path, e.g. ...\\WildernessLabs\\Firmware\\2.5.7.9\\MeadowComms.bin) " +
                 "to the ESP32 coprocessor, as Meadow.CLI 'firmware write esp'. " +
                 "Flash address: Meadow text field (e.g. 0x10000), or empty = from the file name " +
@@ -501,57 +511,52 @@ namespace HcomDiagUi
                 Uses(userData: "1 = last file", hostFile: Req("full path of the file to flash"),
                     text: "flash address, e.g. 0x10000 (empty = from file name)")),
 
-            Cmd(HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT, "(new) file read (aka upload)",
+            Cmd(HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT, "File Read (aka Upload)",
                 "Initiates reading a file from Meadow. Put host's destination pathname " +
                 "in 'Host File' field and the Meadow path name in the 'File Name' field",
                 Send.Text,
                 Uses(hostFile: Req("file to save to"), text: Req("Meadow file name"))),
 
-            Cmd(HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD, "(new) Send command-line",
-                "Only for Ethernet. Sends command (e.g. ping to web site via IP or name. " +
-                "All elements must be space separated (e.g. ping abc.xyz).",
-                Send.DiagCmd, Uses(text: Req("Command line, e.g. ping abc.xyz"))),
-
-            Cmd(HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD, "(new) Set RTC clock",
+            Cmd(HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD, "Set RTC Clock",
                 "Needs UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25-07:00)",
                 SendRtcSetTime, Uses()),     // Sends the host's time
 
-            Cmd(HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD, "(new) Read RTC clock",
+            Cmd(HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD, "Read RTC Clock",
                 "Reads UTC time in ISO 8601 format (e.g. 2022-03-31T17:34:25-07:00)",
                 Send.Text, Uses()),
 
-            Cmd(HCOM_MDOW_REQUEST_RTC_WAKEUP_TIME_CMD, "(new) Set RTC Alarm (wakeup)",
+            Cmd(HCOM_MDOW_REQUEST_RTC_WAKEUP_TIME_CMD, "Set RTC Alarm (Wakeup)",
                 "Sends ISO 8601 time period (e.g. 3:19 P0Y0M0DT0H3M19S)",
                 Send.Text, Uses(text: Req("ISO 8601 period, e.g. P0Y0M0DT0H3M19S"))),
 
-            Cmd(HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA, "(internal) debugging data",
+            Cmd(HCOM_MDOW_REQUEST_DEBUGGING_DEBUGGER_DATA, "(Internal) Debugging Data",
                 "Identifies to F7 debugging information",
                 Send.Header, category: Internal),
 
             // This replaces the 4 developer items above
             Cmd(HCOM_MDOW_REQUEST_DEVELOPER, "Developer",
-                "(new) Diagnostic\r\nExtraData is developer number, UserData contains the value",
+                "Diagnostic\r\nExtraData is developer number, UserData contains the value",
                 Send.Header, Uses(userData: "Value", extraData: "Developer no.")),
 
-            Cmd(HCOM_MDOW_REQUEST_GET_FILES_AND_FOLDERS, "file list & dev nested",
+            Cmd(HCOM_MDOW_REQUEST_GET_FILES_AND_FOLDERS, "File List - Nested",
                 "Returns a list of all devices and files",
-                Send.Header),
+                Send.Header, Uses(userData: "1234: show /proc")),
 
-            Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_INIT, "qspi init",
+            Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_INIT, "QSPI Init",
                 "For testing only (removed from Meadow.OS)",
                 Send.Header, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_WRITE, "qspi write",
+            Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_WRITE, "QSPI Write",
                 "For testing only (removed from Meadow.OS)",
                 Send.Header, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_READ, "qspi read",
+            Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_READ, "QSPI Read",
                 "For testing only (removed from Meadow.OS)",
                 Send.Header, category: Unsupported),
 
-            Cmd(HCOM_MDOW_REQUEST_OTA_REGISTER_DEVICE, "OTA - Register device",
+            Cmd(HCOM_MDOW_REQUEST_OTA_REGISTER_DEVICE, "OTA - Register Device",
                 "For testing only",
-                Send.Header),
+                Send.Header, Uses()),
         };
 
         static readonly Dictionary<MeadowRqstType, MeadowRqstData> _byType =
@@ -576,8 +581,14 @@ namespace HcomDiagUi
                     yield return $"MeadowCommands: no entry for {rqstType}";
             }
 
+            // Several entries for one request type are only allowed when each sends
+            // its own fixed User Data (e.g. NSH Enable / NSH Disable)
             foreach (var group in All.GroupBy(c => c.rqstType).Where(g => g.Count() > 1))
-                yield return $"MeadowCommands: {group.Key} has {group.Count()} entries";
+            {
+                var fixedValues = group.Select(c => c.sender.FixedUserData).ToList();
+                if (fixedValues.Any(v => v == null) || fixedValues.Distinct().Count() != fixedValues.Count)
+                    yield return $"MeadowCommands: {group.Key} has {group.Count()} entries";
+            }
         }
     }
 }

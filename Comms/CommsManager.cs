@@ -153,7 +153,7 @@ namespace HcomDiagUi
             // Every processor that handles an exchange with Meadow
             _messageRoutes = HostMessageRouter.BuildRoutes(new IHostMessageProcessor[]
             {
-                _recvF7DownloadMsgs,      // file write and esp file write
+                _recvF7DownloadMsgs,      // File Write and ESP32 File Write
                 _recvUploadMsgs,
             });
         }
@@ -236,13 +236,15 @@ namespace HcomDiagUi
 
             // Read UI iteration field. Always at least 1
             iterations = _uiSupport.SendIterations() > 1 ? _uiSupport.SendIterations() : 1;
+            bool showIteration = iterations > 1;
 
             try
             {
                 do
                 {
                 dispCount++;
-                _uiSupport.WriteSendRecvTimeLine($"Iteration {dispCount}");
+                // Tag Send/Received lines with [n] only when sending more than once
+                _uiSupport.CurrentIteration = showIteration ? dispCount : 0;
 
                 // Update UI too
                 _uiSupport.WriteSendCount(dispCount);
@@ -282,6 +284,7 @@ namespace HcomDiagUi
             }
             finally
             {
+                _uiSupport.CurrentIteration = 0;
                 _uiSupport.Stopwatch.Stop();
                 _uiSupport.WriteExecutionTime();
                 _uiSupport.SendButtonEnable(true);
