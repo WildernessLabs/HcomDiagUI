@@ -8,8 +8,23 @@ using System.Threading.Tasks;
 
 namespace HcomDiagUi
 {
-    public class UploadProcessing
+    public class UploadProcessing : IHostMessageProcessor
     {
+        // The messages of a file upload (file read) from Meadow
+        public IEnumerable<HostRqstType> Handles => new[]
+        {
+            HostRqstType.HCOM_HOST_REQUEST_INIT_UPLOAD_OKAY,
+            HostRqstType.HCOM_HOST_REQUEST_INIT_UPLOAD_FAIL,
+            HostRqstType.HCOM_HOST_REQUEST_UPLOADING_FILE_DATA,
+            HostRqstType.HCOM_HOST_REQUEST_UPLOAD_FILE_COMPLETED,
+        };
+
+        public void Process(ReceivedMessage msg)
+        {
+            ProcessRcvdUpload(msg.Header, msg.Info, msg.Type, msg.Buffer, msg.Length,
+                msg.PayloadLength);
+        }
+
         UiSupport _uiSupport;
         CommsManager _commsMgr;
         int _hcomHdrLen;

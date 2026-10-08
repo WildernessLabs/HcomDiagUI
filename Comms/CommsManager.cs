@@ -58,6 +58,11 @@ namespace HcomDiagUi
         DnldF7Files _recvF7DownloadMsgs;
         DnldEsp32Files _recvEspDownloadMsgs;
 
+        // Message type -> processor, from the processors' Handles lists.
+        // Unclaimed messages go to _recvNormalMsgs.
+        Dictionary<HostRqstType, IHostMessageProcessor> _messageRoutes =
+            new Dictionary<HostRqstType, IHostMessageProcessor>();
+
         // Constructor
         //==========================================================================
         public CommsManager(HcomDiagUiForm hcomUiForm)
@@ -146,6 +151,14 @@ namespace HcomDiagUi
             _recvUploadMsgs = new UploadProcessing(this, _uiSupport);
             _recvF7DownloadMsgs = new DnldF7Files(this, _uiSupport, _sendSerialComms);
             _recvEspDownloadMsgs = new DnldEsp32Files(this, _uiSupport);
+
+            // Every processor that handles an exchange with Meadow
+            _messageRoutes = HostMessageRouter.BuildRoutes(new IHostMessageProcessor[]
+            {
+                _recvF7DownloadMsgs,
+                _recvUploadMsgs,
+                _recvEspDownloadMsgs,
+            });
         }
 
         //-------------------------------------------------------------------------------
@@ -284,7 +297,13 @@ namespace HcomDiagUi
             byte[] messageBuffer, int messageLength, uint payloadLength)
         {
             HostRqstData hostRqstData = HostMessages.Find(hostRqstType);
-            _uiSupport.WriteDebugLine($"Received '{hostRqstData.msgComplex}' message");
+            var msg = new ReceivedMessage(hdrMsg, hostRqstType, hostRqstData, messageBuffer,
+                messageLength, payloadLength);
+
+            IHostMessageProcessor processor =
+                _messageRoutes.TryGetValue(hostRqstType, out IHostMessageProcessor claimed)
+                    ? claimed : _recvNormalMsgs;
+            _uiSupport.WriteDebugLine($"Received '{hostRqstData.rqstName}' -> {processor.GetType().Name}");
 
             // Meadow explains a refused or failed request with an error text
             // (e.g. 'Mono must be disabled for file download'). It is also shown
@@ -292,14 +311,13 @@ namespace HcomDiagUi
             // An unknown request (e.g. one removed from Meadow.OS) is answered with
             // a rejected text
             if (hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_ERROR)
-                ReportMeadowError("error", messageBuffer, messageLength);
+                ReportMeadowError("error", msg);
             else if (hostRqstType == HostRqstType.HCOM_HOST_REQUEST_TEXT_REJECTED)
-                ReportMeadowError("rejected", messageBuffer, messageLength);
+                ReportMeadowError("rejected", msg);
 
             try
             {
-                ForwardToProcessMsgsHelper(hdrMsg, hostRqstData, hostRqstType, messageBuffer,
-                    messageLength, payloadLength);
+                processor.Process(msg);
             }
             catch (NotConnectedException)
             {
@@ -309,12 +327,11 @@ namespace HcomDiagUi
             }
         }
 
-        void ReportMeadowError(string what, byte[] messageBuffer, int messageLength)
+        void ReportMeadowError(string what, ReceivedMessage msg)
         {
-            int hdrLen = Protocol.HcomProtoHdrMessageSize();
-            string text = messageLength > hdrLen
-                ? Encoding.ASCII.GetString(messageBuffer, hdrLen, messageLength - hdrLen).TrimEnd('\0', ' ', '\r', '\n')
-                : "(no text)";
+            string text = msg.Text.TrimEnd('\0', ' ', '\r', '\n');
+            if (text.Length == 0)
+                text = "(no text)";
 
             string command = _lastCommandName;
             _uiSupport.WriteStatusLine(command == null
@@ -322,39 +339,6 @@ namespace HcomDiagUi
                 : $"Meadow {what} ('{command}'): {text}");
         }
 
-        void ForwardToProcessMsgsHelper(HcomProtoHdrMessage hdrMsg, HostRqstData hostRqstData,
-            HostRqstType hostRqstType, byte[] messageBuffer, int messageLength, uint payloadLength)
-        {
-            // Only a few messages are currently complex (i.e. needed 2 or more messages
-            // to complete their purpose)
-            switch (hostRqstData.msgComplex)
-            {
-                case MessageComplex.Normal:
-                    // Only show normal traffic not data upload/download packets
-                    _recvNormalMsgs.DisplayNormalMsgData(hdrMsg, hostRqstData, hostRqstType,
-                        messageBuffer, messageLength, payloadLength);
-                    break;
-
-                case MessageComplex.F7FileDnld:
-                    _recvF7DownloadMsgs.ProcessRcvdF7Dnld(hdrMsg, hostRqstData, hostRqstType,
-                        messageBuffer, messageLength, payloadLength);
-                    break;
-
-                case MessageComplex.EspFileDnld:
-                    _recvEspDownloadMsgs.ProcessRcvdEsp32Dnld(hdrMsg, hostRqstData, hostRqstType,
-                        messageBuffer, messageLength, payloadLength);
-                    break;
-
-                case MessageComplex.F7FileUpload:
-                    _recvUploadMsgs.ProcessRcvdUpload(hdrMsg, hostRqstData, hostRqstType,
-                        messageBuffer, messageLength, payloadLength);
-                    break;
-
-                default:
-                    Debug.Assert(false);
-                    break;
-            }
-        }
 
         //-------------------------------------------------------------------------------
         public SerialPort SerialPort { get => _serialPort; set => _serialPort = value; }

@@ -26,17 +26,6 @@ namespace HcomDiagUi
         NoHdrBin    // 2-byte header + binary data (should be removed)
     }
 
-    // Some message must be used in combination with other messages. So far,
-    // all such combination involve file upload or download. For the purposes
-    // of this application, all messages are "normal."
-    // Note: this is not a protocol definition but a convenience for this app
-    public enum MessageComplex
-    {
-        Normal,
-        F7FileDnld,        // Send Start, Data & End
-        F7FileUpload,      // Recv Start, Data & End
-        EspFileDnld,       // Send Start, Data & End
-    }
 
     // One command that can be sent to Meadow (see MeadowCommands)
     public class MeadowRqstData
@@ -80,16 +69,14 @@ namespace HcomDiagUi
         public string rqstInfo;
         public HostRqstType rqstType;
         public MessageClasses msgClass;
-        public MessageComplex msgComplex;
 
         public HostRqstData(string rqstName, string rqstInfo,
-            HostRqstType rqstType, MessageClasses msgClass, MessageComplex msgComplex)
+            HostRqstType rqstType, MessageClasses msgClass)
         {
             this.rqstName = rqstName;
             this.rqstInfo = rqstInfo;
             this.rqstType = rqstType;
             this.msgClass = msgClass;
-            this.msgComplex = msgComplex;
         }
 
         public override string ToString()
