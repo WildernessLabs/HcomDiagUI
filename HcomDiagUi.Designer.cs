@@ -88,7 +88,7 @@ namespace HcomDiagUi
             refreshPortsButton.Margin = new System.Windows.Forms.Padding(1);
             refreshPortsButton.Name = "refreshPortsButton";
             refreshPortsButton.Size = new System.Drawing.Size(85, 21);
-            refreshPortsButton.TabIndex = 26;
+            refreshPortsButton.TabIndex = 27;
             refreshPortsButton.Text = "Scan";
             refreshPortsButton.UseVisualStyleBackColor = true;
             refreshPortsButton.Click += refreshPortsButton_Click;
@@ -99,7 +99,7 @@ namespace HcomDiagUi
             connectButton.Margin = new System.Windows.Forms.Padding(1);
             connectButton.Name = "connectButton";
             connectButton.Size = new System.Drawing.Size(85, 21);
-            connectButton.TabIndex = 27;
+            connectButton.TabIndex = 26;
             connectButton.Text = "Connect";
             connectButton.UseVisualStyleBackColor = true;
             connectButton.Click += connectButton_Click;
