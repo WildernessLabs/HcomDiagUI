@@ -453,6 +453,13 @@ namespace HcomDiagUi
             _uiSupport.ShowRecvHex(showRecvHexCheckBox.Checked);
         }
 
+        // Empty the Status and Send/Received boxes
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            statusTextBox.Clear();
+            sendRecvTextBox.Clear();
+        }
+
         private void cancelButton_Click(object sender, EventArgs e)
         {
             _commsManager.CancelCommand();

@@ -539,8 +539,9 @@ namespace HcomDiagUi
                 Send.Header, Uses(userData: "Value", extraData: "Developer no.")),
 
             Cmd(HCOM_MDOW_REQUEST_GET_FILES_AND_FOLDERS, "File List - Nested",
-                "Returns a list of all devices and files",
-                Send.Header, Uses(userData: "1234: show /proc")),
+                "Returns a list of all devices and files. User Data non-zero also lists " +
+                "/proc, which only exists in builds with NSH.",
+                Send.Header, Uses(userData: "1 = show /proc")),
 
             Cmd(HCOM_MDOW_REQUEST_QSPI_FLASH_INIT, "QSPI Init",
                 "For testing only (removed from Meadow.OS)",
