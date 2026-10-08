@@ -90,6 +90,62 @@ namespace HcomDiagUi
                 MarkNothingSent();
         }
 
+        // Flashes the host file to the ESP32, as Meadow.CLI 'firmware write esp'
+        // does. Flash address: the Meadow text field if given (e.g. 0x10000),
+        // otherwise from the file name. User Data 1 = last file: Meadow then
+        // finishes and restarts the ESP32 (Meadow.CLI always sends 0).
+        public void StartEsp32FileDownload()
+        {
+            string hostFile = HostFile;
+            string fileName = HostFileName(hostFile);
+            string addressText = Text.Trim();
+
+            UInt32 flashAddress;
+            if (addressText.Length > 0)
+            {
+                if (!TryParseAddress(addressText, out flashAddress))
+                {
+                    _uiSupport.WriteStatusLine($"'{addressText}' is not a flash address (e.g. 0x10000)");
+                    MarkNothingSent();
+                    return;
+                }
+            }
+            else if (!Esp32FlashAddresses.TryGetValue(fileName, out flashAddress))
+            {
+                _uiSupport.WriteStatusLine($"No known ESP32 flash address for '{fileName}'; " +
+                    "enter it in the Meadow text field (e.g. 0x10000)");
+                MarkNothingSent();
+                return;
+            }
+
+            _uiSupport.WriteStatusLine($"Flashing '{fileName}' to ESP32 address 0x{flashAddress:x}" +
+                (UserData == 1 ? ", last file (ESP32 restarts afterwards)" : ""));
+
+            if (!_f7Download.StartFileDownload(RqstType,
+                    MeadowRqstType.HCOM_MDOW_REQUEST_END_ESP_FILE_TRANSFER, 0, fileName, hostFile,
+                    flashAddress, true, UserData))
+                MarkNothingSent();
+        }
+
+        // ESP32 flash addresses of the coprocessor files, as Meadow.CLI's
+        // MeadowDevice.GetFileTargetAddress()
+        static readonly Dictionary<string, UInt32> Esp32FlashAddresses =
+            new Dictionary<string, UInt32>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "bootloader.bin", 0x1000 },
+                { "partition-table.bin", 0x8000 },
+                { "MeadowComms.bin", 0x10000 },
+            };
+
+        // Hex with 0x prefix, or decimal
+        static bool TryParseAddress(string text, out UInt32 address)
+        {
+            if (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                return UInt32.TryParse(text.Substring(2), System.Globalization.NumberStyles.HexNumber,
+                    null, out address);
+            return UInt32.TryParse(text, out address);
+        }
+
         // File name without its folder. Accepts either path separator, so it
         // doesn't depend on the host OS.
         static string HostFileName(string hostPath)
@@ -205,6 +261,10 @@ namespace HcomDiagUi
         // File-info message carrying only the 'Meadow: Text...' file name
         public static readonly CommandSender FileInfoNameOnly =
             new CommandSender("FileInfoNameOnly", MessageClasses.FileInfo, ctx => ctx.SendFileInfoNameOnly(ctx.Text));
+
+        // Flashes the 'Host File' to the ESP32 coprocessor
+        public static readonly CommandSender Esp32FileDownload =
+            new CommandSender("Esp32FileDownload", MessageClasses.FileInfo, ctx => ctx.StartEsp32FileDownload());
 
         // Downloads the 'Host File' to Meadow as the 'Meadow: Text...' file name
         public static readonly CommandSender F7FileDownload =
@@ -431,8 +491,15 @@ namespace HcomDiagUi
                 Send.FileInfoNameOnly, Uses(text: Req("Meadow file name"))),
 
             Cmd(HCOM_MDOW_REQUEST_START_ESP_FILE_TRANSFER, "esp file write",
-                "start esp file transfer",
-                Send.F7FileDownload),
+                "Flashes the Host File (full path, e.g. ...\\WildernessLabs\\Firmware\\2.5.7.9\\MeadowComms.bin) " +
+                "to the ESP32 coprocessor, as Meadow.CLI 'firmware write esp'. " +
+                "Flash address: Meadow text field (e.g. 0x10000), or empty = from the file name " +
+                "(bootloader.bin 0x1000, partition-table.bin 0x8000, MeadowComms.bin 0x10000). " +
+                "User Data 1 = last file: Meadow finishes and restarts the ESP32. " +
+                "Mono must be disabled; flashing can take a few minutes.",
+                Send.Esp32FileDownload,
+                Uses(userData: "1 = last file", hostFile: Req("full path of the file to flash"),
+                    text: "flash address, e.g. 0x10000 (empty = from file name)")),
 
             Cmd(HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT, "(new) file read (aka upload)",
                 "Initiates reading a file from Meadow. Put host's destination pathname " +

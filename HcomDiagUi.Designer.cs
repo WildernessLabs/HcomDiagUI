@@ -218,6 +218,7 @@ namespace HcomDiagUi
             cmdInfoTextBox.Multiline = true;
             cmdInfoTextBox.Name = "cmdInfoTextBox";
             cmdInfoTextBox.ReadOnly = true;
+            cmdInfoTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             cmdInfoTextBox.Size = new System.Drawing.Size(332, 105);
             cmdInfoTextBox.TabIndex = 10;
             // 

@@ -308,7 +308,10 @@ namespace HcomDiagUi
                     encodedToSend++;
                     encodedBytes[encodedToSend] = 0;    // End delimiter
                     encodedToSend++;
-#if DEBUG
+                    // Every packet sent, as hex, in the debugger's Output window. Off by
+                    // default because a file download writes one long line per packet;
+                    // add HCOM_TRACE_PACKETS to the project's DefineConstants to enable.
+#if HCOM_TRACE_PACKETS
                     Debug.WriteLine($"COBS-encoded Message Hex:'{BitConverter.ToString(encodedBytes, 0, encodedToSend)}'");
 #endif
 
