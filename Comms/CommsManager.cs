@@ -56,7 +56,6 @@ namespace HcomDiagUi
         NormalRcvdProc _recvNormalMsgs;
         UploadProcessing _recvUploadMsgs;
         DnldF7Files _recvF7DownloadMsgs;
-        DnldEsp32Files _recvEspDownloadMsgs;
 
         // Message type -> processor, from the processors' Handles lists.
         // Unclaimed messages go to _recvNormalMsgs.
@@ -150,14 +149,12 @@ namespace HcomDiagUi
             _recvNormalMsgs = new NormalRcvdProc(this, _uiSupport);
             _recvUploadMsgs = new UploadProcessing(this, _uiSupport);
             _recvF7DownloadMsgs = new DnldF7Files(this, _uiSupport, _sendSerialComms);
-            _recvEspDownloadMsgs = new DnldEsp32Files(this, _uiSupport);
 
             // Every processor that handles an exchange with Meadow
             _messageRoutes = HostMessageRouter.BuildRoutes(new IHostMessageProcessor[]
             {
-                _recvF7DownloadMsgs,
+                _recvF7DownloadMsgs,      // file write and esp file write
                 _recvUploadMsgs,
-                _recvEspDownloadMsgs,
             });
         }
 

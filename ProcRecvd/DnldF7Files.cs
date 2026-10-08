@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 
 namespace HcomDiagUi
 {
+    // Downloads a host file to Meadow: to the F7 file system ('file write') or
+    // flashed to the ESP32 coprocessor ('esp file write'). Both use the same
+    // exchange: start message, Meadow's okay/fail reply, data packets, end
+    // message.
     public class DnldF7Files : IHostMessageProcessor
     {
-        // Meadow's replies to a file download (file write) start
+        // Meadow's replies to a file download start
         public IEnumerable<HostRqstType> Handles => new[]
         {
             HostRqstType.HCOM_HOST_REQUEST_INIT_DOWNLOAD_OKAY,
@@ -29,6 +34,10 @@ namespace HcomDiagUi
         private UInt32 _packetCrc32;
         private bool _isFileDnldActive;
 
+        // End message of the download in progress (set by StartFileDownload)
+        private MeadowRqstType _endRequestType = MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER;
+        private UInt32 _endUserData;
+
         public bool IsFileDnldActive {
             get { return _isFileDnldActive; }
             set { _isFileDnldActive = value; } }
@@ -41,11 +50,23 @@ namespace HcomDiagUi
             _isFileDnldActive = false;
         }
 
-        // This is start of file download. Returns false if nothing was sent
-        // because the host file doesn't exist.
+        // This is start of file download to the F7 file system. Returns false
+        // if nothing was sent because the host file doesn't exist.
         public bool FindDownloadFileInformation(MeadowRqstType requestType,
                 UInt32 partition, string meadowFileName,
                 string sourceFileName)
+        {
+            return StartFileDownload(requestType, MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER,
+                partition, meadowFileName, sourceFileName, 0, false, 0);
+        }
+
+        // Start of any file download. startType/endType are the start and end
+        // messages; flashAddress and the file's MD5 (sendMd5) are only used for
+        // the ESP32; endUserData goes in the end message's User Data. Returns
+        // false if nothing was sent because the host file doesn't exist.
+        public bool StartFileDownload(MeadowRqstType startType, MeadowRqstType endType,
+                UInt32 startUserData, string meadowFileName, string sourceFileName,
+                UInt32 flashAddress, bool sendMd5, UInt32 endUserData)
         {
             // Make sure file exists on this host
             if (!File.Exists(sourceFileName))
@@ -63,13 +84,19 @@ namespace HcomDiagUi
             UInt32 fileSize = (UInt32)dataBuff.Length;
             _packetCrc32 = NuttxCrc.Crc32part(dataBuff, (uint)dataBuff.Length, 0);
 
-            // Call to send the initial header
-            UInt32 espAddress = 0;
-            string md5Hash = "12345678901234567890123456789012";        // Must be 32 bytes
+            // Call to send the initial header. The ESP32 checks the flashed data
+            // against the MD5, sent as 32 lowercase hex characters (as Meadow.CLI
+            // does); the F7 ignores the field.
+            string md5Hash = sendMd5
+                ? Convert.ToHexString(MD5.HashData(dataBuff)).ToLowerInvariant()
+                : "12345678901234567890123456789012";        // Must be 32 bytes
+
+            _endRequestType = endType;
+            _endUserData = endUserData;
 
             // This is the start download message. Meadow will respond with a go/no go reply
-            sendSerialComms.BuildAndSendFileRelatedCommand(requestType, partition,
-                0, fileSize, _packetCrc32, espAddress, md5Hash, meadowFileName);
+            sendSerialComms.BuildAndSendFileRelatedCommand(startType, startUserData,
+                0, fileSize, _packetCrc32, flashAddress, md5Hash, meadowFileName);
             return true;
         }
 
@@ -164,7 +191,7 @@ namespace HcomDiagUi
                 uiSupport.WriteDebugLine($"Sending End msg (sent {seqNumb} data packets)");
 
                 // Send the End message
-                sendSerialComms.BuildAndSendHdrMessage(MeadowRqstType.HCOM_MDOW_REQUEST_END_FILE_TRANSFER, 0, 0);
+                sendSerialComms.BuildAndSendHdrMessage(_endRequestType, _endUserData, 0);
             }
             catch (NotConnectedException)
             {
