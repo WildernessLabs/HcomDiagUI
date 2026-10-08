@@ -112,30 +112,6 @@ namespace HcomDiagUi
     }
 
     //--------------------------------------------------------------------
-    // This diagnostic command message allows HCOM to use code originally designed
-    // for NSH that is not be able to be built because we are using the protected
-    // build. This is initially done to support ping for networking.
-    [StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
-    public struct HcomProtoDiagCmdMsg
-    {
-        // Copy of  standard headere
-        [FieldOffset(0)] public UInt16 seqNumber;
-
-        [FieldOffset(2)] public UInt16 version;
-
-        [FieldOffset(4)] public UInt16 rqstType;
-
-        [FieldOffset(6)] public UInt16 extraData;
-
-        [FieldOffset(8)] public UInt32 userData;
-
-        // Additional data fields contains the length of the following text
-        [FieldOffset(12)] public UInt16 argListLen;
-
-        // [FieldOffset(14)] public byte[] argListText;
-    }
-
-    //--------------------------------------------------------------------
     // Header plus File Info
     // Future - Deprecate
     //[StructLayout(LayoutKind.Explicit, Pack = 1, CharSet = CharSet.Ansi)]
@@ -339,7 +315,8 @@ namespace HcomDiagUi
 
         // These message are a header followed by text, one contains the texts length too
         HCOM_MDOW_REQUEST_UPLOAD_FILE_INIT = 0x01 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
-        HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD = 0x02 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
+        // 0x0302 HCOM_MDOW_REQUEST_EXEC_DIAG_APP_CMD ('Send Command-Line', Ethernet ping)
+        // removed: Meadow.OS forwards it to a kernel ioctl that nothing handles
         HCOM_MDOW_REQUEST_RTC_SET_TIME_CMD = 0x03 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,
         // ToDo ...READ_TIME_CMD doesn't send text, it's a header only message type
         HCOM_MDOW_REQUEST_RTC_READ_TIME_CMD = 0x04 | MajorTypes.HCOM_PROTOCOL_HEADER_SIMPLE_TEXT_TYPE,

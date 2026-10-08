@@ -181,52 +181,6 @@ namespace HcomDiagUi
         }
 
         //==========================================================================
-        // Build and send a message with a header, text length plus text
-        internal void BuildAndSendDiagCmdMsg(MeadowRqstType requestType,
-            UInt32 userData, UInt16 extraData, string textData)
-        {
-            // Copy the encoded string to the buffer
-            var hcomDiagCmdMsg = new HcomProtoDiagCmdMsg();
-
-            var protocolDiagCmdSize = Marshal.SizeOf(typeof(HcomProtoDiagCmdMsg));
-
-            hcomDiagCmdMsg.seqNumber = 0;
-            hcomDiagCmdMsg.version = Protocol.HCOM_PROTOCOL_HCOM_VERSION_NUMBER;
-            hcomDiagCmdMsg.rqstType = (UInt16)requestType;
-            hcomDiagCmdMsg.extraData = extraData;
-            hcomDiagCmdMsg.userData = userData;
-
-            // Determine the needed buffer for text length
-            UInt16 encodedLength = (UInt16)Encoding.ASCII.GetByteCount(textData);
-            Debug.WriteLine($"Sending Diag CMD '{textData}' with length {encodedLength}");
-
-            hcomDiagCmdMsg.argListLen = encodedLength;    // Adding the length is the only difference
-
-            // Reserve space for the string
-            int totalSize = protocolDiagCmdSize + encodedLength;
-            byte[] msgBuffer = new byte[totalSize];
-
-            // Copy the structure to message buffer
-            IntPtr structPtr = Marshal.AllocHGlobal(protocolDiagCmdSize);
-
-            // Marshal data from managed structure to unmanaged memory
-            Marshal.StructureToPtr(hcomDiagCmdMsg, structPtr, true);
-
-            // Copy structure (in unmanaged memory) to the start of managed buffer
-            Marshal.Copy(structPtr, msgBuffer, 0, protocolDiagCmdSize);
-            Marshal.FreeHGlobal(structPtr);
-
-            // Encode and put the text at the end of the message buffer, after
-            // the structure
-            _ = Encoding.ASCII.GetBytes(textData, 0, textData.Length, msgBuffer,
-                        protocolDiagCmdSize);
-
-            Debug.WriteLine($"Non-encoded Message Hex:'{BitConverter.ToString(msgBuffer)}'");
-
-            EncodeAndSendPacket(msgBuffer, totalSize);
-        }
-
-        //==========================================================================
         // Build and send a message with a header and binary data
         // Added for Visual Studio Debugging
         internal void BuildAndSendBinaryMsg(byte[] additionalData, MeadowRqstType requestType, UInt32 userData)

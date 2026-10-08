@@ -106,17 +106,34 @@ namespace HcomDiagUi
             _hcomUiForm.WriteSendRecvSafe(text);
         }
 
+        // Iteration of the command being sent, shown as [n] after the timestamp
+        // of Send/Received lines; 0 = don't show (a single iteration)
+        public int CurrentIteration
+        {
+            get { return _currentIteration; }
+            set { _currentIteration = value; }
+        }
+        volatile int _currentIteration;
+
+        string TimeAndIteration()
+        {
+            int iteration = _currentIteration;
+            return iteration > 0
+                ? $"{DateTime.Now:HH:mm:ss.fff} [{iteration}] "
+                : $"{DateTime.Now:HH:mm:ss.fff} ";
+        }
+
         public void WriteSendRecvTime(string text)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append($"{DateTime.Now:HH:mm:ss.fff} {text}");
+            sb.Append($"{TimeAndIteration()}{text}");
             _hcomUiForm.WriteSendRecvSafe(sb.ToString());
         }
 
         public void WriteSendRecvTimeLine(string text)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"{DateTime.Now:HH:mm:ss.fff} {text}");
+            sb.AppendLine($"{TimeAndIteration()}{text}");
             _hcomUiForm.WriteSendRecvSafe(sb.ToString());
         }
 

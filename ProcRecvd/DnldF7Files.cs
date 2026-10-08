@@ -8,8 +8,8 @@ using System.Xml.Linq;
 
 namespace HcomDiagUi
 {
-    // Downloads a host file to Meadow: to the F7 file system ('file write') or
-    // flashed to the ESP32 coprocessor ('esp file write'). Both use the same
+    // Downloads a host file to Meadow: to the F7 file system ('File Write') or
+    // flashed to the ESP32 coprocessor ('ESP32 File Write'). Both use the same
     // exchange: start message, Meadow's okay/fail reply, data packets, end
     // message.
     public class DnldF7Files : IHostMessageProcessor
