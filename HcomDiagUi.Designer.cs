@@ -46,6 +46,7 @@ namespace HcomDiagUi
             cmdValueTextBox = new System.Windows.Forms.TextBox();
             textForMsgTextBox = new System.Windows.Forms.TextBox();
             showRecvHexCheckBox = new System.Windows.Forms.CheckBox();
+            clearButton = new System.Windows.Forms.Button();
             msgClassTextBox = new System.Windows.Forms.TextBox();
             HostFileTextBox = new System.Windows.Forms.TextBox();
             label7 = new System.Windows.Forms.Label();
@@ -257,6 +258,17 @@ namespace HcomDiagUi
             showRecvHexCheckBox.UseVisualStyleBackColor = true;
             showRecvHexCheckBox.CheckedChanged += showRecvHexCheckBox_CheckedChanged;
             // 
+            // clearButton
+            // 
+            clearButton.Location = new System.Drawing.Point(170, 474);
+            clearButton.Margin = new System.Windows.Forms.Padding(1);
+            clearButton.Name = "clearButton";
+            clearButton.Size = new System.Drawing.Size(50, 23);
+            clearButton.TabIndex = 30;
+            clearButton.Text = "Clear";
+            clearButton.UseVisualStyleBackColor = true;
+            clearButton.Click += clearButton_Click;
+            // 
             // msgClassTextBox
             // 
             msgClassTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
@@ -402,6 +414,7 @@ namespace HcomDiagUi
             Controls.Add(cancelButton);
             Controls.Add(execTimeTextBox);
             Controls.Add(showRecvHexCheckBox);
+            Controls.Add(clearButton);
             Controls.Add(HostFileTextBox);
             Controls.Add(textForMsgTextBox);
             Controls.Add(msgClassTextBox);
@@ -450,6 +463,7 @@ namespace HcomDiagUi
         private System.Windows.Forms.TextBox cmdValueTextBox;
         private System.Windows.Forms.TextBox textForMsgTextBox;
         private System.Windows.Forms.CheckBox showRecvHexCheckBox;
+        private System.Windows.Forms.Button clearButton;
         private System.Windows.Forms.TextBox msgClassTextBox;
         private System.Windows.Forms.TextBox HostFileTextBox;
         private System.Windows.Forms.Label label7;
